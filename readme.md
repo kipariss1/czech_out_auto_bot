@@ -14,3 +14,10 @@ Idea:
 - store it into vector database
 - do it periodically for search and add new ones for the search
 - do the filtering of the found ones for the search
+
+  Possible stack:
+  - FastAPI
+  - SQLAlchemy
+  - docker
+  - Atlas MongoDB
+    ...
