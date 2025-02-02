@@ -8,5 +8,5 @@ class User(Base):
 
     __tablename__ = "Users"
 
-    user_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     language = Column(Enum("ru", "en", "cz"), nullable=False, default="en")

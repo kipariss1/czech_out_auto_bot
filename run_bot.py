@@ -26,6 +26,7 @@ def start(message):
     )
 
 
+# TODO: fix the query handler, doesn't work with callback
 @bot.callback_query_handler(func=lambda call: call.data.startswith("lang_"))
 def set_users_language(call):
     lang = call.data.split("_")[1]
@@ -37,7 +38,7 @@ def set_users_language(call):
         db.commit()
 
 
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(content_types=["text"])
 def get_text_messages(message):
     user = get_or_create_user(message.chat.id)
     if user.language == "en":
