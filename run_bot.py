@@ -16,21 +16,14 @@ def get_or_create_user(user_id):
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.InlineKeyboardButton("🇬🇧", callback_data="lang_en")
-    btn2 = types.InlineKeyboardButton("🇷🇺", callback_data="lang_ru")
-    btn3 = types.InlineKeyboardButton("🇨🇿", callback_data="lang_cz")
-    markup.add(btn1, btn2, btn3)
-    bot.send_message(
-        message.from_user.id, "Select language please", reply_markup=markup
-    )
+    bot.reply_to(message, "Please select your language: \n\t🇬🇧 /english \n\t🇷🇺 /russian \n\t /czech")
 
 
-# TODO: fix the query handler, doesn't work with callback
-@bot.callback_query_handler(func=lambda call: call.data.startswith("lang_"))
-def set_users_language(call):
-    lang = call.data.split("_")[1]
-    user_id = call.message.chat.id
+# TODO: finish rewriting with message handlers
+@bot.message_handler(commands=['english', 'russian', 'czech'])
+def set_users_language(message: types.Message):
+    lang = message.text.replace('/', '')
+    user_id = message.from_user.id
     db = sqlite_db_handler.get_db_connection()
     user = get_or_create_user(user_id)
     if user.language != lang:
@@ -38,15 +31,15 @@ def set_users_language(call):
         db.commit()
 
 
-@bot.message_handler(content_types=["text"])
-def get_text_messages(message):
-    user = get_or_create_user(message.chat.id)
-    if user.language == "en":
-        bot.reply_to(message, "Hello zajebal")
-    if user.language == "ru":
-        bot.reply_to(message, "Zdarova zajebal")
-    if user.language == "cz":
-        bot.reply_to(message, "Cau zajebal")
+# @bot.message_handler(content_types=["text"])
+# def get_text_messages(message):
+#     user = get_or_create_user(message.chat.id)
+#     if user.language == "en":
+#         bot.reply_to(message, "Hello zajebal")
+#     if user.language == "ru":
+#         bot.reply_to(message, "Zdarova zajebal")
+#     if user.language == "cz":
+#         bot.reply_to(message, "Cau zajebal")
 
 
 bot.infinity_polling()
