@@ -1,13 +1,18 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, Session
 from src.models.models import Base
+import os
 
 
 class SqliteDBHandler:
 
+    __DB_NAME = "local.db"
     __DB_URL = "sqlite:///./local.db"
 
-    def __init__(self):
+    def __init__(self, dbname: str = None):
+        if dbname:
+            self.__DB_NAME = dbname
+            self.__DB_URL = f"sqlite:///./{dbname}"
         self._engine = sa.create_engine(self.__DB_URL)
         self._sessionmaker = sessionmaker
         self._db_conn = None
@@ -31,3 +36,7 @@ class SqliteDBHandler:
             self._db_conn.close()
             return True
         return False
+
+    def __del__(self):
+        if os.path.exists(self.__DB_NAME):
+            os.remove(self.__DB_NAME)
