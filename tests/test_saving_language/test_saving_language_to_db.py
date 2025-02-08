@@ -10,7 +10,7 @@ def mock_bot(monkeypatch) -> MockBot:
     return mb
 
 
-def test_language_saved_to_db(test_db, mock_bot):
+def test_language_saved_to_db(mock_bot):
     user_id = 3156
     mock_bot.add_handler(start, {"message": StartMessage(user_id=user_id)})
     mock_bot.add_handler(set_users_language, {"message": LangMessage(user_id=user_id)})
