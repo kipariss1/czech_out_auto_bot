@@ -16,13 +16,14 @@ def get_or_create_user(user_id):
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.reply_to(message, "Please select your language: \n\t🇬🇧 /EN \n\t🇷🇺 /RU \n\t🇨🇿 /CZ")
+    bot.reply_to(
+        message, "Please select your language: \n\t🇬🇧 /EN \n\t🇷🇺 /RU \n\t🇨🇿 /CZ"
+    )
 
 
-# TODO: finish rewriting with message handlers
-@bot.message_handler(commands=['EN', 'RU', 'CZ'])
-def set_users_language(message: types.Message):
-    lang = message.text.replace('/', '').lower()
+@bot.message_handler(commands=["EN", "RU", "CZ"])
+def set_users_language(message):
+    lang = message.text.replace("/", "").lower()
     user_id = message.from_user.id
     db = sqlite_db_handler.get_db_connection()
     user = get_or_create_user(user_id)
