@@ -16,13 +16,13 @@ def get_or_create_user(user_id):
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.reply_to(message, "Please select your language: \n\t🇬🇧 /english \n\t🇷🇺 /russian \n\t /czech")
+    bot.reply_to(message, "Please select your language: \n\t🇬🇧 /EN \n\t🇷🇺 /RU \n\t🇨🇿 /CZ")
 
 
 # TODO: finish rewriting with message handlers
-@bot.message_handler(commands=['english', 'russian', 'czech'])
+@bot.message_handler(commands=['EN', 'RU', 'CZ'])
 def set_users_language(message: types.Message):
-    lang = message.text.replace('/', '')
+    lang = message.text.replace('/', '').lower()
     user_id = message.from_user.id
     db = sqlite_db_handler.get_db_connection()
     user = get_or_create_user(user_id)
@@ -31,15 +31,15 @@ def set_users_language(message: types.Message):
         db.commit()
 
 
-# @bot.message_handler(content_types=["text"])
-# def get_text_messages(message):
-#     user = get_or_create_user(message.chat.id)
-#     if user.language == "en":
-#         bot.reply_to(message, "Hello zajebal")
-#     if user.language == "ru":
-#         bot.reply_to(message, "Zdarova zajebal")
-#     if user.language == "cz":
-#         bot.reply_to(message, "Cau zajebal")
+@bot.message_handler(content_types=["text"])
+def get_text_messages(message):
+    user = get_or_create_user(message.chat.id)
+    if user.language == "en":
+        bot.reply_to(message, "Hello zajebal")
+    if user.language == "ru":
+        bot.reply_to(message, "Zdarova zajebal")
+    if user.language == "cz":
+        bot.reply_to(message, "Cau zajebal")
 
 
 bot.infinity_polling()
