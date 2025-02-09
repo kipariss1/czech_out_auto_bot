@@ -35,7 +35,7 @@ def set_users_language(message):
 
 
 def construct_generic_answer(message, user):
-    markup = types.ReplyKeyboardMarkup()
+    markup = types.InlineKeyboardMarkup()
     if user.language == "en":
         open_btn_text = "Open Web app"
         reply_message = (
