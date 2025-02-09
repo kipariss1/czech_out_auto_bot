@@ -42,9 +42,15 @@ def get_text_messages(message):
             "Hello,\n this bot can help you to track the advertisements of specific model of a car with specific parameters on bazos.cz",
         )
     if user.language == "ru":
-        bot.reply_to(message, "Здравствуйте,\n этот бот может помочь вам отслеживать новые обвления конкретной модели автомобиля на bazos.cz")
+        bot.reply_to(
+            message,
+            "Здравствуйте,\n этот бот может помочь вам отслеживать новые обвления конкретной модели автомобиля на bazos.cz",
+        )
     if user.language == "cz":
-        bot.reply_to(message, "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz")
+        bot.reply_to(
+            message,
+            "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz",
+        )
 
 
 if __name__ == "__main__":
