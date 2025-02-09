@@ -31,26 +31,34 @@ def set_users_language(message):
     if user.language != lang:
         user.language = lang
         db.commit()
+    construct_generic_answer(message, user)
 
 
-@bot.message_handler(content_types=["text"])
-def get_text_messages(message):
-    user = get_or_create_user(message.chat.id)
+def construct_generic_answer(message, user):
+    markup = types.ReplyKeyboardMarkup()
     if user.language == "en":
-        bot.reply_to(
-            message,
+        open_btn_text = "Open Web app"
+        reply_message = (
             "Hello,\n this bot can help you to track the advertisements of specific model of a car with specific parameters on bazos.cz",
         )
     if user.language == "ru":
-        bot.reply_to(
-            message,
-            "Здравствуйте,\n этот бот может помочь вам отслеживать новые обвления конкретной модели автомобиля на bazos.cz",
-        )
+        open_btn_text = "Открыть веб-приложение"
+        reply_message = "Здравствуйте,\n этот бот может помочь вам отслеживать новые обвления конкретной модели автомобиля на bazos.cz"
     if user.language == "cz":
-        bot.reply_to(
-            message,
-            "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz",
+        open_btn_text = "Otevřít webovou aplikaci"
+        reply_message = "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz"
+    markup.add(
+        types.InlineKeyboardButton(
+            web_app=WebAppInfo(url="https://google.com"), text=open_btn_text
         )
+    )
+    bot.reply_to(message, reply_message, reply_markup=markup)
+
+
+@bot.message_handler(commands=["web-app"])
+def run_web_app(message):
+    user = get_or_create_user(message.chat.id)
+    construct_generic_answer(message, user)
 
 
 if __name__ == "__main__":
