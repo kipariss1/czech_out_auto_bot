@@ -43,4 +43,5 @@ def get_text_messages(message):
         bot.reply_to(message, "Cau zajebal")
 
 
-bot.infinity_polling()
+if __name__ == "__main__":
+    bot.infinity_polling()
