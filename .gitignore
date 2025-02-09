@@ -2,3 +2,5 @@
 .venv/
 .idea/
 .vscode/
+**/local.db
+**/test.db
