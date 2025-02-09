@@ -1,5 +1,6 @@
 from src import bot
 from telebot import types
+from telebot.types import WebAppInfo
 from src.models.models import User
 from src import sqlite_db_handler
 
@@ -36,9 +37,12 @@ def set_users_language(message):
 def get_text_messages(message):
     user = get_or_create_user(message.chat.id)
     if user.language == "en":
-        bot.reply_to(message, "Hello zajebal")
+        bot.reply_to(
+            message,
+            "Hello, this bot can help you to track the advertisements of specific model of a car with specific parameters on bazos.cz",
+        )
     if user.language == "ru":
-        bot.reply_to(message, "Zdarova zajebal")
+        bot.reply_to(message, "")
     if user.language == "cz":
         bot.reply_to(message, "Cau zajebal")
 
