@@ -43,7 +43,7 @@ def construct_generic_answer(message, user):
         )
     if user.language == "ru":
         open_btn_text = "Открыть веб-приложение"
-        reply_message = "Здравствуйте,\n этот бот может помочь вам отслеживать новые обвления конкретной модели автомобиля на bazos.cz"
+        reply_message = "Здравствуйте,\n этот бот может помочь вам отслеживать новые объявления конкретной модели автомобиля на bazos.cz"
     if user.language == "cz":
         open_btn_text = "Otevřít webovou aplikaci"
         reply_message = "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz"
@@ -55,7 +55,7 @@ def construct_generic_answer(message, user):
     bot.reply_to(message, reply_message, reply_markup=markup)
 
 
-@bot.message_handler(commands=["web-app"])
+@bot.message_handler(commands=["web"])
 def run_web_app(message):
     user = get_or_create_user(message.chat.id)
     construct_generic_answer(message, user)
