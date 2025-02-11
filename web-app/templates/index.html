@@ -1,33 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}">About</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
+{% extends base.html %}
 
-    <main>
-        {% block content %}
-        <h1>Welcome to the base page</h1>
-        <p>This is where the main content will appear.</p>
-        {% endblock %}
-    </main>
+{% block content %}
 
-    <footer>
-        <p>&copy; 2025 My Website</p>
-    </footer>
+<div class="container text-center">
+    <a href="/create_search">Create search page, that's it</a>
+</div>
 
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
-</body>
-</html>
+
+{% endblock %}
