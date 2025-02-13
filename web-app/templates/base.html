@@ -5,14 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/bootstrap.min.css') }}">
+    <style>
+        .header-img {
+          max-width: 40px;
+        }
+      </style>
 </head>
 <body>
-    <header>
-        <div>
-            <img src="{{ url_for('static', path='pics/logo.jpeg') }}"
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <div class="row d-flex align-items-stretch">
+                    <div class="col-4 d-flex justify-content-center align-items-center">
+                        <img src="{{ url_for('static', path='pics/logo.jpeg') }}" class="header-img">
+                    </div>
+                    <div class="col-8 d-flex justify-content-center mt-auto">
+                        <h4>Czech out car bot</h4>
+                    </div>
+                </div>
+            </a>
         </div>
-        <h1>Czech out car</h1>
-    </header>
+    </nav>
 
     <main>
         {% block content %}{% endblock %}
