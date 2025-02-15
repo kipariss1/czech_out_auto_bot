@@ -6,7 +6,7 @@ import asyncio
 
 
 async def request_for_id(id: str, car_manufacturer: str):
-    url = f"https://dummy_url/{id}"
+    url = f"https://m.mobile.de/consumer/api/search/reference-data/models/{id}"
     response = await asyncio.to_thread(requests.get, url)
     if response.status_code == 200:
         return {car_manufacturer: response.json()}
