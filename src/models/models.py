@@ -16,6 +16,6 @@ class CarModel(Base):
 
     __tablename__ = "Car model"
 
-    id = Column(Integer, primary_key=True)
-    manufacturer = Text(length=20)
-    model = Text(length=40)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    manufacturer = Column(Text(length=20))
+    model = Column(Text(length=40))

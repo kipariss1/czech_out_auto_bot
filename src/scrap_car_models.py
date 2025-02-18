@@ -26,22 +26,27 @@ headers = {
 def filter_car_names(el):
     if "label" in el.keys():
         return el["label"]
-    add_car_models_to_db(el["items"])
+    add_car_models_to_db(car_models=el["items"])
 
 
-def add_car_models_to_db(car_manufacturer: str, car_models: list):
+def add_car_models_to_db(car_manufacturer: str = None, car_models: list = []):
+    if car_manufacturer:
+        setattr(add_car_models_to_db, "car_manufacturer", car_manufacturer)
     car_models = list(map(filter_car_names, car_models))
     stuff = ["(alle)", "(Alle)"]
 
     def remove_stuff(el: str):
         for m in stuff:
-            el.replace(m, "")
+            el = el.replace(m, "")
         return el.strip()
 
+    car_models = list(filter(lambda el: not (el is None), car_models))
     car_models = list(map(remove_stuff, car_models))
     car_models = list(set(car_models))
     for car_model in car_models:
-        new_car = CarModel(manufacturer=car_manufacturer, model=car_model)
+        new_car = CarModel(
+            manufacturer=add_car_models_to_db.car_manufacturer, model=car_model
+        )
         db.add(new_car)
         db.commit()
 
