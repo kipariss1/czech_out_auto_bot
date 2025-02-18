@@ -23,6 +23,29 @@ headers = {
 }
 
 
+def filter_car_names(el):
+    if "label" in el.keys():
+        return el["label"]
+    add_car_models_to_db(el["items"])
+
+
+def add_car_models_to_db(car_manufacturer: str, car_models: list):
+    car_models = list(map(filter_car_names, car_models))
+    stuff = ["(alle)", "(Alle)"]
+
+    def remove_stuff(el: str):
+        for m in stuff:
+            el.replace(m, "")
+        return el.strip()
+
+    car_models = list(map(remove_stuff, car_models))
+    car_models = list(set(car_models))
+    for car_model in car_models:
+        new_car = CarModel(manufacturer=car_manufacturer, model=car_model)
+        db.add(new_car)
+        db.commit()
+
+
 if __name__ == "__main__":
     mobile_de_page = requests.get("https://mobile.de/?lang=en", headers=headers)
     if mobile_de_page.status_code == 200:
@@ -33,6 +56,10 @@ if __name__ == "__main__":
             car_manufacturer_list = select_widget.find(
                 "optgroup", {"label": "All makes"}
             )
-            car_models = asyncio.run(gather_and_request(car_manufacturer_list.contents))
-            # TODO: save results in the database
-            pass
+            cars = asyncio.run(gather_and_request(car_manufacturer_list.contents))
+            db = sqlite_db_handler.get_db_connection()
+            # save results in the database
+            for el in cars:
+                car_manufacturer = list(el.keys())[0]
+                car_models = el[car_manufacturer]["data"]
+                add_car_models_to_db(car_manufacturer, car_models)
