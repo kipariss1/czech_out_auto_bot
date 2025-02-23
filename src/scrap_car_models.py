@@ -33,15 +33,15 @@ def add_car_models_to_db(car_manufacturer: str = None, car_models: list = []):
     if car_manufacturer:
         setattr(add_car_models_to_db, "car_manufacturer", car_manufacturer)
     car_models = list(map(filter_car_names, car_models))
-    stuff = ["(alle)", "(Alle)"]
+    stuff = ["(alle)", "(Alle)", "Andere"]
 
     def remove_stuff(el: str):
         for m in stuff:
             el = el.replace(m, "")
         return el.strip()
 
-    car_models = list(filter(lambda el: not (el is None), car_models))
     car_models = list(map(remove_stuff, car_models))
+    car_models = list(filter(lambda el: not (el is None), car_models))
     car_models = list(set(car_models))
     for car_model in car_models:
         new_car = CarModel(
@@ -65,6 +65,8 @@ if __name__ == "__main__":
             db = sqlite_db_handler.get_db_connection()
             # save results in the database
             for el in cars:
+                if not el:
+                    continue
                 car_manufacturer = list(el.keys())[0]
                 car_models = el[car_manufacturer]["data"]
                 add_car_models_to_db(car_manufacturer, car_models)

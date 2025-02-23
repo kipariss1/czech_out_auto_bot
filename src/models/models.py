@@ -27,5 +27,5 @@ class CarSearch(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
-    car = Column(Text(length=100), nullable=False)  # Group searches by id of CarModel
+    car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
     attributes = Column(JSON, nullable=True)
