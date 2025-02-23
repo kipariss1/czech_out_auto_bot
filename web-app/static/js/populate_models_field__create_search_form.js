@@ -5,7 +5,7 @@ document.getElementById("id-manufacturer").addEventListener("change", function()
     let modelSelect = document.getElementById("id-model");
 
     if (manufacturer !== default_option_manufacturer){
-        fetch("/get_models/${manufacturer}")
+        fetch(`/get_models/${manufacturer}`)
         .then(response => response.json())
         .then(models => {
             models.forEach(model => {
@@ -14,6 +14,7 @@ document.getElementById("id-manufacturer").addEventListener("change", function()
                 option.textContent = model;
                 modelSelect.appendChild(option);
             });
+            modelSelect.disabled = false;
             // TODO: make catching error with Alerts!
         })
     }
