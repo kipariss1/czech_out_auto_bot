@@ -18,9 +18,18 @@
             <label for="id-attributes" class="form-label">Type here optional attributes</label>
             <textarea class="form-control" id="id-attributes" rows="1" placeholder="S-Line, M paket edition ..."></textarea>
         </div>
-        <input type="range" class="form-range my-3" id="id-year">
-        <input type="range" class="form-range my-3" id="id-mileage">
-        <input type="range" class="form-range my-3" id="id-price">
+        <div class="my-3">
+            <label for="id-slider-year" class="form-label">Year range: <span id="id-year-range"></span></label>
+            <div id="id-slider-year"></div>
+        </div>
+        <div class="my-3">
+            <label for="id-slider-mileage" class="form-label">Mileage range (km): <span id="id-mileage-range"></span></label>
+            <div id="id-slider-mileage"></div>
+        </div>
+        <div class="my-3">
+            <label for="id-slider-price" class="form-label">Price range: <span id="id-price-range"></span></label>
+            <div id="id-slider-price"></div>
+        </div>
         <div class="my-3">
             <label for="id-psc-code" class="form-label">Enter PSČ</label>
             <textarea class="form-control" id="id-psc-code" rows="1"></textarea>
@@ -34,5 +43,87 @@
 </div>
 
 <script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
+
+<script>
+    const currentYear = new Date().getFullYear();
+    var slider_year = document.getElementById('id-slider-year');
+    var slider_mileage = document.getElementById('id-slider-mileage');
+    var slider_price = document.getElementById('id-slider-price');
+
+    noUiSlider.create(slider_year, {
+        start: [1990, 2010],
+        connect: true,
+        range: {
+            "min": 1950,
+            "max": currentYear
+        },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Number(value);
+            }
+        }
+    });
+
+    var rangeValueYear = document.getElementById("id-year-range");
+    slider_year.noUiSlider.on("update", function (values) {
+        rangeValueYear.innerHTML = values.join(" - ");
+    });
+
+
+    noUiSlider.create(slider_mileage, {
+        start: [50000, 100000],
+        connect: true,
+        range: {
+            "min": 0,
+            "max": 1000000
+        },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Number(value);
+            }
+        }
+    });
+
+    var rangeValueMileage = document.getElementById("id-mileage-range");
+    slider_mileage.noUiSlider.on("update", function (values) {
+        rangeValueMileage.innerHTML = values.join(" - ");
+    });
+
+
+    noUiSlider.create(slider_price, {
+        start: [50000, 100000],
+        connect: true,
+        range: {
+            "min": 0,
+            "max": 1000000
+        },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Number(value);
+            }
+        }
+    });
+
+    var rangeValuePrice = document.getElementById("id-price-range");
+    slider_price.noUiSlider.on("update", function (values) {
+        rangeValuePrice.innerHTML = values.join(" - ");
+    });
+
+</script>
 
 {% endblock %}

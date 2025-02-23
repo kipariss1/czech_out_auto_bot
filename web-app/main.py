@@ -6,7 +6,6 @@ from starlette import requests
 from sqlalchemy import distinct
 from sqlalchemy.orm import Session
 from src import sqlite_db_handler
-from src.database.sqlite_database import SqliteDBHandler
 from src.models.models import CarModel
 from typing import List
 
