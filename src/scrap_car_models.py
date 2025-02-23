@@ -40,8 +40,9 @@ def add_car_models_to_db(car_manufacturer: str = None, car_models: list = []):
             el = el.replace(m, "")
         return el.strip()
 
-    car_models = list(map(remove_stuff, car_models))
     car_models = list(filter(lambda el: not (el is None), car_models))
+    car_models = list(map(remove_stuff, car_models))
+    car_models = list(filter(lambda el: len(el) > 0, car_models))
     car_models = list(set(car_models))
     for car_model in car_models:
         new_car = CarModel(
