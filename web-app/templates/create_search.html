@@ -2,9 +2,23 @@
 
 {% block content %}
 
-<div class="container text-center">
-    <a href="/">Back to home page</a>
-</div>
+<form>
+    <legend>Submit new search for car of your dreams!</legend>
+    <select class="form-select" name="manufacturer" id="id-manufacturer">
+        <option selected>Select car manufacturer!</option>
+        {% for m in car_manufacturers %}
+            <option value="{{ m }}">{{ m }}</option>            
+        {% endfor %}
+    </select>
+    <select class="form-select" name="model" id="id-model" disabled="true"> 
+        <option selected>Select model!</option>
+    </select>
+    <input type="range" class="form-range" id="id-year">
+    <input type="range" class="form-range" id="id-mileage">
+    <input type="range" class="form-range" id="id-price">
+    <input title="Place, input PSČ">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 
 
 {% endblock %}
