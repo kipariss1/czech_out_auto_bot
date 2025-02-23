@@ -14,12 +14,20 @@
         <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
             <option selected>Select model!</option>
         </select>
+        <div class="my-3">
+            <label for="id-attributes" class="form-label">Type here optional attributes</label>
+            <textarea class="form-control" id="id-attributes" rows="1" placeholder="S-Line, M paket edition ..."></textarea>
+        </div>
         <input type="range" class="form-range my-3" id="id-year">
         <input type="range" class="form-range my-3" id="id-mileage">
         <input type="range" class="form-range my-3" id="id-price">
         <div class="my-3">
             <label for="id-psc-code" class="form-label">Enter PSČ</label>
             <textarea class="form-control" id="id-psc-code" rows="1"></textarea>
+        </div>
+        <div class="my-3">
+            <label for="id-km-range" class="form-label">km range from PSČ</label>
+            <input type="number" id="id-km-range" class="form-control" min="0" step="5">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
