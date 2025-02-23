@@ -3,6 +3,7 @@ var default_option_manufacturer = document.getElementById("id-manufacturer").val
 document.getElementById("id-manufacturer").addEventListener("change", function(){
     let manufacturer = this.value;
     let modelSelect = document.getElementById("id-model");
+    modelSelect.innerHTML = "<option selected>Select model!</option>";
 
     if (manufacturer !== default_option_manufacturer){
         fetch(`/get_models/${manufacturer}`)
