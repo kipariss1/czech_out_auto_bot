@@ -4,47 +4,56 @@
 
 <div class="container text-center">
     <form>
-        <h5 class="my-3">Submit new search for car of your dreams!</h5>
-        <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
-            <option selected>Select car manufacturer!</option>
-            {% for m in car_manufacturers %}
-                <option value="{{ m }}">{{ m }}</option>            
-            {% endfor %}
-        </select>
-        <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
-            <option selected>Select model!</option>
-        </select>
-        <div class="my-3">
+        <div class="row mx-3 mt-3">
+            <h5>Submit new search for car of your dreams!</h5>
+        </div>
+        <div class="row mx-3">
+            <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
+                <option selected>Select car manufacturer!</option>
+                {% for m in car_manufacturers %}
+                    <option value="{{ m }}">{{ m }}</option>            
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row mx-3">
+            <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
+                <option selected>Select model!</option>
+            </select>
+        </div>
+        <div class="row mx-3 mb-3">
             <label for="id-attributes" class="form-label">Type here optional attributes</label>
             <textarea class="form-control" id="id-attributes" rows="1" placeholder="S-Line, M paket edition ..."></textarea>
         </div>
-        <div class="my-3">
+        <div class="row mx-3 my-3">
             <label for="id-slider-year" class="form-label">Year range: <span id="id-year-range"></span></label>
-            <div id="id-slider-year"></div>
+            <div id="id-slider-year"></div>                
         </div>
-        <div class="my-3">
+        <div class="row mx-3 my-3">
             <label for="id-slider-mileage" class="form-label">Mileage range (km): <span id="id-mileage-range"></span></label>
             <div id="id-slider-mileage"></div>
         </div>
-        <div class="my-3">
+        <div class="row mx-3 my-3">
             <label for="id-slider-price" class="form-label">Price range: <span id="id-price-range"></span></label>
             <div id="id-slider-price"></div>
         </div>
-        <div class="my-3">
+        <div class="row mx-3 my-3">
             <label for="id-psc-code" class="form-label">Enter PSČ</label>
             <textarea class="form-control" id="id-psc-code" rows="1"></textarea>
         </div>
-        <div class="my-3">
+        <div class="row mx-3 my-3">
             <label for="id-km-range" class="form-label">km range from PSČ</label>
             <input type="number" id="id-km-range" class="form-control" min="0" step="5">
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="row mx-3 my-3">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
     </form>
 </div>
 
 <script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
 
 <script type="module">
+    // TODO: update slider's 
     const currentYear = new Date().getFullYear();
     var slider_year = document.getElementById('id-slider-year');
     var slider_mileage = document.getElementById('id-slider-mileage');
@@ -58,7 +67,6 @@
             "max": currentYear
         },
         step: 1,
-        tooltips: true,
         format: {
             to: function (value) {
                 return Math.round(value);
@@ -83,7 +91,6 @@
             "max": 1000000
         },
         step: 1,
-        tooltips: true,
         format: {
             to: function (value) {
                 return Math.round(value);
@@ -108,7 +115,6 @@
             "max": 1000000
         },
         step: 1,
-        tooltips: true,
         format: {
             to: function (value) {
                 return Math.round(value);
