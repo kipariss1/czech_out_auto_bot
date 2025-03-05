@@ -3,12 +3,12 @@
 {% block content %}
 
 <div class="container text-center" id="id-main-container">
-    <form id="id-submit-search-form" onsubmit="return validate_search_form()">
+    <form id="id-submit-search-form">
         <div class="row mx-3 mt-3">
             <h5>Submit new search for car of your dreams!</h5>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="manufacturer" id="id-manufacturer" required>
+            <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
                 <option selected>Select car manufacturer!</option>
                 {% for m in car_manufacturers %}
                     <option value="{{ m }}">{{ m }}</option>            
@@ -16,7 +16,7 @@
             </select>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="model" id="id-model" disabled="true" required> 
+            <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
                 <option selected>Select model!</option>
             </select>
         </div>
@@ -38,10 +38,10 @@
                         Year range: 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" required>
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" required>
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to">
                     </div>
                 </div>
             </label>
@@ -54,10 +54,10 @@
                         Mileage range (km): 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" required>
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" required="true">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to">
                     </div>
                 </div>
             </label>
@@ -70,10 +70,10 @@
                         Price range (Kč):
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" required="true">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" required="true">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to">
                     </div>
                 </div>
             </label>
@@ -109,6 +109,7 @@
     var attributes_idx = 1;
     var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
     var attributes = document.getElementById('id-row-with-attributes');
+    var search_form = document.getElementById('id-submit-search-form');
 
     var list_sliders = [slider_year, slider_mileage, slider_price];
     var list_from = [input_year_from, input_mileage_from, input_price_from];
@@ -214,12 +215,16 @@
 
     btn_submit_first_attribute.addEventListener('click', add_new_attribute);
 
-    function validate_search_form() {
+    search_form.addEventListener('submit', validate_search_form);
+    function validate_search_form(event) {
         var form = document.forms[0];
         var psc_code = form['psc-code'];
         var psc_km_range = form['psc-km-range'];
+        // TODO: finish validation of the form
+        var required_fields = [];
         if (/^[0-9\s]{5,}$/.test(psc_code.value) === false) {
             // TODO: make alert with message
+            event.preventDefault();
             return false;
         }
         if (psc_code.value.length > 0 && psc_km_range.value.length === 0){
