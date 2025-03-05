@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<div class="container text-center">
-    <form>
+<div class="container text-center" id="id-main-container">
+    <form id="id-submit-search-form">
         <div class="row mx-3 mt-3">
             <h5>Submit new search for car of your dreams!</h5>
         </div>
@@ -22,9 +22,9 @@
         </div>
         <div class="row mx-3 mb-3" id="id-row-with-attributes">
             <label for="id-attributes" class="form-label">Type here optional attributes: </label>
-            <div class="row">
+            <div class="row mb-1">
                 <div class="col-8">
-                    <textarea class="form-control" id="id-attributes-0" n="0" rows="1" placeholder="S-Line, M paket, 2.0 TDI"></textarea>
+                    <textarea class="form-control" id="id-attributes-0" n="0" rows="1" placeholder="M paket, 2.0 TDI"></textarea>
                 </div>
                 <div class="col-2">
                     <button class="btn btn-success" type="button" id="id-attributes-0-submit-btn" n="0">✓</button>
@@ -108,6 +108,7 @@
     var input_price_to = document.getElementById('id-input-price-range-to');
     var attributes_idx = 1;
     var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
+    var attributes = document.getElementById('id-row-with-attributes');
 
     var list_sliders = [slider_year, slider_mileage, slider_price];
     var list_from = [input_year_from, input_mileage_from, input_price_from];
@@ -155,35 +156,38 @@
     function construct_new_attribute() {
         const rowDiv = document.createElement("div");
         rowDiv.classList.add("row");
-        rowDiv.id = `id-added-attribute-{$attributes_idx}`;
+        rowDiv.classList.add("mb-1");
+        rowDiv.id = `id-added-attribute-${attributes_idx}`;
 
         const textareaDiv = document.createElement("div");
         textareaDiv.classList.add("col-8");
         const sbmtBtnAreaDiv = document.createElement("div");
-        textareaDiv.classList.add("col-2");
+        sbmtBtnAreaDiv.classList.add("col-2");
         const dltBtnAreaDiv = document.createElement("div");
-        textareaDiv.classList.add("col-2");
+        dltBtnAreaDiv.classList.add("col-2");
 
         const textarea = document.createElement("textarea");
         textarea.classList.add("form-control");
         textarea.setAttribute("rows", 1);
-        textarea.placeHolder = "S-Line, M paket, 2.0 TDI"
-        textarea.id = `id-attributes-{$attributes_idx}`;
+        textarea.setAttribute('placeholder', "M paket, 2.0 TDI")
+        textarea.id = `id-attributes-${attributes_idx}`;
         textarea.setAttribute("n", attributes_idx);
         textareaDiv.appendChild(textarea);
 
         const submit_attr_btn = document.createElement('button');
         submit_attr_btn.classList.add('btn', 'btn-success');
-        submit_attr_btn.id = `id-attributes-{$attributes_idx}-submit-btn`;
+        submit_attr_btn.id = `id-attributes-${attributes_idx}-submit-btn`;
         submit_attr_btn.setAttribute("n", attributes_idx);
+        submit_attr_btn.setAttribute("type", "button");
         submit_attr_btn.addEventListener('click', add_new_attribute);
         submit_attr_btn.textContent = "✓";
         sbmtBtnAreaDiv.appendChild(submit_attr_btn);
 
         const delete_attr_btn = document.createElement('button');
         delete_attr_btn.classList.add('btn', 'btn-danger');
-        delete_attr_btn.id = `id-attributes-{$attributes_idx}-delete-btn`;
+        delete_attr_btn.id = `id-attributes-${attributes_idx}-delete-btn`;
         delete_attr_btn.setAttribute("n", attributes_idx);
+        delete_attr_btn.setAttribute("type", "button");
         delete_attr_btn.addEventListener('click', delete_attribute);
         delete_attr_btn.textContent = "X";
         dltBtnAreaDiv.appendChild(delete_attr_btn);
@@ -193,17 +197,22 @@
         rowDiv.appendChild(dltBtnAreaDiv);
 
         attributes_idx = attributes_idx + 1;
+        return rowDiv;
     }
 
     function add_new_attribute(event) {
-        construct_new_attribute();
+        var new_row = construct_new_attribute();
+        attributes.appendChild(new_row);
+
     }
 
     function delete_attribute(event) {
         var n = event.target.getAttribute('n');
-        var row_to_delete = `id-added-attribute-{$n}`;
+        var row_to_delete = document.getElementById(`id-added-attribute-${n}`);
         row_to_delete.remove();
     }
+
+    btn_submit_first_attribute.addEventListener('click', add_new_attribute);
 
 </script>
 
