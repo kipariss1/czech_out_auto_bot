@@ -31,10 +31,10 @@
                         Year range: 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to">
                     </div>
                 </div>
             </label>
@@ -68,6 +68,8 @@
     // TODO: update slider's 
     const currentYear = new Date().getFullYear();
     var slider_year = document.getElementById('id-slider-year');
+    var input_year_from = document.getElementById('id-input-year-range-from');
+    var input_year_to = document.getElementById('id-input-year-range-to');
     var slider_mileage = document.getElementById('id-slider-mileage');
     var slider_price = document.getElementById('id-slider-price');
 
@@ -89,9 +91,18 @@
         }
     });
 
-    var rangeValueYear = document.getElementById("id-year-range");
-    slider_year.noUiSlider.on("update", function (values) {
-        rangeValueYear.innerHTML = values.join(" - ");
+    slider_year.noUiSlider.on("update", function (values, handle) {
+        if (handle === 0) {
+            input_year_from.value = Math.round(values[0])
+        } else {
+            input_year_to.value = Math.round(values[1])
+        }
+    });
+    input_year_from.addEventListener('change', function() {
+        slider_year.noUiSlider.set([this.value, null])
+    });
+    input_year_to.addEventListener('change', function() {
+        slider_year.noUiSlider.set([null, this.value])
     });
 
 
