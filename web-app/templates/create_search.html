@@ -41,11 +41,35 @@
             <div id="id-slider-year"></div>                
         </div>
         <div class="row mx-3 my-3">
-            <label for="id-slider-mileage" class="form-label">Mileage range (km): <span id="id-mileage-range"></span></label>
+            <label for="id-slider-mileage" class="form-label">
+                <div class="row">
+                    <div class="col">
+                        Mileage range (km): 
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to">
+                    </div>
+                </div>
+            </label>
             <div id="id-slider-mileage"></div>
         </div>
         <div class="row mx-3 my-3">
-            <label for="id-slider-price" class="form-label">Price range: <span id="id-price-range"></span></label>
+            <label for="id-slider-price" class="form-label">
+                <div class="row">
+                    <div class="col">
+                        Price range:
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to">
+                    </div>
+                </div>
+            </label>
             <div id="id-slider-price"></div>
         </div>
         <div class="row mx-3 my-3">
@@ -71,7 +95,11 @@
     var input_year_from = document.getElementById('id-input-year-range-from');
     var input_year_to = document.getElementById('id-input-year-range-to');
     var slider_mileage = document.getElementById('id-slider-mileage');
+    var input_mileage_from = document.getElementById('id-input-mileage-range-from');
+    var input_mileage_to = document.getElementById('id-input-mileage-range-to');
     var slider_price = document.getElementById('id-slider-price');
+    var input_price_from = document.getElementById('id-input-price-range-from');
+    var input_price_to = document.getElementById('id-input-price-range-to');
 
     noUiSlider.create(slider_year, {
         start: [1990, 2010],
@@ -123,10 +151,25 @@
             }
         }
     });
-
-    var rangeValueMileage = document.getElementById("id-mileage-range");
-    slider_mileage.noUiSlider.on("update", function (values) {
-        rangeValueMileage.innerHTML = values.join(" - ");
+    slider_mileage.noUiSlider.on("update", function (values, handle) {
+        if (handle === 0) {
+            input_mileage_from.value = Math.round(values[0])
+        } else {
+            input_mileage_to.value = Math.round(values[1])
+        }
+    });
+    input_mileage_from.addEventListener('change', function() {
+        slider_mileage.noUiSlider.set([this.value, null])
+    });
+    input_mileage_to.addEventListener('change', function() {
+        slider_mileage.noUiSlider.set([null, this.value])
+    });
+    slider_mileage.noUiSlider.on("update", function (values, handle) {
+        if (handle === 0) {
+            input_mileage_from.value = Math.round(values[0])
+        } else {
+            input_mileage_to.value = Math.round(values[1])
+        }
     });
 
 
@@ -147,10 +190,25 @@
             }
         }
     });
-
-    var rangeValuePrice = document.getElementById("id-price-range");
-    slider_price.noUiSlider.on("update", function (values) {
-        rangeValuePrice.innerHTML = values.join(" - ");
+    slider_price.noUiSlider.on("update", function (values, handle) {
+        if (handle === 0) {
+            input_price_from.value = Math.round(values[0])
+        } else {
+            input_price_to.value = Math.round(values[1])
+        }
+    });
+    input_price_from.addEventListener('change', function() {
+        slider_price.noUiSlider.set([this.value, null])
+    });
+    input_price_to.addEventListener('change', function() {
+        slider_price.noUiSlider.set([null, this.value])
+    });
+    slider_price.noUiSlider.on("update", function (values, handle) {
+        if (handle === 0) {
+            input_price_from.value = Math.round(values[0])
+        } else {
+            input_price_to.value = Math.round(values[1])
+        }
     });
 
 </script>
