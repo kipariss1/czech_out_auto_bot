@@ -3,12 +3,12 @@
 {% block content %}
 
 <div class="container text-center" id="id-main-container">
-    <form id="id-submit-search-form">
+    <form id="id-submit-search-form" onsubmit="return validate_search_form()">
         <div class="row mx-3 mt-3">
             <h5>Submit new search for car of your dreams!</h5>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
+            <select class="form-select my-3" name="manufacturer" id="id-manufacturer" required>
                 <option selected>Select car manufacturer!</option>
                 {% for m in car_manufacturers %}
                     <option value="{{ m }}">{{ m }}</option>            
@@ -16,7 +16,7 @@
             </select>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
+            <select class="form-select my-3" name="model" id="id-model" disabled="true" required> 
                 <option selected>Select model!</option>
             </select>
         </div>
@@ -38,10 +38,10 @@
                         Year range: 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" required>
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" required>
                     </div>
                 </div>
             </label>
@@ -54,10 +54,10 @@
                         Mileage range (km): 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" required>
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" required="true">
                     </div>
                 </div>
             </label>
@@ -70,10 +70,10 @@
                         Price range (Kč):
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" required="true">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" required="true">
                     </div>
                 </div>
             </label>
@@ -81,11 +81,11 @@
         </div>
         <div class="row mx-3 my-3">
             <label for="id-psc-code" class="form-label">Enter PSČ</label>
-            <textarea class="form-control" id="id-psc-code" rows="1"></textarea>
+            <textarea class="form-control" id="id-psc-code" name="psc-code" rows="1"></textarea>
         </div>
         <div class="row mx-3 my-3">
-            <label for="id-km-range" class="form-label">km range from PSČ</label>
-            <input type="number" id="id-km-range" class="form-control" min="0" step="5">
+            <label for="id-psc-km-range" class="form-label">km range from PSČ</label>
+            <input type="number" id="id-psc-km-range" name="psc-km-range" class="form-control" min="0" step="5">
         </div>
         <div class="row mx-3 my-3">
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -213,6 +213,20 @@
     }
 
     btn_submit_first_attribute.addEventListener('click', add_new_attribute);
+
+    function validate_search_form() {
+        var form = document.forms[0];
+        var psc_code = form['psc-code'];
+        var psc_km_range = form['psc-km-range'];
+        if (/^[0-9\s]{5,}$/.test(psc_code.value) === false) {
+            // TODO: make alert with message
+            return false;
+        }
+        if (psc_code.value.length > 0 && psc_km_range.value.length === 0){
+            psc_km_range.value = "10";
+        }
+        return true;
+    }
 
 </script>
 
