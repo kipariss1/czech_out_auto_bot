@@ -21,8 +21,15 @@
             </select>
         </div>
         <div class="row mx-3 mb-3">
-            <label for="id-attributes" class="form-label">Type here optional attributes</label>
-            <textarea class="form-control" id="id-attributes" rows="1" placeholder="S-Line, M paket edition ..."></textarea>
+            <label for="id-attributes" class="form-label">Type here optional attributes: </label>
+            <div class="row">
+                <div class="col-8">
+                    <textarea class="form-control" id="id-attributes-0" n="0" rows="1" placeholder="S-Line, M paket"></textarea>
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-success" type="button" id="id-attributes-0-submit-btn" n="0">✓</button>
+                </div>
+            </div>
         </div>
         <div class="row mx-3 my-3">
             <label for="id-slider-year" class="form-label">
@@ -99,6 +106,8 @@
     var slider_price = document.getElementById('id-slider-price');
     var input_price_from = document.getElementById('id-input-price-range-from');
     var input_price_to = document.getElementById('id-input-price-range-to');
+    var attributes_idx = 1;
+    var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
 
     var list_sliders = [slider_year, slider_mileage, slider_price];
     var list_from = [input_year_from, input_mileage_from, input_price_from];
@@ -142,6 +151,10 @@
     list_sliders.forEach((slider, i) => {
         create_slider(slider, list_show[i], list_range[i], 1, list_from[i], list_to[i]);
     })
+
+    function add_new_attribute(event) {
+        
+    }
 
 </script>
 
