@@ -60,7 +60,7 @@
             <label for="id-slider-price" class="form-label">
                 <div class="row">
                     <div class="col">
-                        Price range:
+                        Price range (Kč):
                     </div>
                     <div class="col">
                         <input type="number" class="form-control form-control-sm" id="id-input-price-range-from">
@@ -89,7 +89,6 @@
 <script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
 
 <script type="module">
-    // TODO: update slider's 
     const currentYear = new Date().getFullYear();
     var slider_year = document.getElementById('id-slider-year');
     var input_year_from = document.getElementById('id-input-year-range-from');
@@ -101,115 +100,48 @@
     var input_price_from = document.getElementById('id-input-price-range-from');
     var input_price_to = document.getElementById('id-input-price-range-to');
 
-    noUiSlider.create(slider_year, {
-        start: [1990, 2010],
-        connect: true,
-        range: {
-            "min": 1950,
-            "max": currentYear
-        },
-        step: 1,
-        format: {
-            to: function (value) {
-                return Math.round(value);
+    var list_sliders = [slider_year, slider_mileage, slider_price];
+    var list_from = [input_year_from, input_mileage_from, input_price_from];
+    var list_to = [input_year_to, input_mileage_to, input_price_to];
+    var list_show = [[1990, 2010], [50000, 200000], [50000, 100000]];
+    var list_range = [[1950, currentYear], [0, 500000], [0, 1000000]]
+
+    function create_slider(slider, show, range, step, input_from, input_to) {
+        noUiSlider.create(slider, {
+            start: [show[0], show[1]],
+            connect: true,
+            range: {
+                "min": range[0],
+                "max": range[1]
             },
-            from: function (value) {
-                return Number(value);
+            step: step,
+            format: {
+                to: function (value) {
+                    return Math.round(value);
+                },
+                from: function (value) {
+                    return Number(value);
+                }
             }
-        }
-    });
-
-    slider_year.noUiSlider.on("update", function (values, handle) {
-        if (handle === 0) {
-            input_year_from.value = Math.round(values[0])
-        } else {
-            input_year_to.value = Math.round(values[1])
-        }
-    });
-    input_year_from.addEventListener('change', function() {
-        slider_year.noUiSlider.set([this.value, null])
-    });
-    input_year_to.addEventListener('change', function() {
-        slider_year.noUiSlider.set([null, this.value])
-    });
-
-
-    noUiSlider.create(slider_mileage, {
-        start: [50000, 100000],
-        connect: true,
-        range: {
-            "min": 0,
-            "max": 1000000
-        },
-        step: 1,
-        format: {
-            to: function (value) {
-                return Math.round(value);
-            },
-            from: function (value) {
-                return Number(value);
+        });
+        slider.noUiSlider.on("update", function (values, handle) {
+            if (handle === 0) {
+                input_from.value = Math.round(values[0])
+            } else {
+                input_to.value = Math.round(values[1])
             }
-        }
-    });
-    slider_mileage.noUiSlider.on("update", function (values, handle) {
-        if (handle === 0) {
-            input_mileage_from.value = Math.round(values[0])
-        } else {
-            input_mileage_to.value = Math.round(values[1])
-        }
-    });
-    input_mileage_from.addEventListener('change', function() {
-        slider_mileage.noUiSlider.set([this.value, null])
-    });
-    input_mileage_to.addEventListener('change', function() {
-        slider_mileage.noUiSlider.set([null, this.value])
-    });
-    slider_mileage.noUiSlider.on("update", function (values, handle) {
-        if (handle === 0) {
-            input_mileage_from.value = Math.round(values[0])
-        } else {
-            input_mileage_to.value = Math.round(values[1])
-        }
-    });
+        });
+        input_from.addEventListener('change', function() {
+            slider.noUiSlider.set([this.value, null])
+        });
+        input_to.addEventListener('change', function() {
+            slider.noUiSlider.set([null, this.value])
+        });
+    }
 
-
-    noUiSlider.create(slider_price, {
-        start: [50000, 100000],
-        connect: true,
-        range: {
-            "min": 0,
-            "max": 1000000
-        },
-        step: 1,
-        format: {
-            to: function (value) {
-                return Math.round(value);
-            },
-            from: function (value) {
-                return Number(value);
-            }
-        }
-    });
-    slider_price.noUiSlider.on("update", function (values, handle) {
-        if (handle === 0) {
-            input_price_from.value = Math.round(values[0])
-        } else {
-            input_price_to.value = Math.round(values[1])
-        }
-    });
-    input_price_from.addEventListener('change', function() {
-        slider_price.noUiSlider.set([this.value, null])
-    });
-    input_price_to.addEventListener('change', function() {
-        slider_price.noUiSlider.set([null, this.value])
-    });
-    slider_price.noUiSlider.on("update", function (values, handle) {
-        if (handle === 0) {
-            input_price_from.value = Math.round(values[0])
-        } else {
-            input_price_to.value = Math.round(values[1])
-        }
-    });
+    list_sliders.forEach((slider, i) => {
+        create_slider(slider, list_show[i], list_range[i], 1, list_from[i], list_to[i]);
+    })
 
 </script>
 
