@@ -53,10 +53,10 @@
                     <div class="col">
                         Mileage range (km): 
                     </div>
-                    <div class="col">
+                    <div class="col-5">
                         <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" name="input-mileage-range-from">
                     </div>
-                    <div class="col">
+                    <div class="col-5">
                         <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" name="input-mileage-range-to">
                     </div>
                 </div>
@@ -69,10 +69,10 @@
                     <div class="col">
                         Price range (Kč):
                     </div>
-                    <div class="col">
+                    <div class="col-5">
                         <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" name="input-price-range-from">
                     </div>
-                    <div class="col">
+                    <div class="col-5">
                         <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" name="input-price-range-to">
                     </div>
                 </div>
@@ -94,68 +94,18 @@
 </div>
 
 <script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
+<script src="{{ url_for('static', path='js/nouislider.min.js') }}"></script>
+<script src="{{ url_for('static', path='js/create_sliders__create_search_form.js') }}"></script>
 
 <script type="module">
-    import { show_alert_message } from "js/utils.js"
+    import { show_alert_message } from "../static/js/utils.js"
 
-    const currentYear = new Date().getFullYear();
-    var slider_year = document.getElementById('id-slider-year');
-    var input_year_from = document.getElementById('id-input-year-range-from');
-    var input_year_to = document.getElementById('id-input-year-range-to');
-    var slider_mileage = document.getElementById('id-slider-mileage');
-    var input_mileage_from = document.getElementById('id-input-mileage-range-from');
-    var input_mileage_to = document.getElementById('id-input-mileage-range-to');
-    var slider_price = document.getElementById('id-slider-price');
-    var input_price_from = document.getElementById('id-input-price-range-from');
-    var input_price_to = document.getElementById('id-input-price-range-to');
     var attributes_idx = 1;
     var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
     var attributes = document.getElementById('id-row-with-attributes');
     var search_form = document.getElementById('id-submit-search-form');
 
-    var list_sliders = [slider_year, slider_mileage, slider_price];
-    var list_from = [input_year_from, input_mileage_from, input_price_from];
-    var list_to = [input_year_to, input_mileage_to, input_price_to];
-    var list_show = [[1990, 2010], [50000, 200000], [50000, 100000]];
-    var list_range = [[1950, currentYear], [0, 500000], [0, 1000000]]
-
-    function create_slider(slider, show, range, step, input_from, input_to) {
-        noUiSlider.create(slider, {
-            start: [show[0], show[1]],
-            connect: true,
-            range: {
-                "min": range[0],
-                "max": range[1]
-            },
-            step: step,
-            format: {
-                to: function (value) {
-                    return Math.round(value);
-                },
-                from: function (value) {
-                    return Number(value);
-                }
-            }
-        });
-        slider.noUiSlider.on("update", function (values, handle) {
-            if (handle === 0) {
-                input_from.value = Math.round(values[0])
-            } else {
-                input_to.value = Math.round(values[1])
-            }
-        });
-        input_from.addEventListener('change', function() {
-            slider.noUiSlider.set([this.value, null])
-        });
-        input_to.addEventListener('change', function() {
-            slider.noUiSlider.set([null, this.value])
-        });
-    }
-
-    list_sliders.forEach((slider, i) => {
-        create_slider(slider, list_show[i], list_range[i], 1, list_from[i], list_to[i]);
-    })
-
+    
     function construct_new_attribute() {
         const rowDiv = document.createElement("div");
         rowDiv.classList.add("row");
@@ -225,21 +175,19 @@
         var psc_code = form['psc-code'];
         var psc_km_range = form['psc-km-range'];
 
-        // TODO: finish validation of the form
-        if (manufacturer.value.length > 0 || model.value.length > 0) {
+        if (manufacturer.value === "Select car manufacturer!" || model.value === "Select model!") {
             show_alert_message("You must select car and model to continue!");
             event.preventDefault();
-            return false;
+            return
         }
-        if (/^[0-9\s]{5,}$/.test(psc_code.value) === false) {
-            show_alert_message("PSC should be only numbers with optional space!");
+        if (psc_code.value.length > 0 && /^[0-9\s]{5,}$/.test(psc_code.value) === false) {
+            show_alert_message("PSC should be only numbers with optional space and needs to be at least 5 characters!");
             event.preventDefault();
-            return false;
+            return
         }
         if (psc_code.value.length > 0 && psc_km_range.value.length === 0){
             psc_km_range.value = "10";
         }
-        return true;
     }
 
 </script>
