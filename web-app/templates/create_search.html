@@ -38,10 +38,10 @@
                         Year range: 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" name="input-year-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" name="input-year-range-to">
                     </div>
                 </div>
             </label>
@@ -54,10 +54,10 @@
                         Mileage range (km): 
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" name="input-mileage-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" name="input-mileage-range-to">
                     </div>
                 </div>
             </label>
@@ -70,10 +70,10 @@
                         Price range (Kč):
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" name="input-price-range-from">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" name="input-price-range-to">
                     </div>
                 </div>
             </label>
@@ -96,6 +96,8 @@
 <script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
 
 <script type="module">
+    import { show_alert_message } from "js/utils.js"
+
     const currentYear = new Date().getFullYear();
     var slider_year = document.getElementById('id-slider-year');
     var input_year_from = document.getElementById('id-input-year-range-from');
@@ -218,12 +220,19 @@
     search_form.addEventListener('submit', validate_search_form);
     function validate_search_form(event) {
         var form = document.forms[0];
+        var manufacturer = form['manufacturer'];
+        var model = form['model'];
         var psc_code = form['psc-code'];
         var psc_km_range = form['psc-km-range'];
+
         // TODO: finish validation of the form
-        var required_fields = [];
+        if (manufacturer.value.length > 0 || model.value.length > 0) {
+            show_alert_message("You must select car and model to continue!");
+            event.preventDefault();
+            return false;
+        }
         if (/^[0-9\s]{5,}$/.test(psc_code.value) === false) {
-            // TODO: make alert with message
+            show_alert_message("PSC should be only numbers with optional space!");
             event.preventDefault();
             return false;
         }
