@@ -31,6 +31,15 @@ def create_search_view(
     return templates.TemplateResponse("create_search.html", render_dict)
 
 
+@app.post("/create_search", response_class=HTMLResponse)
+def post_create_search_view(
+    request: requests.Request,
+    db: Session = Depends(sqlite_db_handler.get_db_connection),
+):
+    # TODO: process form here
+    pass
+
+
 @app.get("/get_models/{manufacturer}", response_model=List[str])
 def get_models(
     manufacturer: str,
