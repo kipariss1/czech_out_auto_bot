@@ -1,5 +1,6 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON
+from pydantic import BaseModel
 
 Base = declarative_base()
 
@@ -19,6 +20,20 @@ class CarModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer = Column(Text(length=20))
     model = Column(Text(length=40))
+
+
+class CarSearchCreate(BaseModel):
+    manufacturer: str
+    model: str
+    input_year_range_from: str
+    input_year_range_to: str
+    input_mileage_range_from: str
+    input_mileage_range_to: str
+    input_price_range_from: str
+    input_price_range_to: str
+
+    class Config:
+        extra = "allow"
 
 
 class CarSearch(Base):
