@@ -81,11 +81,11 @@
         </div>
         <div class="row mx-3 my-3">
             <label for="id-psc-code" class="form-label">Enter PSČ</label>
-            <textarea class="form-control" id="id-psc-code" name="psc-code" rows="1"></textarea>
+            <textarea class="form-control" id="id-psc-code" name="psc_code" rows="1"></textarea>
         </div>
         <div class="row mx-3 my-3">
             <label for="id-psc-km-range" class="form-label">km range from PSČ</label>
-            <input type="number" id="id-psc-km-range" name="psc-km-range" class="form-control" min="0" step="5">
+            <input type="number" id="id-psc-km-range" name="psc_km_range" class="form-control" min="0" step="5">
         </div>
         <div class="row mx-3 my-3">
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -173,8 +173,8 @@
         var form = document.forms[0];
         var manufacturer = form['manufacturer'];
         var model = form['model'];
-        var psc_code = form['psc-code'];
-        var psc_km_range = form['psc-km-range'];
+        var psc_code = form['psc_code'];
+        var psc_km_range = form['psc_km_range'];
 
         if (manufacturer.value === "Select car manufacturer!" || model.value === "Select model!") {
             show_alert_message("You must select car and model to continue!");
