@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from starlette import requests
-from sqlalchemy import distinct
+from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
 from src import sqlite_db_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
-from src.models.models import CarSearchCreate
+from src.models.models import CarSearchCreate, CarSearch
 
 
 router = APIRouter()
@@ -35,8 +35,23 @@ def post_create_search_view(
     request: CarSearchCreate,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
 ):
-    # TODO: process form here
-    pass
+    cars = db.query(CarModel).filter(
+        and_(
+            CarModel.manufacturer == request.manufacturer,
+            CarModel.model == request.model,
+        )
+    )
+    if len(cars) != 1:
+        raise Exception("The car name is not found or ambiguous")
+    # TODO: find a way to fetch user from tg to web app and to backend
+    # TODO: finish the creation of the new search
+    attributes = []
+    new_search = CarSearch(
+        user_id=1,
+        car_model_id=cars[0].id,
+        psc_code=request.psc_code,
+        psc_km_range=request.psc_km_range,
+    )
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])

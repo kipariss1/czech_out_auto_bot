@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON
+from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON, CheckConstraint
 from pydantic import BaseModel
 
 Base = declarative_base()
@@ -45,4 +45,11 @@ class CarSearch(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    psc_code = Column(Text(6), nullable=True)
+    psc_km_range = Column(Text(4), nullable=True)
     attributes = Column(JSON, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("psc_code ~ '^[0-9\s]{5,}$'", name="check_psc_code"),
+        CheckConstraint("psc_km_range ~ '^[0-9]{1, 4}$'", name="check_psc_km_range"),
+    )
