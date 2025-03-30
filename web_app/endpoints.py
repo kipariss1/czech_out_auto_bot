@@ -64,7 +64,8 @@ def post_create_search_view(
     )
     if len(list(cars)) != 1:
         raise Exception("The car name is not found or ambiguous")
-    # TODO: find a way to fetch user from tg to web app and to backend
+    # TODO: decrypt the enc_user_id here
+    # TODO: check if the same search exists
     new_search = CarSearch(
         user_id=request.enc_user_id,
         car_model_id=cars[0].id,

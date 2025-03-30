@@ -1,6 +1,7 @@
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, validates
 from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON, CheckConstraint
 from pydantic import BaseModel
+import re
 
 Base = declarative_base()
 
@@ -50,7 +51,14 @@ class CarSearch(Base):
     psc_km_range = Column(Text(4), nullable=True)
     attributes = Column(JSON, nullable=True)
 
-    __table_args__ = (
-        CheckConstraint("psc_code ~ '^[0-9\s]{5,}$'", name="check_psc_code"),
-        CheckConstraint("psc_km_range ~ '^[0-9]{1, 4}$'", name="check_psc_km_range"),
-    )
+    @validates("psc_code")
+    def validate_psc_code(self, key, address):
+        if not re.match("^[0-9\s]{5,}$", address):
+            raise ValueError("PSC code is not in right format")
+        return address
+
+    @validates("psc_km_range")
+    def validate_psc_code(self, key, address):
+        if not re.match("^[0-9]{1, 4}$", address):
+            raise ValueError("PSC km range is not in right format")
+        return address
