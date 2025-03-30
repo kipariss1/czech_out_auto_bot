@@ -98,7 +98,7 @@
 <script src="{{ url_for('static', path='js/create_sliders__create_search_form.js') }}"></script>
 
 <script type="module">
-    import { show_alert_message } from "../static/js/utils.js"
+    import { show_alert_message, get_cookie } from "../static/js/utils.js"
 
     var attributes_idx = 1;
     var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
@@ -202,7 +202,7 @@
         for (let i = 0; i < attributes_idx; i++) {
             form_data_dict[`attributes_${i}`] = form[`id-attributes-${i}`].value 
         }
-        form_data_dict['enc_user_id'] = document.cookie;
+        form_data_dict['enc_user_id'] = get_cookie('enc_user_id');
 
         fetch("create_search", {
             method: "POST",
