@@ -48,6 +48,7 @@ def construct_generic_answer(message, user):
         open_btn_text = "Otevřít webovou aplikaci"
         reply_message = "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz"
     markup.add(
+        # TODO: put user id here in the url with 127.0.0.1:8000/?enc_user_id=<encrypted_user_id>
         types.InlineKeyboardButton(
             web_app=WebAppInfo(url="https://google.com"), text=open_btn_text
         )

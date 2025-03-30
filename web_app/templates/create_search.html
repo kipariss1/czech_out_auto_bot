@@ -202,6 +202,7 @@
         for (let i = 0; i < attributes_idx; i++) {
             form_data_dict[`attributes_${i}`] = form[`id-attributes-${i}`].value 
         }
+        form_data_dict['enc_user_id'] = document.cookie;
 
         fetch("create_search", {
             method: "POST",

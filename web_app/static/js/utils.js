@@ -3,3 +3,4 @@ export function show_alert_message(message) {
     alert_tab.innerText = message;
     alert_tab.style.display = "block";
 }
+
