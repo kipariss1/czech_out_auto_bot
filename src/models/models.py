@@ -59,6 +59,6 @@ class CarSearch(Base):
 
     @validates("psc_km_range")
     def validate_psc_code(self, key, address):
-        if not re.match("^[0-9]{1, 4}$", address):
+        if not re.match("^[0-9]{1,4}$", address):
             raise ValueError("PSC km range is not in right format")
         return address

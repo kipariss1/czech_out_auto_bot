@@ -51,6 +51,24 @@ def _construct_attributes(request: dict) -> dict:
     return attributes
 
 
+def _check_if_search_exists(
+    db, user_id, car_model_id, psc_code, psc_km_range, attributes
+):
+    existing_searches = db.query(CarSearch).filter(
+        and_(
+            CarSearch.user_id == user_id,
+            CarSearch.car_model_id == car_model_id,
+            CarSearch.psc_code == psc_code,
+            CarSearch.psc_km_range == psc_km_range,
+            # TODO: check the comparison of attributes
+            CarSearch.attributes == attributes,
+        )
+    )
+    if len(list(existing_searches)) > 0:
+        return True
+    return False
+
+
 @router.post("/create_search", response_class=HTMLResponse)
 def post_create_search_view(
     request: CarSearchCreate,
@@ -64,17 +82,22 @@ def post_create_search_view(
     )
     if len(list(cars)) != 1:
         raise Exception("The car name is not found or ambiguous")
-    # TODO: decrypt the enc_user_id here
-    # TODO: check if the same search exists
-    new_search = CarSearch(
-        user_id=request.enc_user_id,
-        car_model_id=cars[0].id,
-        psc_code=request.psc_code,
-        psc_km_range=request.psc_km_range,
-        attributes=_construct_attributes(dict(request)),
-    )
+    new_search_args = {
+        # TODO: decrypt the enc_user_id here
+        "user_id": request.enc_user_id,
+        "car_model_id": cars[0].id,
+        "psc_code": request.psc_code,
+        "psc_km_range": request.psc_km_range,
+        "attributes": _construct_attributes(dict(request)),
+    }
+    if _check_if_search_exists(db, **new_search_args):
+        # TODO: make an actual redirect to main page with error 'Search already exists'
+        return HTMLResponse("Search already exists")
+    new_search = CarSearch(**new_search_args)
     db.add(new_search)
     db.commit()
+    # TODO: redirect to main page with 'New search created' writing
+    return HTMLResponse("Here should be redirect to main page")
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
