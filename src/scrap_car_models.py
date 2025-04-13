@@ -29,21 +29,27 @@ def filter_car_names(el):
     add_car_models_to_db(car_models=el["items"])
 
 
-def add_car_models_to_db(car_manufacturer: str = None, car_models: list = []):
+def add_car_models_to_db(
+    car_manufacturer: str = None,
+    car_models: list = [],
+    fixture=True,
+    db=sqlite_db_handler.get_db_connection(),
+):
     if car_manufacturer:
         setattr(add_car_models_to_db, "car_manufacturer", car_manufacturer)
-    car_models = list(map(filter_car_names, car_models))
-    stuff = ["(alle)", "(Alle)", "Andere"]
+    if not fixture:
+        car_models = list(map(filter_car_names, car_models))
+        stuff = ["(alle)", "(Alle)", "Andere"]
 
-    def remove_stuff(el: str):
-        for m in stuff:
-            el = el.replace(m, "")
-        return el.strip()
+        def remove_stuff(el: str):
+            for m in stuff:
+                el = el.replace(m, "")
+            return el.strip()
 
-    car_models = list(filter(lambda el: not (el is None), car_models))
-    car_models = list(map(remove_stuff, car_models))
-    car_models = list(filter(lambda el: len(el) > 0, car_models))
-    car_models = list(set(car_models))
+        car_models = list(filter(lambda el: not (el is None), car_models))
+        car_models = list(map(remove_stuff, car_models))
+        car_models = list(filter(lambda el: len(el) > 0, car_models))
+        car_models = list(set(car_models))
     for car_model in car_models:
         new_car = CarModel(
             manufacturer=add_car_models_to_db.car_manufacturer, model=car_model
