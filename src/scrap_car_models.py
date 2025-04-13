@@ -76,4 +76,4 @@ if __name__ == "__main__":
                     continue
                 car_manufacturer = list(el.keys())[0]
                 car_models = el[car_manufacturer]["data"]
-                add_car_models_to_db(car_manufacturer, car_models)
+                add_car_models_to_db(car_manufacturer, car_models, fixture=False)
