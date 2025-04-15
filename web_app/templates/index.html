@@ -6,5 +6,20 @@
     <a href="/create_search">Create search page, that's it</a>
 </div>
 
+<script type="module">
+    import { show_alert_message, show_success_message } from "../static/js/utils.js"
+
+    const new_search_created = {{ new_search_created | tojson }};
+    const search_already_exists = {{ search_already_exists | tojson }};
+
+    if (new_search_created === true) {
+        show_success_message("New search successfully created!");
+    }
+
+    if (search_already_exists) {
+        show_alert_message("Attempted search alreay exists ¯\\_(ツ)_/¯");
+    }     
+</script>
+
 
 {% endblock %}

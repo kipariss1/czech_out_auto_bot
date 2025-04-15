@@ -15,8 +15,21 @@ templates = Jinja2Templates(directory="web_app/templates")
 
 
 @router.get("/")
-def main_view(request: Request, enc_user_id: str = None):
-    response = templates.TemplateResponse("index.html", {"request": request})
+def main_view(
+    request: Request,
+    db: Session = Depends(sqlite_db_handler.get_db_connection),
+    enc_user_id: str = None,
+    new_search_created: bool = False,
+    search_already_exists: bool = False,
+):
+    render_dict = {
+        "request": request,
+        "new_search_created": new_search_created,
+        "search_already_exists": search_already_exists,
+    }
+    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    render_dict["searches"] = list(map(lambda s: s.to_dict(), list(searches)))
+    response = templates.TemplateResponse("index.html", render_dict)
     response.set_cookie(
         key="enc_user_id", value=enc_user_id, samesite="strict", max_age=3600
     )
@@ -109,12 +122,3 @@ def get_models(
     )
     models = list(map(lambda el: el[0], models))
     return sorted(models)
-
-
-@router.get("/get_searches/{enc_user_id}", response_class=JSONResponse)
-def get_searches(
-    enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
-):
-    # TODO: decrypt user id and get searches from databases
-    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
-    return JSONResponse({"searches": list(searches)})

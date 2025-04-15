@@ -62,3 +62,13 @@ class CarSearch(Base):
         if not re.match("^[0-9]{1,4}$", address):
             raise ValueError("PSC km range is not in right format")
         return address
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "car_model_id": self.car_model_id,
+            "psc_code": self.psc_code,
+            "psc_km_range": self.psc_km_range,
+            "attributes": self.attributes,
+        }
