@@ -111,6 +111,20 @@ def post_create_search_view(
     # TODO: redirect to main page with 'New search created' writing
     return HTMLResponse("Here should be redirect to main page")
 
+@router.delete("/delete_search/{search_id}/{enc_user_id}")
+def delete_search(
+    request: requests.Request,
+    search_id: str,
+    enc_user_id: str,
+    db: Session = Depends(sqlite_db_handler.get_db_connection),
+):
+    car_search = db.query(CarSearch).filter(
+        CarSearch.id == search_id
+    ).first()
+    db.delete(car_search)
+    db.commit()
+    return main_view(request, db, enc_user_id)
+
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
 def get_models(
