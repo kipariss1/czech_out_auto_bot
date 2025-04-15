@@ -60,7 +60,6 @@ def _check_if_search_exists(
             CarSearch.car_model_id == car_model_id,
             CarSearch.psc_code == psc_code,
             CarSearch.psc_km_range == psc_km_range,
-            # TODO: check the comparison of attributes
             CarSearch.attributes == attributes,
         )
     )
@@ -117,4 +116,5 @@ def get_searches(
     enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
 ):
     # TODO: decrypt user id and get searches from databases
-    return JSONResponse({})
+    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    return JSONResponse({"searches": list(searches)})
