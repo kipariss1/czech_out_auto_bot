@@ -1,5 +1,5 @@
-from sqlalchemy.orm import declarative_base, validates
-from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON, CheckConstraint
+from sqlalchemy.orm import declarative_base, validates, relationship
+from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON
 from pydantic import BaseModel
 import re
 
@@ -47,6 +47,7 @@ class CarSearch(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    car_model = relationship("CarModel")
     psc_code = Column(Text(6), nullable=True)
     psc_km_range = Column(Text(4), nullable=True)
     attributes = Column(JSON, nullable=True)
@@ -63,12 +64,28 @@ class CarSearch(Base):
             raise ValueError("PSC km range is not in right format")
         return address
 
+    def _construct_attributes(self):
+        new_attrs = {
+            "Year range": f"{self.attributes['input_year_range_from']} - {self.attributes['input_year_range_to']}",
+            "Mileage range": f"{self.attributes['input_mileage_range_from']} - {self.attributes['input_mileage_range_to']}",
+            "Price range": f"{self.attributes['input_price_range_from']} - {self.attributes['input_price_range_to']}",
+        }
+        new_attrs.update(
+            {
+                f"Unique trait #{k.split('_')[1]}": v
+                for k, v in self.attributes.items()
+                if "attributes_" in k
+            }
+        )
+        return new_attrs
+
     def to_dict(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "car_model_id": self.car_model_id,
+            "car_model": f"{self.car_model.manufacturer} {self.car_model.model}",
             "psc_code": self.psc_code,
             "psc_km_range": self.psc_km_range,
-            "attributes": self.attributes,
+            "attributes": self._construct_attributes(),
         }
