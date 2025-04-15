@@ -3,36 +3,37 @@
 {% block content %}
 
 {% for search in searches %}
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Search #{{ search.id }}</h5>
-            <p class="card-text mb-1"><strong>Car Model ID:</strong> {{ search.car_model_id }}</p>
-            <p class="card-text mb-1"><strong>PSC Code:</strong> {{ search.psc_code }}</p>
-            <p class="card-text mb-2"><strong>PSC KM Range:</strong> {{ search.psc_km_range }}</p>
+<div class="card shadow-sm my-3 mx-2">
+    <div class="card-body">
+        <h5 class="card-title">Search #{{ search.id }}</h5>
+        <p class="card-text mb-1"><strong>Car Model ID:</strong> {{ search.car_model_id }}</p>
+        <p class="card-text mb-1"><strong>PSC Code:</strong> {{ search.psc_code }}</p>
+        <p class="card-text mb-2"><strong>PSC KM Range:</strong> {{ search.psc_km_range }}</p>
 
-            <p class="card-text"><strong>Attributes:</strong></p>
-            <ul class="mb-3">
-                {% for attr in search.attributes %}
-                    <li>{{ attr }}</li>
-                {% endfor %}
-            </ul>
+        <p class="card-text"><strong>Attributes:</strong></p>
+        <ul class="mb-3">
+            {% for key, val in search.attributes.items() %}
+                <li><strong>{{ key }}:</strong> {{ val }}</li>
+            {% endfor %}
+        </ul>
 
-            <!-- 🗑️ Delete button with icon -->
-            <form method="post" action="/delete_search/{{ search.id }}/{{ search.user_id }}" class="d-inline">
-                <button type="submit" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-trash"></i> Delete
-                </button>
-            </form>
-        </div>
+        <form method="post" action="/delete_search/{{ search.id }}/{{ search.user_id }}" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                🗑️ Delete
+            </button>
+        </form>
     </div>
-    {% endfor %}
+</div>
+{% endfor %}
 
-    <!-- ➕ Create New Car Search -->
-    <div class="d-grid">
-        <a href="/create_search" class="btn btn-primary btn-lg mt-4">
-            Create New Car Search
-        </a>
-    </div>
+<!-- ➕ Create New Car Search -->
+<div class="d-grid mx-2 mt-4">
+    <a href="/create_search" class="btn btn-primary btn-lg mt-4">
+        Create New Car Search
+    </a>
+</div>
+
+<div class="my-3"></div>
 
 <script type="module">
     import { show_alert_message, show_success_message } from "../static/js/utils.js"

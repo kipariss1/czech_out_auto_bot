@@ -81,7 +81,7 @@ def _check_if_search_exists(
     return False
 
 
-@router.post("/create_search", response_class=HTMLResponse)
+@router.post("/create_search", response_class=JSONResponse)
 def post_create_search_view(
     request: CarSearchCreate,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
@@ -103,24 +103,23 @@ def post_create_search_view(
         "attributes": _construct_attributes(dict(request)),
     }
     if _check_if_search_exists(db, **new_search_args):
-        # TODO: make an actual redirect to main page with error 'Search already exists'
-        return HTMLResponse("Search already exists")
+        return JSONResponse(
+            {"search_created": False, "reason": "search already exists"}
+        )
     new_search = CarSearch(**new_search_args)
     db.add(new_search)
     db.commit()
-    # TODO: redirect to main page with 'New search created' writing
-    return HTMLResponse("Here should be redirect to main page")
+    return JSONResponse({"search_created": True})
 
-@router.delete("/delete_search/{search_id}/{enc_user_id}")
+
+@router.post("/delete_search/{search_id}/{enc_user_id}")
 def delete_search(
     request: requests.Request,
     search_id: str,
     enc_user_id: str,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
 ):
-    car_search = db.query(CarSearch).filter(
-        CarSearch.id == search_id
-    ).first()
+    car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
     return main_view(request, db, enc_user_id)
