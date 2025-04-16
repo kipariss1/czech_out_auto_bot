@@ -18,7 +18,8 @@ templates = Jinja2Templates(directory="web_app/templates")
 def get_searches_by_id(
     enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
 ):
-    return db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))
 
 
 @router.get("/")

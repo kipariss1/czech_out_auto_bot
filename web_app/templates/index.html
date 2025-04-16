@@ -2,40 +2,20 @@
 
 {% block content %}
 
-{% for search in searches %}
-<div class="card shadow-sm my-3 mx-2">
-    <div class="card-body">
-        <h5 class="card-title">🚗 Search #{{ loop.index }} <strong>{{ search.car_model }}</strong></h5>
-        <p class="card-text mb-1"><strong>PSČ Code:</strong> {{ search.psc_code }}</p>
-        <p class="card-text mb-2"><strong>PSČ km range:</strong> {{ search.psc_km_range }}</p>
-
-        <p class="card-text"><strong>Attributes:</strong></p>
-        <ul class="mb-3">
-            {% for key, val in search.attributes.items() %}
-                <li><strong>{{ key }}:</strong> {{ val }}</li>
-            {% endfor %}
-        </ul>
-
-        <form method="post" action="/delete_search/{{ search.id }}/{{ search.user_id }}" class="d-inline">
-            <button type="submit" class="btn btn-outline-danger btn-sm">
-                🗑️ Delete
-            </button>
-        </form>
-    </div>
-</div>
-{% endfor %}
+<div id="search-cards-container"></div>
 
 <!-- ➕ Create New Car Search -->
 <div class="d-grid mx-2 mt-4">
     <a href="/create_search" class="btn btn-primary btn-lg mt-4">
-        Create New Car Search
+        🔎 Create New Car Search
     </a>
 </div>
 
 <div class="my-3"></div>
 
 <script type="module">
-    import { show_alert_message, show_success_message } from "../static/js/utils.js"
+    import { show_alert_message, show_success_message, get_cookie } from "../static/js/utils.js"
+    import { populate_search_cards } from "../static/js/populate_search_cards__create_main_view.js"
 
     const new_search_created = {{ new_search_created | tojson }};
     const search_already_exists = {{ search_already_exists | tojson }};
@@ -46,7 +26,15 @@
 
     if (search_already_exists) {
         show_alert_message("Attempted search alreay exists ¯\\_(ツ)_/¯");
-    }     
+    }
+    
+    fetch(
+        `/searches/${get_cookie('enc_user_id')}`
+    ).then((res) => {
+        populate_search_cards(res);
+    }).catch((err) => {
+        show_alert_message(String(err));
+    });
 </script>
 
 
