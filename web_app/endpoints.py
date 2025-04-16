@@ -14,6 +14,13 @@ router = APIRouter()
 templates = Jinja2Templates(directory="web_app/templates")
 
 
+@router.get("/searches/{enc_user_id}")
+def get_searches_by_id(
+    enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
+):
+    return db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+
+
 @router.get("/")
 def main_view(
     request: Request,
@@ -27,12 +34,11 @@ def main_view(
         "new_search_created": new_search_created,
         "search_already_exists": search_already_exists,
     }
-    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
-    render_dict["searches"] = list(map(lambda s: s.to_dict(), list(searches)))
     response = templates.TemplateResponse("index.html", render_dict)
-    response.set_cookie(
-        key="enc_user_id", value=enc_user_id, samesite="strict", max_age=3600
-    )
+    if enc_user_id:
+        response.set_cookie(
+            key="enc_user_id", value=enc_user_id, samesite="strict", max_age=3600
+        )
     return response
 
 
@@ -81,19 +87,25 @@ def _check_if_search_exists(
     return False
 
 
+def _find_car_by_model(manufacturer: str, model: str):
+    db = sqlite_db_handler.get_db_connection()
+    cars = db.query(CarModel).filter(
+        and_(
+            CarModel.manufacturer == manufacturer,
+            CarModel.model == model,
+        )
+    )
+    if len(list(cars)) != 1:
+        raise Exception("The car name is not found or ambiguous")
+    return cars
+
+
 @router.post("/create_search", response_class=JSONResponse)
 def post_create_search_view(
     request: CarSearchCreate,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
 ):
-    cars = db.query(CarModel).filter(
-        and_(
-            CarModel.manufacturer == request.manufacturer,
-            CarModel.model == request.model,
-        )
-    )
-    if len(list(cars)) != 1:
-        raise Exception("The car name is not found or ambiguous")
+    cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
         # TODO: decrypt the enc_user_id here
         "user_id": request.enc_user_id,
