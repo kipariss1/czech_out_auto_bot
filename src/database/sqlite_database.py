@@ -36,7 +36,3 @@ class SqliteDBHandler:
             self._db_conn.close()
             return True
         return False
-
-    def __del__(self):
-        if os.path.exists(self.__DB_NAME):
-            os.remove(self.__DB_NAME)
