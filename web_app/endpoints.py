@@ -25,7 +25,6 @@ def get_searches_by_id(
 @router.get("/")
 def main_view(
     request: Request,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
     enc_user_id: str = None,
     new_search_created: bool = False,
     search_already_exists: bool = False,
@@ -135,7 +134,7 @@ def delete_search(
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return main_view(request, db, enc_user_id)
+    return main_view(request, enc_user_id)
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])

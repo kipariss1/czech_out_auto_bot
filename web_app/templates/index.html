@@ -30,6 +30,8 @@
     
     fetch(
         `/searches/${get_cookie('enc_user_id')}`
+    ).then((res) => 
+        res.json()
     ).then((res) => {
         populate_search_cards(res);
     }).catch((err) => {
