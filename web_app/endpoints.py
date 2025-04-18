@@ -8,7 +8,6 @@ from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
-from urllib.parse import quote
 
 
 router = APIRouter()
