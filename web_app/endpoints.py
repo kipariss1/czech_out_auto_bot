@@ -3,11 +3,12 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
-from src import sqlite_db_handler
+from src import sqlite_db_handler, cipher_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
+from urllib.parse import quote, unquote
 
 
 router = APIRouter()
@@ -37,7 +38,10 @@ def main_view(
     response = templates.TemplateResponse("index.html", render_dict)
     if enc_user_id:
         response.set_cookie(
-            key="enc_user_id", value=enc_user_id, samesite="strict", max_age=3600
+            key="enc_user_id",
+            value=unquote(enc_user_id),
+            samesite="strict",
+            max_age=3600,
         )
     return response
 
@@ -107,8 +111,7 @@ def post_create_search_view(
 ):
     cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
-        # TODO: decrypt the enc_user_id here
-        "user_id": request.enc_user_id,
+        "user_id": cipher_handler.decode(request.enc_user_id),
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
@@ -133,7 +136,7 @@ def delete_search(
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return RedirectResponse(f"/?enc_user_id={enc_user_id}", status_code=303)
+    return RedirectResponse(f"/?enc_user_id={quote(enc_user_id)}", status_code=303)
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
