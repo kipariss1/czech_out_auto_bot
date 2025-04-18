@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
@@ -126,7 +126,6 @@ def post_create_search_view(
 
 @router.post("/delete_search/{search_id}/{enc_user_id}")
 def delete_search(
-    request: requests.Request,
     search_id: str,
     enc_user_id: str,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
@@ -134,7 +133,7 @@ def delete_search(
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return main_view(request, enc_user_id)
+    return RedirectResponse(f"/?enc_user_id={enc_user_id}", status_code=303)
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
