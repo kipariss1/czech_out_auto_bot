@@ -211,11 +211,15 @@
             },
             body: JSON.stringify(form_data_dict)
         }).then(res => {
-            if (res.ok && res['search_created']) {
-                window.location.href = `/?enc_user_id=${get_cookie('enc_user_id')}&new_search_created=true`
+            if (res.ok) {
+                return res.json()
             }
-            if (res.ok && !res['search_created']) {
-                window.location.href = `/?enc_user_id=${get_cookie('enc_user_id')}&search_already_exists=true`
+        }).then(res => {
+            if (res['search_created']) {
+                window.location.href = `/?new_search_created=true`
+            }
+            if (!res['search_created']) {
+                window.location.href = `/?search_already_exists=true`
             }
         }).catch(err => show_alert_message(String(err)))
     }
