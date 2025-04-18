@@ -27,9 +27,11 @@
     if (search_already_exists === true) {
         show_alert_message("Attempted search alreay exists ¯\\_(ツ)_/¯");
     }
-    
+    var enc_user_id = get_cookie('enc_user_id');
+    enc_user_id = enc_user_id.replace(/['"]/g, '');
+    enc_user_id = encodeURIComponent(enc_user_id)
     fetch(
-        `/searches/${get_cookie('enc_user_id')}`
+        `/searches/${enc_user_id}`
     ).then((res) => 
         res.json()
     ).then((res) => {

@@ -8,7 +8,7 @@ from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
-from urllib.parse import quote, unquote
+from urllib.parse import quote
 
 
 router = APIRouter()
@@ -19,7 +19,11 @@ templates = Jinja2Templates(directory="web_app/templates")
 def get_searches_by_id(
     enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
 ):
-    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    searches = (
+        db.query(CarSearch)
+        .filter(CarSearch.user_id == cipher_handler.decode(enc_user_id))
+        .all()
+    )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))
 
 
@@ -39,7 +43,7 @@ def main_view(
     if enc_user_id:
         response.set_cookie(
             key="enc_user_id",
-            value=unquote(enc_user_id),
+            value=enc_user_id,
             samesite="strict",
             max_age=3600,
         )
@@ -127,16 +131,18 @@ def post_create_search_view(
     return JSONResponse({"search_created": True})
 
 
-@router.post("/delete_search/{search_id}/{enc_user_id}")
+@router.post("/delete_search/{search_id}/{user_id}")
 def delete_search(
     search_id: str,
-    enc_user_id: str,
+    user_id: str,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return RedirectResponse(f"/?enc_user_id={quote(enc_user_id)}", status_code=303)
+    return RedirectResponse(
+        f"/?enc_user_id={cipher_handler.url_safe_encode(user_id)}", status_code=303
+    )
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])

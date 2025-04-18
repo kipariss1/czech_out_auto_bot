@@ -9,13 +9,13 @@ class CipherHandler:
         self.__key = Fernet.generate_key()
         self.__fernet = Fernet(self.__key)
 
-    def encode(self, str2encode: Union[str, bytes]):
+    def encode(self, str2encode: Union[str, bytes]) -> str:
         if not isinstance(str2encode, bytes):
             str2encode = str2encode.encode("utf8")
-        return self.__fernet.encrypt(str2encode)
+        return self.__fernet.encrypt(str2encode).decode("utf8")
 
-    def decode(self, str2decode: str):
-        return self.__fernet.decrypt(str2decode)
+    def decode(self, str2decode: str) -> str:
+        return self.__fernet.decrypt(str2decode).decode("utf8")
 
     def url_safe_encode(self, str2encode):
         return quote(self.encode(str2encode))
