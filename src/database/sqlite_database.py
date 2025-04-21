@@ -10,7 +10,6 @@ class SqliteDBHandler:
 
     def __init__(self, dbname: str = None):
         if dbname:
-            self.__DB_NAME = dbname
             self.__DB_URL = f"sqlite:///./{dbname}"
         self._engine = sa.create_engine(self.__DB_URL)
         self._sessionmaker = sessionmaker
