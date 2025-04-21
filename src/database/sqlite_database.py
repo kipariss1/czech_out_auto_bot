@@ -1,13 +1,12 @@
+from src.settings.settings import settings
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, Session
 from src.models.models import Base
-import os
 
 
 class SqliteDBHandler:
 
-    __DB_NAME = "local.db"
-    __DB_URL = "sqlite:///./local.db"
+    __DB_URL = settings.db_url
 
     def __init__(self, dbname: str = None):
         if dbname:

@@ -2,6 +2,7 @@ from src import bot, cipher_handler
 from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User
+from src import sqlite_db_handler
 
 
 def get_or_create_user(user_id):

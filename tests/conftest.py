@@ -8,7 +8,6 @@ def test_db_handler():
     t_db_handler = SqliteDBHandler("test.db")
     yield t_db_handler
     t_db_handler.close_db_connection()
-    del t_db_handler
 
 
 @pytest.fixture(autouse=True)
