@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div id="search-cards-container"></div>
+
+<!-- ➕ Create New Car Search -->
+<div class="d-grid mx-2 mt-4">
+    <a href="/create_search" class="btn btn-primary btn-lg mt-4">
+        🔎 Create New Car Search
+    </a>
+</div>
+
+<div class="my-3"></div>
+
+<script type="module">
+    import { show_alert_message, show_success_message, get_cookie } from "../static/js/utils.js"
+    import { populate_search_cards } from "../static/js/populate_search_cards__create_main_view.js"
+
+    const new_search_created = {{ new_search_created | tojson }};
+    const search_already_exists = {{ search_already_exists | tojson }};
+
+    if (new_search_created === true) {
+        show_success_message("New search successfully created!");
+    }
+
+    if (search_already_exists === true) {
+        show_alert_message("Attempted search alreay exists ¯\\_(ツ)_/¯");
+    }
+    var enc_user_id = get_cookie('enc_user_id');
+    enc_user_id = enc_user_id.replace(/['"]/g, '');
+    enc_user_id = encodeURIComponent(enc_user_id)
+    fetch(
+        `/searches/${enc_user_id}`
+    ).then((res) => 
+        res.json()
+    ).then((res) => {
+        populate_search_cards(res);
+    }).catch((err) => {
+        show_alert_message(String(err));
+    });
+</script>
+
+
+{% endblock %}

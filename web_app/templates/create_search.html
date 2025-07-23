@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container text-center" id="id-main-container">
+    <form id="id-submit-search-form" method="post">
+        <div class="row mx-3 mt-3">
+            <h5>Submit new search for car of your dreams!</h5>
+        </div>
+        <div class="row mx-3">
+            <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
+                <option selected>Select car manufacturer!</option>
+                {% for m in car_manufacturers %}
+                    <option value="{{ m }}">{{ m }}</option>            
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row mx-3">
+            <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
+                <option selected>Select model!</option>
+            </select>
+        </div>
+        <div class="row mx-3 mb-3" id="id-row-with-attributes">
+            <label for="id-attributes-0" class="form-label">Type here optional attributes: </label>
+            <div class="row mb-1">
+                <div class="col-8">
+                    <textarea class="form-control" id="id-attributes-0" n="0" rows="1" placeholder="M paket, 2.0 TDI"></textarea>
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-success" type="button" id="id-attributes-0-submit-btn" n="0">✓</button>
+                </div>
+            </div>
+        </div>
+        <div class="row mx-3 my-3">
+            <label for="id-slider-year" class="form-label">
+                <div class="row">
+                    <div class="col">
+                        Year range: 
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" name="input_year_range_from">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" name="input_year_range_to">
+                    </div>
+                </div>
+            </label>
+            <div id="id-slider-year"></div>                
+        </div>
+        <div class="row mx-3 my-3">
+            <label for="id-slider-mileage" class="form-label">
+                <div class="row">
+                    <div class="col">
+                        Mileage range (km): 
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" name="input_mileage_range_from">
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" name="input_mileage_range_to">
+                    </div>
+                </div>
+            </label>
+            <div id="id-slider-mileage"></div>
+        </div>
+        <div class="row mx-3 my-3">
+            <label for="id-slider-price" class="form-label">
+                <div class="row">
+                    <div class="col">
+                        Price range (Kč):
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" name="input_price_range_from">
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" name="input_price_range_to">
+                    </div>
+                </div>
+            </label>
+            <div id="id-slider-price"></div>
+        </div>
+        <div class="row mx-3 my-3">
+            <label for="id-psc-code" class="form-label">Enter PSČ</label>
+            <textarea class="form-control" id="id-psc-code" name="psc_code" rows="1"></textarea>
+        </div>
+        <div class="row mx-3 my-3">
+            <label for="id-psc-km-range" class="form-label">km range from PSČ</label>
+            <input type="number" id="id-psc-km-range" name="psc_km_range" class="form-control" min="0" step="5">
+        </div>
+        <div class="row mx-3 my-3">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script src="{{ url_for('static', path='js/populate_models_field__create_search_form.js') }}"></script>
+<script src="{{ url_for('static', path='js/nouislider.min.js') }}"></script>
+<script src="{{ url_for('static', path='js/create_sliders__create_search_form.js') }}"></script>
+
+<script type="module">
+    import { show_alert_message, get_cookie } from "../static/js/utils.js"
+
+    var attributes_idx = 1;
+    var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
+    var attributes = document.getElementById('id-row-with-attributes');
+    var search_form = document.getElementById('id-submit-search-form');
+
+    
+    function construct_new_attribute() {
+        const rowDiv = document.createElement("div");
+        rowDiv.classList.add("row");
+        rowDiv.classList.add("mb-1");
+        rowDiv.id = `id-added-attribute-${attributes_idx}`;
+
+        const textareaDiv = document.createElement("div");
+        textareaDiv.classList.add("col-8");
+        const sbmtBtnAreaDiv = document.createElement("div");
+        sbmtBtnAreaDiv.classList.add("col-2");
+        const dltBtnAreaDiv = document.createElement("div");
+        dltBtnAreaDiv.classList.add("col-2");
+
+        const textarea = document.createElement("textarea");
+        textarea.classList.add("form-control");
+        textarea.setAttribute("rows", 1);
+        textarea.setAttribute('placeholder', "M paket, 2.0 TDI")
+        textarea.id = `id-attributes-${attributes_idx}`;
+        textarea.setAttribute("n", attributes_idx);
+        textareaDiv.appendChild(textarea);
+
+        const submit_attr_btn = document.createElement('button');
+        submit_attr_btn.classList.add('btn', 'btn-success');
+        submit_attr_btn.id = `id-attributes-${attributes_idx}-submit-btn`;
+        submit_attr_btn.setAttribute("n", attributes_idx);
+        submit_attr_btn.setAttribute("type", "button");
+        submit_attr_btn.addEventListener('click', add_new_attribute);
+        submit_attr_btn.textContent = "✓";
+        sbmtBtnAreaDiv.appendChild(submit_attr_btn);
+
+        const delete_attr_btn = document.createElement('button');
+        delete_attr_btn.classList.add('btn', 'btn-danger');
+        delete_attr_btn.id = `id-attributes-${attributes_idx}-delete-btn`;
+        delete_attr_btn.setAttribute("n", attributes_idx);
+        delete_attr_btn.setAttribute("type", "button");
+        delete_attr_btn.addEventListener('click', delete_attribute);
+        delete_attr_btn.textContent = "X";
+        dltBtnAreaDiv.appendChild(delete_attr_btn);
+
+        rowDiv.appendChild(textareaDiv);
+        rowDiv.appendChild(sbmtBtnAreaDiv);
+        rowDiv.appendChild(dltBtnAreaDiv);
+
+        attributes_idx = attributes_idx + 1;
+        return rowDiv;
+    }
+
+    function add_new_attribute(event) {
+        var new_row = construct_new_attribute();
+        attributes.appendChild(new_row);
+
+    }
+
+    function delete_attribute(event) {
+        var n = event.target.getAttribute('n');
+        var row_to_delete = document.getElementById(`id-added-attribute-${n}`);
+        row_to_delete.remove();
+    }
+
+    btn_submit_first_attribute.addEventListener('click', add_new_attribute);
+
+    search_form.addEventListener('submit', validate_search_form);
+    function validate_search_form(event) {
+        event.preventDefault();
+        var form = document.forms[0];
+        var manufacturer = form['manufacturer'];
+        var model = form['model'];
+        var psc_code = form['psc_code'];
+        var psc_km_range = form['psc_km_range'];
+
+        if (manufacturer.value === "Select car manufacturer!" || model.value === "Select model!") {
+            show_alert_message("You must select car and model to continue!");
+            return
+        }
+        if (psc_code.value.length > 0 && /^[0-9\s]{5,}$/.test(psc_code.value) === false) {
+            show_alert_message("PSC should be only numbers with optional space and needs to be at least 5 characters!");
+            return
+        }
+        if (psc_code.value.length > 0 && psc_km_range.value.length === 0){
+            psc_km_range.value = "10";
+        }
+        send_form(form);
+    }
+
+    function  send_form(form) {
+        const form_data_dict = {};
+
+        var form_data = new FormData(form);
+
+        form_data.forEach((value, key) => {
+            form_data_dict[key] = value;
+        });
+
+        for (let i = 0; i < attributes_idx; i++) {
+            form_data_dict[`attributes_${i}`] = form[`id-attributes-${i}`].value 
+        }
+        form_data_dict['enc_user_id'] = get_cookie('enc_user_id');
+
+        fetch("create_search", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(form_data_dict)
+        }).then(res => {
+            if (res.ok) {
+                return res.json()
+            }
+        }).then(res => {
+            if (res['search_created']) {
+                window.location.href = `/?new_search_created=true`
+            }
+            if (!res['search_created']) {
+                window.location.href = `/?search_already_exists=true`
+            }
+        }).catch(err => show_alert_message(String(err)))
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/nouislider.min.css') }}">
+    <style>
+        .header-img {
+          max-width: 40px;
+        }
+      </style>
+</head>
+<body>
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <div class="row d-flex align-items-stretch">
+                    <div class="col-4 d-flex justify-content-center align-items-center">
+                        <img src="{{ url_for('static', path='pics/logo.jpeg') }}" class="header-img">
+                    </div>
+                    <div class="col-8 d-flex justify-content-center mt-auto">
+                        <h4>Czech out car bot</h4>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <main id="id-main">
+        <div class="alert alert-warning" role="alert" id="id-alert-tab" style="display:none">
+            Default text    
+        </div>
+
+        <div class="alert alert-success" role="alert" id="id-success-message-tab" style="display:none">
+            Default text    
+        </div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', path='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

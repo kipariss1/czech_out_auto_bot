@@ -1,4 +1,4 @@
-from src import bot
+from src import bot, cipher_handler
 from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User
@@ -47,9 +47,13 @@ def construct_generic_answer(message, user):
     if user.language == "cz":
         open_btn_text = "Otevřít webovou aplikaci"
         reply_message = "Dobrý den,\n tento bot vám pomůže sledovat inzeráty konkrétního modelu auta s konkrétními parametry na bazos.cz"
+    base_url = "127.0.0.1"  # for now it's 127.0.0.1 TODO: put there an actual after start of hosting
     markup.add(
         types.InlineKeyboardButton(
-            web_app=WebAppInfo(url="https://google.com"), text=open_btn_text
+            web_app=WebAppInfo(
+                url=f"{base_url}/?enc_user_id={cipher_handler.url_safe_encode(str(message.from_user.id))}"
+            ),
+            text=open_btn_text,
         )
     )
     bot.reply_to(message, reply_message, reply_markup=markup)
