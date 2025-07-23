@@ -8,10 +8,11 @@ from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
+from web_app import BASE_DIR
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory="web_app/templates")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 @router.get("/searches/{enc_user_id}")
