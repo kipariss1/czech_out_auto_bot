@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
-from src import sqlite_db_handler
+from src import sqlite_db_handler, cipher_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
@@ -18,14 +18,17 @@ templates = Jinja2Templates(directory="web_app/templates")
 def get_searches_by_id(
     enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
 ):
-    searches = db.query(CarSearch).filter(CarSearch.user_id == enc_user_id).all()
+    searches = (
+        db.query(CarSearch)
+        .filter(CarSearch.user_id == cipher_handler.decode(enc_user_id))
+        .all()
+    )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))
 
 
 @router.get("/")
 def main_view(
     request: Request,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
     enc_user_id: str = None,
     new_search_created: bool = False,
     search_already_exists: bool = False,
@@ -38,7 +41,10 @@ def main_view(
     response = templates.TemplateResponse("index.html", render_dict)
     if enc_user_id:
         response.set_cookie(
-            key="enc_user_id", value=enc_user_id, samesite="strict", max_age=3600
+            key="enc_user_id",
+            value=enc_user_id,
+            samesite="strict",
+            max_age=3600,
         )
     return response
 
@@ -108,8 +114,7 @@ def post_create_search_view(
 ):
     cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
-        # TODO: decrypt the enc_user_id here
-        "user_id": request.enc_user_id,
+        "user_id": cipher_handler.decode(request.enc_user_id),
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
@@ -125,17 +130,18 @@ def post_create_search_view(
     return JSONResponse({"search_created": True})
 
 
-@router.post("/delete_search/{search_id}/{enc_user_id}")
+@router.post("/delete_search/{search_id}/{user_id}")
 def delete_search(
-    request: requests.Request,
     search_id: str,
-    enc_user_id: str,
+    user_id: str,
     db: Session = Depends(sqlite_db_handler.get_db_connection),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return main_view(request, db, enc_user_id)
+    return RedirectResponse(
+        f"/?enc_user_id={cipher_handler.url_safe_encode(user_id)}", status_code=303
+    )
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])

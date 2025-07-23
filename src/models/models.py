@@ -34,7 +34,7 @@ class CarSearchCreate(BaseModel):
     input_price_range_to: str
     psc_code: str
     psc_km_range: str
-    enc_user_id: int
+    enc_user_id: str
 
     class Config:
         extra = "allow"
