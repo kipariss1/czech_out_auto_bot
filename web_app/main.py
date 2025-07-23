@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,7 +9,8 @@ from web_app.endpoints import router
 
 app = FastAPI()
 app.include_router(router)
-app.mount("/static", StaticFiles(directory="web_app/static"), name="static")
+BASE_DIR = Path(os.path.abspath(__file__)).parent
+app.mount("/static", StaticFiles(directory= BASE_DIR / "static"), name="static")
 
 
 if __name__ == "__main__":
