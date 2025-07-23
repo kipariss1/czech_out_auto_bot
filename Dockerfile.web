@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 WORKDIR /app
-COPY . /app
+COPY ./src /app/src
+COPY ./web_app /app/web_app
+COPY ./requirements.txt /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libsqlite3-dev \
@@ -8,4 +10,4 @@ RUN apt-get update && apt-get install -y \
 RUN pip install -r requirements.txt
 EXPOSE 8000
 ENV PYTHONPATH=/app
-CMD ["sh", "-c", "python run_bot.py & cd web_app && uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "cd web_app && uvicorn main:app --host 0.0.0.0 --port 8000"]
