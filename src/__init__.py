@@ -4,7 +4,7 @@ from src.settings.security.cipher_handler import CipherHandler
 from src.settings.settings import Settings
 import os
 
-token = os.getenv("czech_out_auto_bot_token")
+token = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(token)
 sqlite_db_handler = SqliteDBHandler()
 cipher_handler = CipherHandler()
