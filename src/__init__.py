@@ -1,5 +1,5 @@
 import telebot
-from src.database.sqlite_database import SqliteDBHandler
+from src.database_utils.sqlite_database import SqliteDBHandler
 from src.settings.security.cipher_handler import CipherHandler
 import os
 
