@@ -1,13 +1,30 @@
 FROM python:3.11-slim
+
 WORKDIR /app
+
 COPY ./src /app/src
+
 COPY ./web_app /app/web_app
+
 COPY ./requirements.txt /app
+
 RUN apt-get update && apt-get install -y \
     gcc \
     libsqlite3-dev \
     build-essential
+
+RUN mkdir -p /app/certs && \
+    openssl req -x509 -nodes -days 365 \
+    -newkey rsa:2048 \
+    -nodes \
+    -keyout /app/certs/ssl.key \
+    -out /app/certs/ssl.crt \
+    -subj "/C=CZ/ST=Denial/L=Prague/O=Dis/CN=localhost"
+
 RUN pip install -r requirements.txt
+
 EXPOSE 8000
+
 ENV PYTHONPATH=/app
-CMD ["sh", "-c", "cd web_app && uvicorn main:app --host 0.0.0.0 --port 8000"]
+
+CMD ["sh", "-c", "cd web_app && python main.py"]
