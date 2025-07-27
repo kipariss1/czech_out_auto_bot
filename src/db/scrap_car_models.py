@@ -58,7 +58,7 @@ def add_car_models_to_csv(
 
 
 def prepare_csv(filename=FILENAME):
-    with open(filename, mode="a", newline="", encoding="utf-8") as file:
+    with open(filename, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["Manufacturer", "Model"])
 
@@ -80,10 +80,10 @@ if __name__ == "__main__":
         )
         cars = asyncio.run(gather_and_request(car_manufacturer_list.contents))
         # save results in the .csv
+        prepare_csv()
         for el in cars:
             if not el:
                 continue
             car_manufacturer = list(el.keys())[0]
             car_models = el[car_manufacturer]["data"]
-            prepare_csv()
             add_car_models_to_csv(car_manufacturer, car_models)
