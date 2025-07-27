@@ -1,10 +1,10 @@
-from src import cipher_handler
+from src.settings.security import cipher_handler
 from telegram_bot import bot
 from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User
 from src.settings import settings
-from src import sqlite_db_handler
+from src.database_utils import sqlite_db_handler
 
 
 def get_or_create_user(user_id):

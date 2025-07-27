@@ -2,17 +2,18 @@ from bs4 import BeautifulSoup
 import asyncio
 import requests
 import csv
+from src import SRC_DIR
 
 
-headers = {
+HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
-
+FILENAME = SRC_DIR / "db" / "cars.csv"
 
 async def request_for_id(id: str, car_manufacturer: str):
     url = f"https://m.mobile.de/consumer/api/search/reference-data/models/{id}"
-    response = await asyncio.to_thread(requests.get, url, headers=headers)
+    response = await asyncio.to_thread(requests.get, url, headers=HEADERS)
     if response.status_code == 200:
         return {car_manufacturer: response.json()}
     return None
@@ -32,7 +33,7 @@ def filter_car_names(el):
 def add_car_models_to_csv(
     car_manufacturer: str = None,
     car_models: list = [],
-    filename="cars.csv"
+    filename=FILENAME
 ):
     if car_manufacturer:
         setattr(add_car_models_to_csv, "car_manufacturer", car_manufacturer)
@@ -56,7 +57,7 @@ def add_car_models_to_csv(
                 writer.writerow([add_car_models_to_csv.car_manufacturer, car_model])
 
 
-def prepare_csv(filename="cars.csv"):
+def prepare_csv(filename=FILENAME):
     with open(filename, mode="a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["Manufacturer", "Model"])
@@ -84,4 +85,5 @@ if __name__ == "__main__":
                 continue
             car_manufacturer = list(el.keys())[0]
             car_models = el[car_manufacturer]["data"]
+            prepare_csv()
             add_car_models_to_csv(car_manufacturer, car_models)

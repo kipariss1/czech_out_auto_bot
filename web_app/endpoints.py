@@ -3,7 +3,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
-from src import sqlite_db_handler, cipher_handler
+from src.database_utils import sqlite_db_handler 
+from src.settings.security import cipher_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
