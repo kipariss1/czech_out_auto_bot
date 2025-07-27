@@ -1,8 +1,8 @@
-from src import sqlite_db_handler
-from src.models.models import CarModel
 import requests
 from bs4 import BeautifulSoup
 import asyncio
+import csv
+import os
 
 
 async def request_for_id(id: str, car_manufacturer: str):
@@ -18,25 +18,19 @@ async def gather_and_request(id_list: list):
     return await asyncio.gather(*tasks)
 
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
-
 def filter_car_names(el):
     if "label" in el.keys():
         return el["label"]
-    add_car_models_to_db(car_models=el["items"])
+    add_car_models_to_csv(car_models=el["items"])
 
 
-def add_car_models_to_db(
+def add_car_models_to_csv(
     car_manufacturer: str = None,
     car_models: list = [],
     fixture=True,
-    db=sqlite_db_handler.get_db_connection(),
 ):
     if car_manufacturer:
-        setattr(add_car_models_to_db, "car_manufacturer", car_manufacturer)
+        setattr(add_car_models_to_csv, "car_manufacturer", car_manufacturer)
     if not fixture:
         car_models = list(map(filter_car_names, car_models))
         stuff = ["(alle)", "(Alle)", "Andere"]
@@ -51,15 +45,11 @@ def add_car_models_to_db(
         car_models = list(filter(lambda el: len(el) > 0, car_models))
         car_models = list(set(car_models))
     for car_model in car_models:
-        new_car = CarModel(
-            manufacturer=add_car_models_to_db.car_manufacturer, model=car_model
-        )
-        db.add(new_car)
-        db.commit()
+        pass
 
 
 if __name__ == "__main__":
-    mobile_de_page = requests.get("https://mobile.de/?lang=en", headers=headers)
+    mobile_de_page = requests.get("https://mobile.de/?lang=en", headers=headers) # TODO: redo with playwright 
     if mobile_de_page.status_code == 200:
         mobile_de_bs = BeautifulSoup(mobile_de_page.text, "html.parser")
 
@@ -69,11 +59,10 @@ if __name__ == "__main__":
                 "optgroup", {"label": "All makes"}
             )
             cars = asyncio.run(gather_and_request(car_manufacturer_list.contents))
-            db = sqlite_db_handler.get_db_connection()
-            # save results in the database
+            # save results in the .csv
             for el in cars:
                 if not el:
                     continue
                 car_manufacturer = list(el.keys())[0]
                 car_models = el[car_manufacturer]["data"]
-                add_car_models_to_db(car_manufacturer, car_models, fixture=False)
+                add_car_models_to_csv(car_manufacturer, car_models, fixture=False)

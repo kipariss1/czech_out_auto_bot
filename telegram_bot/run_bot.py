@@ -1,4 +1,5 @@
-from src import bot, cipher_handler
+from src import cipher_handler
+from telegram_bot import bot
 from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User

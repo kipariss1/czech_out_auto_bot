@@ -1,9 +1,7 @@
-import telebot
 from src.database_utils.sqlite_database import SqliteDBHandler
 from src.settings.security.cipher_handler import CipherHandler
-import os
+from pathlib import Path
 
-token = os.getenv("BOT_TOKEN")
-bot = telebot.TeleBot(token)
+SRC_DIR = Path(__file__).parent
 sqlite_db_handler = SqliteDBHandler()
 cipher_handler = CipherHandler()
