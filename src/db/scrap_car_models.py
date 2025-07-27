@@ -32,6 +32,7 @@ def filter_car_names(el):
 def add_car_models_to_csv(
     car_manufacturer: str = None,
     car_models: list = [],
+    filename="cars.csv"
 ):
     if car_manufacturer:
         setattr(add_car_models_to_csv, "car_manufacturer", car_manufacturer)
@@ -49,11 +50,16 @@ def add_car_models_to_csv(
     car_models = list(filter(lambda el: len(el) > 0, car_models))
     car_models = list(set(car_models))
 
-    with open("cars.csv", mode="a", newline="", encoding="utf-8") as file:
+    with open(filename, mode="a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writerow(["Manufacturer", "Model"])        
             for car_model in car_models:
-                writer.writerow(add_car_models_to_csv.car_manufacturer, car_model)
+                writer.writerow([add_car_models_to_csv.car_manufacturer, car_model])
+
+
+def prepare_csv(filename="cars.csv"):
+    with open(filename, mode="a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Manufacturer", "Model"])
 
 
 def read_page_from_file():
