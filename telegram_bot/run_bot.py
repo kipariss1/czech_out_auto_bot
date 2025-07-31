@@ -3,7 +3,7 @@ from telegram_bot import bot
 from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User
-from src.settings import settings
+from src.settings.settings import settings
 from src.database_utils import sqlite_db_handler
 
 
