@@ -1,1 +1,0 @@
-# TODO: make the script to upload from cars.csv to local.db

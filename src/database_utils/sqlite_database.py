@@ -1,7 +1,9 @@
 from src.settings.settings import settings
 import sqlalchemy as sa
+import pandas as pd
 from sqlalchemy.orm import sessionmaker, Session
-from src.models.models import Base
+from src.models.models import Base, CarModel
+from src import SRC_DIR
 
 
 class SqliteDBHandler:
@@ -15,6 +17,17 @@ class SqliteDBHandler:
         self._sessionmaker = sessionmaker
         self._db_conn = None
         Base.metadata.create_all(bind=self._engine)
+        self._updload_cars_to_db()
+
+    def _updload_cars_to_db(self):
+        db = self.get_db_connection()
+        if (SRC_DIR / "db" / "cars.csv").exists():
+            csv = pd.read_csv(SRC_DIR / "db" / "cars.csv", skiprows=1)
+            for _, row in csv.iterrows():
+                new_car = CarModel(manufacturer=row['Manufacturer'], model=row['Model'])
+                db.add(new_car)
+                db.commit()
+
 
     def __get_db_session(self) -> Session:
         return self._sessionmaker(bind=self._engine)
