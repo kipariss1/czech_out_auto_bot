@@ -22,7 +22,7 @@ class SqliteDBHandler:
     def _updload_cars_to_db(self):
         db = self.get_db_connection()
         if (SRC_DIR / "db" / "cars.csv").exists():
-            csv = pd.read_csv(SRC_DIR / "db" / "cars.csv", skiprows=1)
+            csv = pd.read_csv(SRC_DIR / "db" / "cars.csv")
             for _, row in csv.iterrows():
                 new_car = CarModel(manufacturer=row['Manufacturer'], model=row['Model'])
                 db.add(new_car)
