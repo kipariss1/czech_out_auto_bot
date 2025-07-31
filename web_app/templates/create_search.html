@@ -211,10 +211,13 @@
             },
             body: JSON.stringify(form_data_dict)
         }).then(res => {
-            if (res.ok) {
+            if (res.ok && res.status === 200) {
                 return res.json()
             }
+            throw new Error('There is unexpected problem on backend, we are looking into this ¯\\_(ツ)_/¯');
         }).then(res => {
+            console.log(`This is the responce:`);
+            console.log(res);
             if (res['search_created']) {
                 window.location.href = `/?new_search_created=true`
             }
