@@ -1,13 +1,17 @@
 from cryptography.fernet import Fernet
 from urllib.parse import quote, unquote
 from typing import Union
+import os
 
 
 class CipherHandler:
 
     def __init__(self):
-        self.__key = Fernet.generate_key()
+        self.__key = os.getenv('CIPHER_KEY') if os.getenv('CIPHER_KEY') else Fernet.generate_key()
         self.__fernet = Fernet(self.__key)
+
+    def init_key(self):
+        os.environ['CIPHER_KEY'] = self.__key
 
     def encode(self, str2encode: Union[str, bytes]) -> str:
         if not isinstance(str2encode, bytes):

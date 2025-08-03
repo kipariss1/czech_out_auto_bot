@@ -17,7 +17,6 @@ class SqliteDBHandler:
         self._sessionmaker = sessionmaker
         self._db_conn = None
         Base.metadata.create_all(bind=self._engine)
-        self.__initialized = True
 
     def updload_cars_to_db(self):
         db = self.get_db_connection()
