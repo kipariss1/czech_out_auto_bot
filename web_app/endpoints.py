@@ -22,7 +22,7 @@ def get_searches_by_id(
 ):
     searches = (
         db.query(CarSearch)
-        .filter(CarSearch.user_id == cipher_handler.decode(enc_user_id))
+        .filter(CarSearch.user_id == cipher_handler.decode_from_url(enc_user_id))
         .all()
     )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))

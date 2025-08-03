@@ -22,6 +22,5 @@ EXPOSE 8000
 ENV PYTHONPATH=/app
 
 CMD ["bash", "-c", "python src/database_utils/init_db.py \
-&& python src/settings/security/init_cipher.py \
 && python telegram_bot/run_bot.py \
 & python web_app/main.py"]
