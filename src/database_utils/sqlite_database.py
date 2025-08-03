@@ -9,12 +9,7 @@ from src import SRC_DIR
 class SqliteDBHandler:
 
     __DB_URL = settings.db_url
-    __instance = None
-
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super(SqliteDBHandler, cls).__new__(cls)
-        return cls.__instance
+    __initialized = None
 
     def __init__(self, dbname: str = None):
         if dbname:
@@ -22,8 +17,10 @@ class SqliteDBHandler:
         self._engine = sa.create_engine(self.__DB_URL)
         self._sessionmaker = sessionmaker
         self._db_conn = None
-        Base.metadata.create_all(bind=self._engine)
-        self._updload_cars_to_db()
+        if self.__initialized is None:
+            Base.metadata.create_all(bind=self._engine)
+            self._updload_cars_to_db()
+        self.__initialized = True
 
     def _updload_cars_to_db(self):
         db = self.get_db_connection()
