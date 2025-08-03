@@ -6,6 +6,8 @@ COPY ./src /app/src
 
 COPY ./web_app /app/web_app
 
+COPY ./telegram_bot /app/telegram_bot
+
 COPY ./requirements.txt /app
 
 RUN apt-get update && apt-get install -y \
@@ -19,4 +21,4 @@ EXPOSE 8000
 
 ENV PYTHONPATH=/app
 
-CMD ["sh", "-c", "cd web_app && python main.py"]
+CMD ["bash", "-c", "python telegram_bot/run_bot.py & python web_app/main.py"]

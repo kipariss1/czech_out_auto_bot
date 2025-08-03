@@ -9,6 +9,12 @@ from src import SRC_DIR
 class SqliteDBHandler:
 
     __DB_URL = settings.db_url
+    __instance = None
+
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super(SqliteDBHandler, cls).__new__(cls)
+        return cls.__instance
 
     def __init__(self, dbname: str = None):
         if dbname:
