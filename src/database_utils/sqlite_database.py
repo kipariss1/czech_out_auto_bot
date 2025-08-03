@@ -9,7 +9,6 @@ from src import SRC_DIR
 class SqliteDBHandler:
 
     __DB_URL = settings.db_url
-    __initialized = None
 
     def __init__(self, dbname: str = None):
         if dbname:
@@ -17,12 +16,10 @@ class SqliteDBHandler:
         self._engine = sa.create_engine(self.__DB_URL)
         self._sessionmaker = sessionmaker
         self._db_conn = None
-        if self.__initialized is None:
-            Base.metadata.create_all(bind=self._engine)
-            self._updload_cars_to_db()
+        Base.metadata.create_all(bind=self._engine)
         self.__initialized = True
 
-    def _updload_cars_to_db(self):
+    def updload_cars_to_db(self):
         db = self.get_db_connection()
         if (SRC_DIR / "db" / "cars.csv").exists():
             csv = pd.read_csv(SRC_DIR / "db" / "cars.csv")
