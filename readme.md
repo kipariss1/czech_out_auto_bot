@@ -1,6 +1,14 @@
-# Bot for searching cars in czech republic
+## Bot for searching cars in czech republic
 
-Idea:
+✅ For now it's PoC webapp & bot running in one container.
+
+TODO:
+ - separate containers for web_app, telegram bot and db
+ - grown up db
+ - implement jobs for scrapping bazos.cz and processing it with LLM
+ - implement sending notifications to user 
+
+Original Idea:
  - parse bazos, sauto ..., run it throught some LLM
  - ask if it's a car or a carpart
  - extract info about advertisement like this:
