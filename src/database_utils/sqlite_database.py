@@ -18,9 +18,13 @@ class SqliteDBHandler:
         self._db_conn = None
         Base.metadata.create_all(bind=self._engine)
 
+    def _cars_loaded(self) -> bool:
+        db = self.get_db_connection()
+        return db.query(CarModel).count() > 0
+
     def updload_cars_to_db(self):
         db = self.get_db_connection()
-        if (SRC_DIR / "db" / "cars.csv").exists():
+        if (SRC_DIR / "db" / "cars.csv").exists() and not self._cars_loaded():
             csv = pd.read_csv(SRC_DIR / "db" / "cars.csv")
             for _, row in csv.iterrows():
                 new_car = CarModel(manufacturer=row['Manufacturer'], model=row['Model'])
