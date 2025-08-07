@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY ./src /app/src
+
+COPY ./web_app /app/web_app
+
+COPY ./telegram_bot /app/telegram_bot
+
+COPY ./requirements.txt /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libsqlite3-dev \
+    build-essential
+
+RUN pip install -r requirements.txt
+
+EXPOSE 8000
+
+ENV PYTHONPATH=/app
+
+CMD ["bash", "-c", "python telegram_bot/run_bot.py & python web_app/main.py"]

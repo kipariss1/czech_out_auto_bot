@@ -3,15 +3,17 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
-from src import sqlite_db_handler, cipher_handler
+from src.database_utils import sqlite_db_handler 
+from src.settings.security import cipher_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
+from web_app import BASE_DIR
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory="web_app/templates")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 @router.get("/searches/{enc_user_id}")
@@ -20,7 +22,7 @@ def get_searches_by_id(
 ):
     searches = (
         db.query(CarSearch)
-        .filter(CarSearch.user_id == cipher_handler.decode(enc_user_id))
+        .filter(CarSearch.user_id == cipher_handler.decode_from_url(enc_user_id))
         .all()
     )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))

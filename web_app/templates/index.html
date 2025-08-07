@@ -32,7 +32,7 @@
     enc_user_id = encodeURIComponent(enc_user_id)
     fetch(
         `/searches/${enc_user_id}`
-    ).then((res) => 
+    ).then((res) =>
         res.json()
     ).then((res) => {
         populate_search_cards(res);

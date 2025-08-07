@@ -34,13 +34,13 @@
         <div class="row mx-3 my-3">
             <label for="id-slider-year" class="form-label">
                 <div class="row">
-                    <div class="col">
-                        Year range: 
+                    <div class="col-3">
+                        Year: 
                     </div>
-                    <div class="col">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" name="input_year_range_from">
                     </div>
-                    <div class="col">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" name="input_year_range_to">
                     </div>
                 </div>
@@ -50,13 +50,13 @@
         <div class="row mx-3 my-3">
             <label for="id-slider-mileage" class="form-label">
                 <div class="row">
-                    <div class="col">
-                        Mileage range (km): 
+                    <div class="col-3">
+                        Mileage (km): 
                     </div>
-                    <div class="col-5">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" name="input_mileage_range_from">
                     </div>
-                    <div class="col-5">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" name="input_mileage_range_to">
                     </div>
                 </div>
@@ -66,13 +66,13 @@
         <div class="row mx-3 my-3">
             <label for="id-slider-price" class="form-label">
                 <div class="row">
-                    <div class="col">
-                        Price range (Kč):
+                    <div class="col-3">
+                        Price (Kč):
                     </div>
-                    <div class="col-5">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" name="input_price_range_from">
                     </div>
-                    <div class="col-5">
+                    <div class="col-4">
                         <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" name="input_price_range_to">
                     </div>
                 </div>
@@ -211,10 +211,13 @@
             },
             body: JSON.stringify(form_data_dict)
         }).then(res => {
-            if (res.ok) {
+            if (res.ok && res.status === 200) {
                 return res.json()
             }
+            throw new Error('There is unexpected problem on backend, we are looking into this ¯\\_(ツ)_/¯');
         }).then(res => {
+            console.log(`This is the responce:`);
+            console.log(res);
             if (res['search_created']) {
                 window.location.href = `/?new_search_created=true`
             }
