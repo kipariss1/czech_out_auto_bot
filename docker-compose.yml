@@ -10,8 +10,6 @@ services:
       - ./src/db:/app/src/db
     ports:
       - "8000:8000"
-    environment:
-      - PYTHONPATH="/app"
 
   telegram_bot:
     build:
@@ -20,5 +18,3 @@ services:
     container_name: telegram_bot
     volumes:
       - ./src/db:/app/src/db
-    environment:
-      - PYTHONPATH="/app"
