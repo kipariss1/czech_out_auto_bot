@@ -9,7 +9,7 @@ services:
     volumes:
       - ./src/db:/app/src/db
     ports:
-      "8000:8000"
+      - "8000:8000"
 
   telegram_bot:
     build:
