@@ -13,3 +13,4 @@ node_modules/
 /playwright/.cache/
 .pytest_cache/
 .env
+postgres_data/
