@@ -1,4 +1,4 @@
-from src.database_utils.sqlite_database import SqliteDBHandler
+from src.database_utils.database_factory import DBFactory
 
-sqlite_db_handler = SqliteDBHandler()
-sqlite_db_handler.updload_cars_to_db()
+db_handler = DBFactory.create_db_handler()
+db_handler.updload_cars_to_db()     # TODO: сделать для PostgresDBHandler тоже
