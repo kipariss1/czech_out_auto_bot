@@ -32,7 +32,7 @@ class Settings(BaseSettings):
                              + f"\n\t - Password is {'xxxxxxx' if self.POSTGRES_PASSWORD is not None else None}" 
                              + f"\n\t - DB name is {self.POSTGRES_DB}")
         return {
-            'user': self.POSTGRES_DB,
+            'user': self.POSTGRES_USER,
             'password': self.POSTGRES_PASSWORD,
             'db': self.POSTGRES_DB
         }
