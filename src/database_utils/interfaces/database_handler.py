@@ -37,6 +37,7 @@ class DatabaseHandler(ABC):
     def close_db_connection(self) -> bool:
         if self._db_conn:
             self._db_conn.close()
+            self._db_conn = None
             return True
         return False
     
