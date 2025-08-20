@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
+import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine import Engine
+from src import SRC_DIR
+from src.models.models import CarModel
+import pandas as pd
 
 class DatabaseHandler(ABC):
 
@@ -9,9 +13,13 @@ class DatabaseHandler(ABC):
         self._db_conn = None
         Base.metadata.create_all(bind=self._engine)
 
+    @staticmethod
     @abstractmethod
-    def init_engine(self) -> Engine:
+    def db_url() -> str:
         pass
+
+    def init_engine(self):
+        return sa.create_engine(self.db_url())
 
     def __get_db_session(self) -> Session:
         return sessionmaker(bind=self._engine)
@@ -31,3 +39,12 @@ class DatabaseHandler(ABC):
             self._db_conn.close()
             return True
         return False
+    
+    def updload_cars_to_db(self):
+        db = self.get_db_connection()
+        if (SRC_DIR / "db" / "cars.csv").exists() and not self._cars_loaded():
+            csv = pd.read_csv(SRC_DIR / "db" / "cars.csv")
+            for _, row in csv.iterrows():
+                new_car = CarModel(manufacturer=row['Manufacturer'], model=row['Model'])
+                db.add(new_car)
+                db.commit()
