@@ -40,6 +40,10 @@ class DatabaseHandler(ABC):
             return True
         return False
     
+    def _cars_loaded(self) -> bool:
+        db = self.get_db_connection()
+        return db.query(CarModel).count() > 0
+    
     def updload_cars_to_db(self):
         db = self.get_db_connection()
         if (SRC_DIR / "db" / "cars.csv").exists() and not self._cars_loaded():
