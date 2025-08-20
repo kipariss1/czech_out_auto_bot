@@ -11,11 +11,10 @@ class PostgresData(TypedDict):
 
 class Settings(BaseSettings):
     ENV: Literal['production', 'test'] = os.getenv("ENV", "production")
-    if ENV == 'production':
-        POSTGRES_USER: str = os.getenv("POSTGRES_USER", None)
-        POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", None)
-        POSTGRES_DB: str = os.getenv("POSTGRES_DB", None)
-    WEBAPP_BASE_URL: str = os.getenv("RENDER_EXTERNAL_URL")
+    POSTGRES_USER: str | None = os.getenv("POSTGRES_USER", None)
+    POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD", None)
+    POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", None)
+    WEBAPP_BASE_URL: str | None = os.getenv("RENDER_EXTERNAL_URL")
     
     @property
     def base_url(self):
@@ -27,7 +26,7 @@ class Settings(BaseSettings):
     
     @property
     def postgres_data(self) -> PostgresData:
-        if any(x is None for x in (self.POSTGRES_USER, self.POSTGRES_PASSWORD, self.POSTGRES_DB)):
+        if any(x is None for x in (self.POSTGRES_USER, self.POSTGRES_PASSWORD, self.POSTGRES_DB)) and self.ENV == 'production':
             raise ValueError("ENV type is 'production' but Postgres data is missing, check the data below" 
                              + f"\n\t - User is {self.POSTGRES_USER}" 
                              + f"\n\t - Password is {'xxxxxxx' if self.POSTGRES_PASSWORD is not None else None}" 
