@@ -6,6 +6,7 @@ x-common-env: &common-env
   POSTGRES_DB: ${POSTGRES_DB}
 
 services:
+
   web_app:
     build:
       context: .
