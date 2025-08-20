@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import distinct, and_
 from sqlalchemy.orm import Session
-from src.database_utils import sqlite_db_handler 
+from src.database_utils import db_handler 
 from src.settings.security import cipher_handler
 from src.models.models import CarModel
 from fastapi.templating import Jinja2Templates
@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 @router.get("/searches/{enc_user_id}")
 def get_searches_by_id(
-    enc_user_id: str, db: Session = Depends(sqlite_db_handler.get_db_connection)
+    enc_user_id: str, db: Session = Depends(db_handler.get_db_connection)
 ):
     searches = (
         db.query(CarSearch)
@@ -54,7 +54,7 @@ def main_view(
 @router.get("/create_search", response_class=HTMLResponse)
 def create_search_view(
     request: requests.Request,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
+    db: Session = Depends(db_handler.get_db_connection),
 ):
     unique_car_manufacturers = db.query(distinct(CarModel.manufacturer)).all()
     unique_car_manufacturers = list(map(lambda el: el[0], unique_car_manufacturers))
@@ -97,7 +97,7 @@ def _check_if_search_exists(
 
 
 def _find_car_by_model(manufacturer: str, model: str):
-    db = sqlite_db_handler.get_db_connection()
+    db = db_handler.get_db_connection()
     cars = db.query(CarModel).filter(
         and_(
             CarModel.manufacturer == manufacturer,
@@ -112,7 +112,7 @@ def _find_car_by_model(manufacturer: str, model: str):
 @router.post("/create_search", response_class=JSONResponse)
 def post_create_search_view(
     request: CarSearchCreate,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
+    db: Session = Depends(db_handler.get_db_connection),
 ):
     cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
@@ -136,7 +136,7 @@ def post_create_search_view(
 def delete_search(
     search_id: str,
     user_id: str,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
+    db: Session = Depends(db_handler.get_db_connection),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
@@ -149,7 +149,7 @@ def delete_search(
 @router.get("/get_models/{manufacturer}", response_model=List[str])
 def get_models(
     manufacturer: str,
-    db: Session = Depends(sqlite_db_handler.get_db_connection),
+    db: Session = Depends(db_handler.get_db_connection),
 ):
     models = (
         db.query(CarModel.model).filter(CarModel.manufacturer == manufacturer).all()
