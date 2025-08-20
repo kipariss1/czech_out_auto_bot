@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, Enum, String, ForeignKey, JSON
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON
 from pydantic import BaseModel
 import re
 
@@ -11,7 +11,11 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    language = Column(Enum("ru", "en", "cz", name="languages", create_type=False), nullable=False, default="en")
+    language = Column(String(2), nullable=False, default="en")
+
+    __table_args__ = (
+        CheckConstraint("language IN ('ru', 'en', 'cz')", name="check_language"),
+    )
 
 
 class CarModel(Base):
