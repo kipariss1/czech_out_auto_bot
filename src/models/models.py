@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON
+from sqlalchemy import Column, Integer, Enum, String, ForeignKey, JSON
 from pydantic import BaseModel
 import re
 
@@ -11,7 +11,7 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    language = Column(Enum("ru", "en", "cz"), nullable=False, default="en", name='languages')
+    language = Column(Enum("ru", "en", "cz", name="languages"), nullable=False, default="en")
 
 
 class CarModel(Base):
@@ -19,8 +19,8 @@ class CarModel(Base):
     __tablename__ = "Car_Models"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    manufacturer = Column(Text(length=20))
-    model = Column(Text(length=40))
+    manufacturer = Column(String(length=20))
+    model = Column(String(length=40))
 
 
 class CarSearchCreate(BaseModel):
