@@ -1,6 +1,5 @@
 from src.database_utils.interfaces.database_handler import DatabaseHandler
 from src.settings.settings import settings
-import sqlalchemy as sa
 
 class PostgresDBHandler(DatabaseHandler):
 

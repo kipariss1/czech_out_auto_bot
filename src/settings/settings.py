@@ -12,9 +12,9 @@ class PostgresData(TypedDict):
 class Settings(BaseSettings):
     ENV: Literal['production', 'test'] = os.getenv("ENV", "production")
     if ENV == 'production':
-        POSTGRES_USER = os.getenv("POSTGRES_USER", None)
-        POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
-        POSTGRES_DB = os.getenv("POSTGRES_DB", None)
+        POSTGRES_USER: str = os.getenv("POSTGRES_USER", None)
+        POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", None)
+        POSTGRES_DB: str = os.getenv("POSTGRES_DB", None)
     WEBAPP_BASE_URL: str = os.getenv("RENDER_EXTERNAL_URL")
     
     @property
