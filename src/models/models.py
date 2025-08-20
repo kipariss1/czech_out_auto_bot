@@ -48,8 +48,8 @@ class CarSearch(Base):
     user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
     car_model = relationship("CarModel")
-    psc_code = Column(Text(6), nullable=True)
-    psc_km_range = Column(Text(4), nullable=True)
+    psc_code = Column(String(6), nullable=True)
+    psc_km_range = Column(String(4), nullable=True)
     attributes = Column(JSON, nullable=True)
 
     @validates("psc_code")
