@@ -11,7 +11,7 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    language = Column(Enum("ru", "en", "cz"), nullable=False, default="en")
+    language = Column(Enum("ru", "en", "cz"), nullable=False, default="en", name='languages')
 
 
 class CarModel(Base):
