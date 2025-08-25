@@ -13,14 +13,17 @@ class DatabaseHandler(ABC):
     def __init__(self, Base: DeclarativeBase):
         self._engine = self.init_engine()
         self._db_conn = None
-        Base.metadata.create_all(bind=self._engine)
+        self._base = Base
+
+    def create_tables(self):
+        self._base.metadata.create_all(bind=self._engine)
 
     @staticmethod
     @abstractmethod
     def db_url() -> str:
         pass
 
-    def init_engine(self):
+    def init_engine(self) -> Engine:
         return sa.create_engine(self.db_url())
 
     def __get_db_session(self) -> Session:

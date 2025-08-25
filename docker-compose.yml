@@ -23,6 +23,8 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+      telegram_bot:
+        condition: service_started
 
 
   telegram_bot:
