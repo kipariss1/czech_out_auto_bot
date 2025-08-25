@@ -1,6 +1,7 @@
 ## Bot for searching cars in czech republic
 
-✅ For now it's PoC webapp & bot running in one container.
+✅It's Webapp, Telegram Bot and Postgres DB running in separate containers.
+~~For now it's PoC webapp & bot running in one container.~~
 
 TODO:
  - separate containers for web_app, telegram bot and db ✅
