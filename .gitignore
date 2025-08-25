@@ -12,3 +12,5 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 .pytest_cache/
+.env
+postgres_data/

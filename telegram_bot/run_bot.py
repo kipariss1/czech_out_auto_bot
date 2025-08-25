@@ -4,11 +4,11 @@ from telebot import types
 from telebot.types import WebAppInfo
 from src.models.models import User
 from src.settings.settings import settings
-from src.database_utils import sqlite_db_handler
+from src.database_utils import db_handler
 
 
 def get_or_create_user(user_id):
-    db = sqlite_db_handler.get_db_connection()
+    db = db_handler.get_db_connection()
     user = db.query(User).filter_by(id=user_id).first()
     if user is None:
         user = User(id=user_id)
@@ -19,6 +19,8 @@ def get_or_create_user(user_id):
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    user_id = message.from_user.id
+    get_or_create_user(user_id)
     bot.reply_to(
         message, "Please select your language: \n\t🇬🇧 /EN \n\t🇷🇺 /RU \n\t🇨🇿 /CZ"
     )
@@ -28,7 +30,7 @@ def start(message):
 def set_users_language(message):
     lang = message.text.replace("/", "").lower()
     user_id = message.from_user.id
-    db = sqlite_db_handler.get_db_connection()
+    db = db_handler.get_db_connection()
     user = get_or_create_user(user_id)
     if user.language != lang:
         user.language = lang

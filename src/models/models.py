@@ -1,5 +1,6 @@
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, Enum, Text, ForeignKey, JSON
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 import re
 
@@ -11,7 +12,11 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    language = Column(Enum("ru", "en", "cz"), nullable=False, default="en")
+    language = Column(String(2), nullable=False, default="en")
+
+    __table_args__ = (
+        CheckConstraint("language IN ('ru', 'en', 'cz')", name="check_language"),
+    )
 
 
 class CarModel(Base):
@@ -19,8 +24,11 @@ class CarModel(Base):
     __tablename__ = "Car_Models"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    manufacturer = Column(Text(length=20))
-    model = Column(Text(length=40))
+    manufacturer = Column(String(length=20))
+    model = Column(String(length=40))
+
+    def __mapper_configure__(cls, mapper):
+        mapper.order_by = (cls.manufacturer, cls.model)
 
 
 class CarSearchCreate(BaseModel):
@@ -48,9 +56,9 @@ class CarSearch(Base):
     user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
     car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
     car_model = relationship("CarModel")
-    psc_code = Column(Text(6), nullable=True)
-    psc_km_range = Column(Text(4), nullable=True)
-    attributes = Column(JSON, nullable=True)
+    psc_code = Column(String(6), nullable=True)
+    psc_km_range = Column(String(4), nullable=True)
+    attributes = Column(JSONB, nullable=True)
 
     @validates("psc_code")
     def validate_psc_code(self, key, address):
@@ -72,7 +80,7 @@ class CarSearch(Base):
         }
         new_attrs.update(
             {
-                f"Unique trait #{k.split('_')[1]}": v
+                f"Unique trait #{int(k.split('_')[1]) + 1}": v
                 for k, v in self.attributes.items()
                 if "attributes_" in k
             }

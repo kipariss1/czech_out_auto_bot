@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY ./src /app/src
 
-COPY ./web_app /app/web_app
+COPY ./telegram_bot /app/telegram_bot
 
 COPY ./requirements.txt /app
 
@@ -15,8 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install -r requirements.txt
 
-EXPOSE 8000
-
 ENV PYTHONPATH=/app
 
-CMD ["bash", "-c", "python web_app/main.py"]
+CMD ["bash", "-c", "python src/database_utils/init_db.py && python telegram_bot/run_bot.py"]
