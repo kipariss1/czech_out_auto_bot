@@ -1,7 +1,5 @@
 from src.database_utils.interfaces.database_handler import DatabaseHandler
 from src.settings.settings import settings
-from sqlalchemy import inspect
-from sqlalchemy.orm import DeclarativeBase
 
 class PostgresDBHandler(DatabaseHandler):
 

@@ -19,6 +19,8 @@ def get_or_create_user(user_id):
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    user_id = message.from_user.id
+    get_or_create_user(user_id)
     bot.reply_to(
         message, "Please select your language: \n\t🇬🇧 /EN \n\t🇷🇺 /RU \n\t🇨🇿 /CZ"
     )

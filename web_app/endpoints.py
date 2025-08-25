@@ -56,7 +56,12 @@ def create_search_view(
     request: requests.Request,
     db: Session = Depends(db_handler.get_db_connection),
 ):
-    unique_car_manufacturers = db.query(distinct(CarModel.manufacturer)).all()
+    unique_car_manufacturers = (
+        db.query(CarModel.manufacturer)
+        .distinct()
+        .order_by(CarModel.manufacturer.asc())
+        .all()
+    )
     unique_car_manufacturers = list(map(lambda el: el[0], unique_car_manufacturers))
     render_dict = {"request": request, "car_manufacturers": unique_car_manufacturers}
     return templates.TemplateResponse("create_search.html", render_dict)
