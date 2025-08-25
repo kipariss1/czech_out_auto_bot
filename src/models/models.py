@@ -80,7 +80,7 @@ class CarSearch(Base):
         }
         new_attrs.update(
             {
-                f"Unique trait #{k.split('_')[1]}": v
+                f"Unique trait #{int(k.split('_')[1]) + 1}": v
                 for k, v in self.attributes.items()
                 if "attributes_" in k
             }
