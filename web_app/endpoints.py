@@ -88,7 +88,7 @@ def _check_if_search_exists(
             CarSearch.car_model_id == car_model_id,
             CarSearch.psc_code == psc_code,
             CarSearch.psc_km_range == psc_km_range,
-            CarSearch.attributes == attributes,
+            CarSearch.attributes.contains(attributes),
         )
     )
     if len(list(existing_searches)) > 0:
