@@ -5,10 +5,12 @@ from sqlalchemy.engine import Engine
 from src import SRC_DIR
 from src.models.models import CarModel
 import pandas as pd
+from sqlalchemy.orm import DeclarativeBase
+
 
 class DatabaseHandler(ABC):
 
-    def __init__(self, Base):
+    def __init__(self, Base: DeclarativeBase):
         self._engine = self.init_engine()
         self._db_conn = None
         Base.metadata.create_all(bind=self._engine)

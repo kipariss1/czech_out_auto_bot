@@ -26,6 +26,9 @@ class CarModel(Base):
     manufacturer = Column(String(length=20))
     model = Column(String(length=40))
 
+    def __mapper_configure__(cls, mapper):
+        mapper.order_by = (cls.manufacturer, cls.model)
+
 
 class CarSearchCreate(BaseModel):
     manufacturer: str
