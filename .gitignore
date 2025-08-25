@@ -14,3 +14,7 @@ node_modules/
 .pytest_cache/
 .env
 postgres_data/
+
+# nodejs & typescript
+**/node_modules/
+**/dist/

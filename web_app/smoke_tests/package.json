@@ -1,0 +1,19 @@
+{
+  "name": "smoke_tests",
+  "version": "1.0.0",
+  "main": "smoke_tests.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "playwright": "^1.55.0"
+  }
+}

@@ -1,0 +1,15 @@
+name: CI Test Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  smoke-e2e-tests:
+    runs-on: ubuntu-latest
+
+# TODO: finish the test workflow for github
