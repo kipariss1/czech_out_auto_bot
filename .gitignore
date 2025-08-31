@@ -18,3 +18,4 @@ postgres_data/
 # nodejs & typescript
 **/node_modules/
 **/dist/
+**/test-results/
