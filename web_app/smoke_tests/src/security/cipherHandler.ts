@@ -1,4 +1,4 @@
-import * as fernet from 'fernet';
+import fernet from 'fernet';
 
 export class CipherHandler {
   private secret: fernet.Secret;
@@ -9,7 +9,6 @@ export class CipherHandler {
     if (!envKey) {
       throw new Error("CIPHER_KEY is not set in environment variables");
     }
-
     this.key = envKey;
     this.secret = new fernet.Secret(this.key);
   }
