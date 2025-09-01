@@ -16,7 +16,7 @@ test.beforeAll(async ({}) => {
 });
 
 test.afterAll(async ({}) => {
-    sqliteDBhandler.removeDb();
+    sqliteDBhandler.removeUser();
 });
 
 test('Happy path test', async ({ page }) => {

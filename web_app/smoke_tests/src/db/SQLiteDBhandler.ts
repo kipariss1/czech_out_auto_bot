@@ -24,12 +24,8 @@ export class SQLiteDBhandler {
     }
 
 
-    removeDb() {
-        try {
-            fs.unlinkSync(this.dbPath);
-        } catch (err) {
-            console.log("Error deleting db file:", err);
-        }
+    removeUser() {
+        this.db.prepare("DELETE FROM Users").run();
     }
 
 }
