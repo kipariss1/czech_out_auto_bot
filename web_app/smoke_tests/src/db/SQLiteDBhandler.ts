@@ -1,7 +1,6 @@
 import Database from "better-sqlite3";
 import { smokeTestsDir } from "../index.js";
 import path from "path";
-import fs from "fs";
 
 type TestUser = {
     id: string;

@@ -8,7 +8,7 @@
             <h5>Submit new search for car of your dreams!</h5>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="manufacturer" id="id-manufacturer">
+            <select class="form-select my-3" name="manufacturer" id="id-manufacturer" data-testid="select-manufacturer-input">
                 <option selected>Select car manufacturer!</option>
                 {% for m in car_manufacturers %}
                     <option value="{{ m }}">{{ m }}</option>            
@@ -16,7 +16,7 @@
             </select>
         </div>
         <div class="row mx-3">
-            <select class="form-select my-3" name="model" id="id-model" disabled="true"> 
+            <select class="form-select my-3" name="model" id="id-model" disabled="true" data-testid="select-model-input"> 
                 <option selected>Select model!</option>
             </select>
         </div>
@@ -88,7 +88,7 @@
             <input type="number" id="id-psc-km-range" name="psc_km_range" class="form-control" min="0" step="5">
         </div>
         <div class="row mx-3 my-3">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" data-testid="submit-btn">Submit</button>
         </div>
     </form>
 </div>
