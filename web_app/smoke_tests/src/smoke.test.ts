@@ -15,7 +15,7 @@ const baseUrl = 'http://localhost:8000/';
 const inputData: SearchFormInputs = {
         carManufacturer: 'Audi',
         carModel: 'A3',
-        optionalAttributes: ['Sline'],
+        optionalAttributes: ['Sline', '2.0 TDI'],
         mileageFrom: 150_000,
         mileageTo: 250_000,
         priceFrom: 150_000,
@@ -26,15 +26,15 @@ const inputData: SearchFormInputs = {
         kmRangeFromPSC: 25
     }
 
-test.beforeAll(async ({}) => {
+test.beforeEach(async ({}) => {
     sqliteDBhandler.insertUser(testUser);
 });
 
-test.afterAll(async ({}) => {
+test.afterEach(async ({}) => {
     sqliteDBhandler.cleanDB();
 });
 
-test.only('Happy path test', async ({ page }) => {
+test('Happy path test', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
 
@@ -49,9 +49,24 @@ test.only('Happy path test', async ({ page }) => {
     await assertTextPresent(page, `Price range (Kč): ${inputData.priceFrom} - ${inputData.priceTo}`);
     await assertTextPresent(page, `Unique trait #1: ${inputData.optionalAttributes![0]}`);
     await assertTextPresent(page, `Unique trait #2: ${inputData.optionalAttributes![1]}`);
-})
+});
 
-test('Assert form validation works', async ({ page }) => {
+test('Assert user can\'t create the same search two times', async ({ page }) => {
+    const landingPage = new LandingPage(page);
+    const createSearchPage = new CreateSearchPage(page);
+
+    await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    await landingPage.waitForPageToLoad();
+    await landingPage.createSearchBtn.click();
+    await createSearchPage.createNewSearch(inputData);
+    await landingPage.waitForPageToLoad();
+    await landingPage.createSearchBtn.click();
+    await createSearchPage.createNewSearch(inputData);
+    await landingPage.waitForPageToLoad();
+    await assertAlertPresent(page, 'Attempted search alreay exists ¯\\_(ツ)_/¯')
+});
+
+test.only('Assert form validation works', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
     await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
@@ -81,4 +96,4 @@ test('Assert form validation works', async ({ page }) => {
         await createSearchPage.submitBtn.click();
         await landingPage.waitForPageToLoad();
     });
-})
+});
