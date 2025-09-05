@@ -1,6 +1,7 @@
 import { test, expect } from 'playwright/test'
 import { sqliteDBhandler, cipherHandler } from './index.js';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
+import { assertTextPresent } from './assertions';
 
 const testUser = {
         id: '111111111',
@@ -37,8 +38,17 @@ test('Happy path test', async ({ page }) => {
     const createSearchPage = new CreateSearchPage(page);
 
     await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    await landingPage.waitForPageToLoad();
     await landingPage.createSearchBtn.click();
     await createSearchPage.createNewSearch(inputData);
-    // TODO: make the expectations here
-    await page.waitForTimeout(5000);
+    await landingPage.waitForPageToLoad();
+    await assertTextPresent(page, 'Year range:');
+    await assertTextPresent(page, `${inputData.yearFromInput} - ${inputData.yearToInput}`);
+    await assertTextPresent(page, 'Mileage range:');
+    await assertTextPresent(page, `${inputData.mileageFrom} - ${inputData.mileageTo}`);
+    await assertTextPresent(page, 'Price range:');
+    await assertTextPresent(page, `${inputData.priceFrom} - ${inputData.priceTo}`);
+    await assertTextPresent(page, 'Unique trait #1:');
+    await assertTextPresent(page, 'Year range:');
+    await assertTextPresent(page, `${inputData.optionalAttributes![0]}`);
 })

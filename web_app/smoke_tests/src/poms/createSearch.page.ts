@@ -1,4 +1,5 @@
 import { type Locator, type Page } from "playwright"
+import { BasePage } from "./base.page";
 
 export type SearchFormInputs = {
     carManufacturer: string;
@@ -14,7 +15,7 @@ export type SearchFormInputs = {
     kmRangeFromPSC: number;       
 };
 
-export class CreateSearchPage {
+export class CreateSearchPage extends BasePage {
 
     public carManufacturerSelect: Locator;
     public carModelSelect: Locator;
@@ -30,7 +31,8 @@ export class CreateSearchPage {
     public kmRangeFromPSCinput: Locator;
     public submitBtn: Locator;
 
-    constructor(private page: Page) {
+    constructor(protected page: Page) {
+        super(page);
         this.carManufacturerSelect = page.getByTestId("select-manufacturer-input");
         this.carModelSelect = page.getByTestId("select-model-input");
         this.optionalAtributes = page.locator('[id^="id-attributes-"]');

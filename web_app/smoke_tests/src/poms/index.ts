@@ -1,2 +1,2 @@
-export * from './createSearchPage';
-export * from './landingPage';
+export * from './createSearch.page';
+export * from './landing.page';
