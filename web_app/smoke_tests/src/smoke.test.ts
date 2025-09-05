@@ -66,23 +66,23 @@ test('Assert user can\'t create the same search two times', async ({ page }) => 
     await assertAlertPresent(page, 'Attempted search alreay exists ¯\\_(ツ)_/¯')
 });
 
-test.only('Assert form validation works', async ({ page }) => {
+test('Assert form validation works', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
     await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
-    test.step('Assert form requires selection of model', async () => {
+    await test.step('Assert form requires selection of model', async () => {
         await landingPage.createSearchBtn.click();
         await createSearchPage.waitForPageToLoad();
         await createSearchPage.carManufacturerSelect.selectOption(inputData.carManufacturer);
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'You must select car and model to continue!')
     });
-    test.step('Assert form requires PSC', async () => {
+    await test.step('Assert form requires PSC', async () => {
         await createSearchPage.carModelSelect.selectOption(inputData.carModel);
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'You should enter PSC to continue!')
     });
-    test.step('Assert form requires PSC in correct format', async () => {
+    await test.step('Assert form requires PSC in correct format', async () => {
         await createSearchPage.PSCinput.fill('1');
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');
