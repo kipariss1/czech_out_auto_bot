@@ -23,8 +23,16 @@ export class SQLiteDBhandler {
     }
 
 
-    removeUser() {
+    removeUsers() {
         this.db.prepare("DELETE FROM Users").run();
     }
 
+    removeSearches() {
+        this.db.prepare("DELETE FROM Car_Searches").run();
+    }
+
+    cleanDB() {
+        this.removeSearches();
+        this.removeUsers();
+    }
 }

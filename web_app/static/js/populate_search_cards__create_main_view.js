@@ -28,6 +28,12 @@ export function populate_search_cards(list_searches) {
         ul.className = "mb-3";
         for (let key in search.attributes) {
             const li = document.createElement("li");
+            if (key === 'Price range') {
+                const newKey = 'Price range (Kč)';
+                li.innerHTML = `<strong>${newKey}:</strong> ${search.attributes[key]}`;
+                ul.appendChild(li);
+                continue;
+            }
             li.innerHTML = `<strong>${key}:</strong> ${search.attributes[key]}`;
             ul.appendChild(li);
         }

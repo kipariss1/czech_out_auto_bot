@@ -35,8 +35,8 @@ export class CreateSearchPage extends BasePage {
         super(page);
         this.carManufacturerSelect = page.getByTestId("select-manufacturer-input");
         this.carModelSelect = page.getByTestId("select-model-input");
-        this.optionalAtributes = page.locator('[id^="id-attributes-"]');
-        this.optionalAtributeBtns = page.locator('[id^="id-attributes-"][id$="-submit-btn"]');
+        this.optionalAtributes = page.locator('[id^="id-attribute-"]');
+        this.optionalAtributeBtns = page.locator('[id^="id-attributes-submit-btn-"]');
         this.yearFromInput = page.locator('#id-input-year-range-from');
         this.yearToInput = page.locator('#id-input-year-range-to');
         this.milegeFromInput = page.locator('#id-input-mileage-range-from');
@@ -51,7 +51,7 @@ export class CreateSearchPage extends BasePage {
     async createNewSearch(data: SearchFormInputs) {
         await this.carManufacturerSelect.selectOption(data.carManufacturer);
         await this.carManufacturerSelect.dispatchEvent('change');
-        await this.page.waitForTimeout(5000);
+        await this.page.waitForTimeout(1000);
         await this.carModelSelect.selectOption(data.carModel);
         if (data.optionalAttributes && data.optionalAttributes.length > 0) {
             for (let i = 0; i < data.optionalAttributes.length; i++) {

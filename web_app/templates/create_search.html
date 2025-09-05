@@ -24,10 +24,10 @@
             <label for="id-attributes-0" class="form-label">Type here optional attributes: </label>
             <div class="row mb-1">
                 <div class="col-8">
-                    <textarea class="form-control" id="id-attributes-0" n="0" rows="1" placeholder="M paket, 2.0 TDI"></textarea>
+                    <textarea class="form-control" id="id-attribute-0" n="0" rows="1" placeholder="M paket, 2.0 TDI"></textarea>
                 </div>
                 <div class="col-2">
-                    <button class="btn btn-success" type="button" id="id-attributes-0-submit-btn" n="0">✓</button>
+                    <button class="btn btn-success" type="button" id="id-attributes-submit-btn-0" n="0">✓</button>
                 </div>
             </div>
         </div>
@@ -38,10 +38,10 @@
                         Year: 
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" name="input_year_range_from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-from" data-testid="id-input-year-range-from" name="input_year_range_from">
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" name="input_year_range_to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-year-range-to" data-testid="id-input-year-range-to" name="input_year_range_to">
                     </div>
                 </div>
             </label>
@@ -54,10 +54,10 @@
                         Mileage (km): 
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" name="input_mileage_range_from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-from" data-testid="id-input-mileage-range-from" name="input_mileage_range_from">
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" name="input_mileage_range_to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-mileage-range-to" data-testid="id-input-mileage-range-to" name="input_mileage_range_to">
                     </div>
                 </div>
             </label>
@@ -70,10 +70,10 @@
                         Price (Kč):
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" name="input_price_range_from">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-from" data-testid="id-input-price-range-from" name="input_price_range_from">
                     </div>
                     <div class="col-4">
-                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" name="input_price_range_to">
+                        <input type="number" class="form-control form-control-sm" id="id-input-price-range-to" data-testid="id-input-price-range-to" name="input_price_range_to">
                     </div>
                 </div>
             </label>
@@ -101,7 +101,7 @@
     import { show_alert_message, get_cookie } from "../static/js/utils.js"
 
     var attributes_idx = 1;
-    var btn_submit_first_attribute = document.getElementById('id-attributes-0-submit-btn');
+    var btn_submit_first_attribute = document.getElementById('id-attributes-submit-btn-0');
     var attributes = document.getElementById('id-row-with-attributes');
     var search_form = document.getElementById('id-submit-search-form');
 
@@ -123,13 +123,13 @@
         textarea.classList.add("form-control");
         textarea.setAttribute("rows", 1);
         textarea.setAttribute('placeholder', "M paket, 2.0 TDI")
-        textarea.id = `id-attributes-${attributes_idx}`;
+        textarea.id = `id-attribute-${attributes_idx}`;
         textarea.setAttribute("n", attributes_idx);
         textareaDiv.appendChild(textarea);
 
         const submit_attr_btn = document.createElement('button');
         submit_attr_btn.classList.add('btn', 'btn-success');
-        submit_attr_btn.id = `id-attributes-${attributes_idx}-submit-btn`;
+        submit_attr_btn.id = `id-attributes-submit-btn-${attributes_idx}`;
         submit_attr_btn.setAttribute("n", attributes_idx);
         submit_attr_btn.setAttribute("type", "button");
         submit_attr_btn.addEventListener('click', add_new_attribute);
@@ -138,7 +138,7 @@
 
         const delete_attr_btn = document.createElement('button');
         delete_attr_btn.classList.add('btn', 'btn-danger');
-        delete_attr_btn.id = `id-attributes-${attributes_idx}-delete-btn`;
+        delete_attr_btn.id = `id-attributes-delete-btn-${attributes_idx}`;
         delete_attr_btn.setAttribute("n", attributes_idx);
         delete_attr_btn.setAttribute("type", "button");
         delete_attr_btn.addEventListener('click', delete_attribute);
@@ -180,7 +180,11 @@
             show_alert_message("You must select car and model to continue!");
             return
         }
-        if (psc_code.value.length > 0 && /^[0-9\s]{5,}$/.test(psc_code.value) === false) {
+        if (psc_code.value.length === 0) {
+            show_alert_message("You should enter PSC to continue!");
+            return
+        }
+        if (psc_code.value.length > 0 && /^[0-9\s]{5,6}$/.test(psc_code.value) === false) {
             show_alert_message("PSC should be only numbers with optional space and needs to be at least 5 characters!");
             return
         }
@@ -200,7 +204,7 @@
         });
 
         for (let i = 0; i < attributes_idx; i++) {
-            form_data_dict[`attributes_${i}`] = form[`id-attributes-${i}`].value 
+            form_data_dict[`attributes_${i}`] = form[`id-attribute-${i}`].value 
         }
         form_data_dict['enc_user_id'] = get_cookie('enc_user_id');
 

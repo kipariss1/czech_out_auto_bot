@@ -1,7 +1,7 @@
 import { test, expect } from 'playwright/test'
 import { sqliteDBhandler, cipherHandler } from './index.js';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
-import { assertTextPresent } from './assertions';
+import { assertTextPresent, assertAlertPresent } from './assertions';
 
 const testUser = {
         id: '111111111',
@@ -12,16 +12,7 @@ const enc_user_id = cipherHandler.encode(testUser.id);
 
 const baseUrl = 'http://localhost:8000/';
 
-test.beforeAll(async ({}) => {
-    sqliteDBhandler.insertUser(testUser);
-});
-
-test.afterAll(async ({}) => {
-    sqliteDBhandler.removeUser();
-});
-
-test('Happy path test', async ({ page }) => {
-    const inputData: SearchFormInputs = {
+const inputData: SearchFormInputs = {
         carManufacturer: 'Audi',
         carModel: 'A3',
         optionalAttributes: ['Sline'],
@@ -34,6 +25,16 @@ test('Happy path test', async ({ page }) => {
         pscCode: '11000',
         kmRangeFromPSC: 25
     }
+
+test.beforeAll(async ({}) => {
+    sqliteDBhandler.insertUser(testUser);
+});
+
+test.afterAll(async ({}) => {
+    sqliteDBhandler.cleanDB();
+});
+
+test.only('Happy path test', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
 
@@ -42,13 +43,42 @@ test('Happy path test', async ({ page }) => {
     await landingPage.createSearchBtn.click();
     await createSearchPage.createNewSearch(inputData);
     await landingPage.waitForPageToLoad();
-    await assertTextPresent(page, 'Year range:');
-    await assertTextPresent(page, `${inputData.yearFromInput} - ${inputData.yearToInput}`);
-    await assertTextPresent(page, 'Mileage range:');
-    await assertTextPresent(page, `${inputData.mileageFrom} - ${inputData.mileageTo}`);
-    await assertTextPresent(page, 'Price range:');
-    await assertTextPresent(page, `${inputData.priceFrom} - ${inputData.priceTo}`);
-    await assertTextPresent(page, 'Unique trait #1:');
-    await assertTextPresent(page, 'Year range:');
-    await assertTextPresent(page, `${inputData.optionalAttributes![0]}`);
+    await assertAlertPresent(page, 'New search successfully created!');
+    await assertTextPresent(page, `Year range: ${inputData.yearFromInput} - ${inputData.yearToInput}`);
+    await assertTextPresent(page, `Mileage range: ${inputData.mileageFrom} - ${inputData.mileageTo}`);
+    await assertTextPresent(page, `Price range (Kč): ${inputData.priceFrom} - ${inputData.priceTo}`);
+    await assertTextPresent(page, `Unique trait #1: ${inputData.optionalAttributes![0]}`);
+    await assertTextPresent(page, `Unique trait #2: ${inputData.optionalAttributes![1]}`);
+})
+
+test('Assert form validation works', async ({ page }) => {
+    const landingPage = new LandingPage(page);
+    const createSearchPage = new CreateSearchPage(page);
+    await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    test.step('Assert form requires selection of model', async () => {
+        await landingPage.createSearchBtn.click();
+        await createSearchPage.waitForPageToLoad();
+        await createSearchPage.carManufacturerSelect.selectOption(inputData.carManufacturer);
+        await createSearchPage.submitBtn.click();
+        await assertAlertPresent(page, 'You must select car and model to continue!')
+    });
+    test.step('Assert form requires PSC', async () => {
+        await createSearchPage.carModelSelect.selectOption(inputData.carModel);
+        await createSearchPage.submitBtn.click();
+        await assertAlertPresent(page, 'You should enter PSC to continue!')
+    });
+    test.step('Assert form requires PSC in correct format', async () => {
+        await createSearchPage.PSCinput.fill('1');
+        await createSearchPage.submitBtn.click();
+        await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');
+        await createSearchPage.PSCinput.fill('11111111');
+        await createSearchPage.submitBtn.click();
+        await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');
+        await createSearchPage.PSCinput.fill('111aa');
+        await createSearchPage.submitBtn.click();
+        await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');
+        await createSearchPage.PSCinput.fill('11 000');
+        await createSearchPage.submitBtn.click();
+        await landingPage.waitForPageToLoad();
+    });
 })
