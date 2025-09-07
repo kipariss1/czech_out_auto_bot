@@ -8,6 +8,7 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "node16",
+    "moduleResolution": "node16",
     "target": "esnext",
     "types": ["node"],
     // For nodejs:
@@ -40,7 +41,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "moduleResolution": "node16",
     "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
