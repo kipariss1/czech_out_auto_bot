@@ -44,7 +44,7 @@ jobs:
           node-version: 20
 
       - name: Install Node.js dependencies
-        run: npm i
+        run: cd web_app/smoke_tests && npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
