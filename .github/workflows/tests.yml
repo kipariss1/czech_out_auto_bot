@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: ${{ github.workspace }}
+      ENV: test
+      CIPHER_KEY: ${{ vars.CIPHER_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
