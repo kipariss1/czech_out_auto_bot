@@ -7,10 +7,14 @@
 
 # Playwright
 node_modules/
-/test-results/
+**/test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
 .pytest_cache/
 .env
 postgres_data/
+
+# nodejs & typescript
+**/node_modules/
+**/dist/

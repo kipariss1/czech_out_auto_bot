@@ -1,5 +1,6 @@
+from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 import re
@@ -58,7 +59,7 @@ class CarSearch(Base):
     car_model = relationship("CarModel")
     psc_code = Column(String(6), nullable=True)
     psc_km_range = Column(String(4), nullable=True)
-    attributes = Column(JSONB, nullable=True)
+    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
 
     @validates("psc_code")
     def validate_psc_code(self, key, address):

@@ -1,0 +1,25 @@
+{
+  "name": "smoke_tests",
+  "version": "1.0.0",
+  "main": "smoke_tests.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test:playwright": "npx playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/fernet": "^0.4.3",
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "fernet": "^0.3.3",
+    "playwright": "^1.55.0"
+  }
+}
