@@ -44,7 +44,7 @@ jobs:
           node-version: 20
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: npm i
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
