@@ -1,12 +1,12 @@
 ## Bot for searching cars in czech republic
 
-✅It's Webapp, Telegram Bot and Postgres DB running in separate containers.
+✅It's Webapp, Telegram Bot and Postgres DB running in separate containers with e2e tests pipeline for webapp.
 ~~For now it's PoC webapp & bot running in one container.~~
 
 TODO:
  - separate containers for web_app, telegram bot and db ✅
  - grown up db ✅
- - implement smoke tests for web app
+ - implement smoke tests for web app ✅
  - implement jobs for scrapping bazos.cz and processing it with LLM
  - implement sending notifications to user 
 
