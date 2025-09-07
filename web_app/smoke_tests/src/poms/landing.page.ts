@@ -1,5 +1,5 @@
 import { type Locator, type Page } from "playwright";
-import { BasePage } from "./base.page";
+import { BasePage } from "./base.page.js";
 
 export class LandingPage extends BasePage {
     public createSearchBtn: Locator;

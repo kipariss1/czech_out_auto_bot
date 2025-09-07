@@ -1,7 +1,7 @@
 import { test, expect } from 'playwright/test'
 import { sqliteDBhandler, cipherHandler } from './index.js';
-import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
-import { assertTextPresent, assertAlertPresent } from './assertions';
+import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms/index.js';
+import { assertTextPresent, assertAlertPresent } from './assertions/index.js';
 
 const testUser = {
         id: '111111111',
