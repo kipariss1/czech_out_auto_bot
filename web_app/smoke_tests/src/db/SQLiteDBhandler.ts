@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { smokeTestsDir } from "../index.js";
+import { smokeTestsDir } from "../index";
 import path from "path";
 
 type TestUser = {

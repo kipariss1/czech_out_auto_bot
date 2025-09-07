@@ -1,1 +1,1 @@
-export * from './assertions.utils.js';
+export * from './assertions.utils';

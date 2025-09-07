@@ -1,5 +1,5 @@
 import { type Locator, type Page } from "playwright"
-import { BasePage } from "./base.page.js";
+import { BasePage } from "./base.page";
 
 export type SearchFormInputs = {
     carManufacturer: string;
