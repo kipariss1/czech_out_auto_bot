@@ -36,6 +36,7 @@ class AutoAdvertisementPage:
                 html = await response.text()
                 parsed = bs(html, "html.parser")
                 details = parsed.find("div", class_="popisdetail")
+                # TODO: add here parsing of the PSC of the ad
                 self.text = details.text
 
 

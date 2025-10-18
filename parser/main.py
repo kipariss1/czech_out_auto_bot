@@ -1,5 +1,6 @@
-import requests
+from . import bazos_parser
+import asyncio
 
-bazos_page = requests.get('http://auto.bazos.cz')
 
-pass
+if __name__ == '__main__':
+    asyncio.run(bazos_parser.parse())
