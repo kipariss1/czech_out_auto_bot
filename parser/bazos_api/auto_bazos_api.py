@@ -55,7 +55,7 @@ class AutoPage:
         return requests.get(self.url)
 
     def _construct_link(self, page=0):
-        url = f"https://auto.bazos.cz/{f"{page*20}/" if page else ""}?hledat={self.model.replace(' ', '+')}&" 
+        url = f'https://auto.bazos.cz/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' 
         + f"rubriky=auto&hlokalita={self.locality}&humkreis={self.range}&" 
         + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
         return url

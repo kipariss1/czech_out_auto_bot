@@ -1,6 +1,6 @@
-from . import bazos_parser
+from parser import bp
 import asyncio
 
 
 if __name__ == '__main__':
-    asyncio.run(bazos_parser.parse())
+    asyncio.run(bp.parse())
