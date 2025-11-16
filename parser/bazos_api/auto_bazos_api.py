@@ -52,18 +52,19 @@ class AutoPage:
 
     def _get_html(self):
         self.url = self._construct_link(self.page)
-        return requests.get(self.url)
+        response = requests.get(self.url)
+        return response.text
 
     def _construct_link(self, page=0):
-        url = f'https://auto.bazos.cz/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' 
-        + f"rubriky=auto&hlokalita={self.locality}&humkreis={self.range}&" 
-        + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
+        url = f'https://auto.bazos.cz/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' \
+            + f"rubriky=auto&hlokalita={self.locality}&humkreis={self.range}&" \
+            + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
         return url
 
     def get_advertisements(self) -> list[str]:
         parsed = bs(self.html, "html.parser")
-        advertisements = parsed.find("div", class_="inzeratynadpis")
-        return map(lambda ad: ad.find("a")["href"].text, advertisements)
+        advertisements = parsed.find_all("div", class_="inzeratynadpis")
+        return list(map(lambda ad: ad.find("a")["href"].text, advertisements))
     
     def next_page(self):
         self.page += 1

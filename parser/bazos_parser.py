@@ -25,10 +25,11 @@ class BazosParser:
             args: AutoPageSearchArgs = {
                 'model': f"{car.manufacturer} {car.model}",
                 'locality': None,
+                'range': None,
                 'price_from': None,
                 'price_to': None
             }
-            car_page_bazos = AutoPage(args)
+            car_page_bazos = AutoPage(**args)
             car_ads = car_page_bazos.get_advertisements()
             car_ads = map(lambda ad: AutoAdvertisementPage(ad), car_ads)
             await asyncio.gather(*(car_ad.get_page_text() for car_ad in car_ads))
