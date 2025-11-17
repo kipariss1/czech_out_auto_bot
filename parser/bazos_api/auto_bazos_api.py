@@ -5,14 +5,6 @@ from bs4 import BeautifulSoup as bs
 import re
 
 
-class AutoPageSearchArgs(TypedDict):
-    model: str
-    locality: str
-    range: str
-    price_from: str
-    price_to: str
-
-
 class AutoAdvertisementPage:
 
     id: str
@@ -21,6 +13,7 @@ class AutoAdvertisementPage:
     def __init__(self, link: str):
         self.link = link
         self.text: str
+        self.location: str
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -36,10 +29,17 @@ class AutoAdvertisementPage:
                 html = await response.text()
                 parsed = bs(html, "html.parser")
                 details = parsed.find("div", class_="popisdetail")
+                self.location = parsed.find("a", {"title": "Přibližná lokalita"}).text
                 # TODO: add here parsing of the PSC of the ad
                 self.text = details.text
 
 
+class AutoPageSearchArgs(TypedDict):
+    model: str
+    locality: str
+    range: str
+    price_from: int
+    price_to: int
 
 
 class AutoPage:
