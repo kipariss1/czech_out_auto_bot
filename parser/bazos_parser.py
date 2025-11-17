@@ -17,12 +17,12 @@ class BazosParser:
     def _get_price_range_for_car(self, car_id: int) -> dict[str, int]:
         min_from = (
             self.db.query(func.min(CarSearch.price_range_from))
-            .filter(CarSearch.car_id == car_id)
+            .filter(CarSearch.car_model_id == car_id)
             .scalar()
         )
         max_to = (
             self.db.query(func.max(CarSearch.price_range_to))
-            .filter(CarSearch.car_id == car_id)
+            .filter(CarSearch.car_model_id == car_id)
             .scalar()
         )
         return min_from, max_to
@@ -44,4 +44,4 @@ class BazosParser:
             car_ads = car_page_bazos.get_advertisements()
             car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
             await asyncio.gather(*(car_ad.get_page_text() for car_ad in car_ads))
-            pass
+            # TODO: here implement logic of remembering which is last checked ad and going from there

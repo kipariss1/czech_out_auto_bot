@@ -61,13 +61,8 @@ class CarSearch(Base):
     psc_km_range = Column(String(4), nullable=True)
     price_range_from = Column(Integer, nullable=True)
     price_range_to = Column(Integer, nullable=True)
-    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)  # TODO: mv price/range_from/to from json attributes to normal String
+    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
     created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),     # ставится на уровне БД при вставке
-        nullable=False
-    )
-    last_checked_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
