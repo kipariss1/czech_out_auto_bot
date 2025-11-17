@@ -25,14 +25,14 @@ class AutoAdvertisementPage:
             setattr(self, key, value)
 
     def _get_attrs_from_link(self) -> dict[str, str]:
-        pattern = r'href="/inzerat/(\d+)/([^.]+)\.php"'
+        pattern = r'/inzerat/(\d+)/([^.]+)\.php'
         match = re.search(pattern, self.link)
         if match:
             return {'id': match.group(1), 'name': match.group(2)}
 
     async def get_page_text(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get() as response:
+            async with session.get(self.link) as response:
                 html = await response.text()
                 parsed = bs(html, "html.parser")
                 details = parsed.find("div", class_="popisdetail")
@@ -46,6 +46,7 @@ class AutoPage:
 
     def __init__(self, **kwargs: AutoPageSearchArgs):
         self.page = 0
+        self.base_url = 'https://auto.bazos.cz'
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.html = self._get_html()
@@ -56,7 +57,7 @@ class AutoPage:
         return response.text
 
     def _construct_link(self, page=0):
-        url = f'https://auto.bazos.cz/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' \
+        url = f'{self.base_url}/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' \
             + f"rubriky=auto&hlokalita={self.locality}&humkreis={self.range}&" \
             + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
         return url
@@ -64,7 +65,8 @@ class AutoPage:
     def get_advertisements(self) -> list[str]:
         parsed = bs(self.html, "html.parser")
         advertisements = parsed.find_all("div", class_="inzeratynadpis")
-        return list(map(lambda ad: ad.find("a")["href"].text, advertisements))
+        advertisements = list(filter(lambda ad: ad.find("a"), advertisements))
+        return list(map(lambda ad: self.base_url + ad.find("a")["href"], advertisements))
     
     def next_page(self):
         self.page += 1
