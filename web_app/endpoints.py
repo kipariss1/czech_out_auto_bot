@@ -125,6 +125,8 @@ def post_create_search_view(
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
+        "price_range_from": int(request.input_price_range_from),
+        "price_range_to": int(request.input_price_range_from),
         "attributes": _construct_attributes(dict(request)),
     }
     if _check_if_search_exists(db, **new_search_args):

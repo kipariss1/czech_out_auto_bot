@@ -1,6 +1,6 @@
 from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 import re
@@ -59,7 +59,19 @@ class CarSearch(Base):
     car_model = relationship("CarModel")
     psc_code = Column(String(6), nullable=True)
     psc_km_range = Column(String(4), nullable=True)
-    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
+    price_range_from = Column(Integer, nullable=True)
+    price_range_to = Column(Integer, nullable=True)
+    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)  # TODO: mv price/range_from/to from json attributes to normal String
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),     # ставится на уровне БД при вставке
+        nullable=False
+    )
+    last_checked_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
 
     @validates("psc_code")
     def validate_psc_code(self, key, address):
