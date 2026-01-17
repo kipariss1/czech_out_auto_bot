@@ -27,6 +27,7 @@ class CarModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer = Column(String(length=20))
     model = Column(String(length=40))
+    last_checked_id = Column(Integer, nullable=True)
 
     def __mapper_configure__(cls, mapper):
         mapper.order_by = (cls.manufacturer, cls.model)

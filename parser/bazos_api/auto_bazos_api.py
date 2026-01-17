@@ -68,6 +68,13 @@ class AutoPage:
         advertisements = list(filter(lambda ad: ad.find("a"), advertisements))
         return list(map(lambda ad: self.base_url + ad.find("a")["href"], advertisements))
     
-    def next_page(self):
+    def go_next_page(self):
         self.page += 1
         self.html = self._get_html()
+
+    def go_previous_page(self):
+        if self.page == 0:
+            return False
+        self.page -= 1
+        self.html = self._get_html()
+        return True
