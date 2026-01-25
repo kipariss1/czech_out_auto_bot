@@ -7,6 +7,8 @@ from src.settings.settings import settings
 from src.database_utils import db_handler
 
 
+# TODO: убрать выбор языков нахер
+
 def get_or_create_user(user_id):
     db = db_handler.get_db_connection()
     user = db.query(User).filter_by(id=user_id).first()

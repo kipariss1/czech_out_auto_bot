@@ -13,7 +13,7 @@ class AutoAdvertisementPage:
     def __init__(self, link: str):
         self.link = link
         self.text: str
-        self.location: str
+        self.location_link: str
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -28,10 +28,11 @@ class AutoAdvertisementPage:
             async with session.get(self.link) as response:
                 html = await response.text()
                 parsed = bs(html, "html.parser")
-                details = parsed.find("div", class_="popisdetail")
-                self.location = parsed.find("a", {"title": "Přibližná lokalita"}).text
+                title = parsed.find("h1", class_="nadpisdetail").text
+                details = parsed.find("div", class_="popisdetail").text
+                self.location_link = parsed.find("a", {"title": "Přibližná lokalita"}).text
                 # TODO: add here parsing of the PSC of the ad
-                self.text = details.text
+                self.text = f"{title}\n\n{details}"
 
 
 class AutoPageSearchArgs(TypedDict):

@@ -106,3 +106,11 @@ class CarSearch(Base):
             "psc_km_range": self.psc_km_range,
             "attributes": self._construct_attributes(),
         }
+    
+class AdQueue(Base):
+
+    __tablename__ = "Advertisements_Queue"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)

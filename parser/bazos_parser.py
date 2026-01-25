@@ -67,6 +67,4 @@ class BazosParser:
                     car_ads = car_page_bazos.get_advertisements()
                     car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
                     queue_to_check.append(car_ads)
-            await asyncio.gather(*(car_ad.get_page_text() for car_ad in queue_to_check))
-            pass
             # TODO: Here implement going through queue and sending ad if it fits to any search and then save the new last checked id of the ad
