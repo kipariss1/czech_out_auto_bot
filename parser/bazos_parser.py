@@ -1,7 +1,6 @@
-import asyncio
 from src.database_utils import db_handler
 from sqlalchemy import select, distinct, func
-from src.models.models import CarSearch, CarModel
+from src.models.models import CarSearch, CarModel, AdQueue
 from bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
 
 
@@ -67,4 +66,17 @@ class BazosParser:
                     car_ads = car_page_bazos.get_advertisements()
                     car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
                     queue_to_check.append(car_ads)
-            # TODO: Here implement going through queue and sending ad if it fits to any search and then save the new last checked id of the ad
+            # ADDING ADDS TO QUEUE
+            links = [e.link for e in queue_to_check]
+            row = self.db.query(AdQueue).filter_by(car_model_id=car_id).one_or_none()
+            if row:
+                row.queue = links
+            else:
+                row = AdQueue(
+                    car_model_id=car_id,
+                    queue=links
+                )
+                self.db.add(row)
+            self.db.commit()
+
+

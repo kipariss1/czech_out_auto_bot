@@ -1,6 +1,6 @@
 from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 import re
@@ -114,3 +114,7 @@ class AdQueue(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
     queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("car_model_id", name="uq_car_model_queue"),
+    )
