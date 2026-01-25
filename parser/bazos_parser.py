@@ -33,6 +33,7 @@ class BazosParser:
         return last_checked_id
         
     async def parse(self):
+        # TODO: refactor this gigantic function to be many small ones
         unique_car_searches_query = select(distinct(CarSearch.car_model_id))
         unique_car_ids = self.db.execute(unique_car_searches_query).scalars().all()
         for car_id in unique_car_ids:
