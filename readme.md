@@ -7,8 +7,7 @@ TODO:
  - separate containers for web_app, telegram bot and db ✅
  - grown up db ✅
  - implement smoke tests for web app ✅
- - implement jobs for scrapping bazos.cz and processing it with LLM
- - implement sending notifications to user 
+ - implement jobs for scrapping bazos.cz and processing it with LLM & sending to user (parser & worker)
 
 Original Idea:
  - parse bazos, sauto ..., run it throught some LLM
@@ -29,5 +28,5 @@ Original Idea:
   - FastAPI
   - SQLAlchemy
   - docker
-  - Atlas MongoDB
+  - Postgres (SQLite for testing)
     ...
