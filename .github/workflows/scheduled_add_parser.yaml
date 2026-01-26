@@ -1,0 +1,52 @@
+name: Scheduled pipeline (add_parser)
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # каждый день в 02:00 UTC
+  workflow_dispatch:
+
+jobs:
+  smoke-e2e-tests:
+    if: github.ref == 'refs/heads/add_parser'
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      ENV: test
+      CIPHER_KEY: ${{ vars.CIPHER_KEY }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: add_parser
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Start web-app
+        run: |
+          uvicorn web_app.main:app --host 0.0.0.0 --port 8000 --reload &
+
+      - name: Init DB
+        run: |
+          python ./src/database_utils/init_db.py
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node.js dependencies
+        run: cd web_app/smoke_tests && npm ci
+
+      - name: Install Playwright browsers
+        run: cd web_app/smoke_tests && npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: cd web_app/smoke_tests && npm run build && npm run test:playwright
