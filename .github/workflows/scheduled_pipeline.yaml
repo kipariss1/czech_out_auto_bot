@@ -1,8 +1,8 @@
-name: Scheduled pipeline (add_parser)
+name: Scheduled pipeline
 
 on:
   schedule:
-    - cron: "0 2 * * *"   # каждый день в 02:00 UTC
+    - cron: "0 0 1 1 *"   # Once a year
   workflow_dispatch:
 
 jobs:
