@@ -1,7 +1,11 @@
 from parser import bp
 import asyncio
+import click
 
-# TODO: make a CLI from this
+
+@click.command()
+def cli():
+    asyncio.run(bp.parse())
 
 if __name__ == '__main__':
-    asyncio.run(bp.parse())
+    cli()
