@@ -4,7 +4,7 @@ import json
 
 
 def test_bazos_parser_correctly_finds_the_last_checked_ad(build_mock_db):
-    with open("../test_data/test_bazos_parser_correctly_finds_the_last_checked_ad.json") as f:
+    with open("tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad.json") as f:
         text = f.read()
     mock_data = json.loads(text)
     mock_db = build_mock_db(
@@ -13,6 +13,7 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(build_mock_db):
     )
     bp = BazosParser()
     bp.parse()
+    
 
 
 
