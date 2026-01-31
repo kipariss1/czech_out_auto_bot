@@ -1,3 +1,3 @@
-from bazos_parser import BazosParser
+from parser.bazos_parser import BazosParser
 
 bp = BazosParser()

@@ -4,9 +4,8 @@ import json
 
 
 def test_bazos_parser_correctly_finds_the_last_checked_ad(build_mock_db):
-    f = open("../test_data/test_bazos_parser_correctly_finds_the_last_checked_ad.json")
-    text = f.read()
-    f.close()
+    with open("../test_data/test_bazos_parser_correctly_finds_the_last_checked_ad.json") as f:
+        text = f.read()
     mock_data = json.loads(text)
     mock_db = build_mock_db(
         "parser.bazos_parser.db_handler.get_db_connection",
