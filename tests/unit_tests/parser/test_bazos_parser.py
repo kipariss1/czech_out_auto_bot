@@ -81,12 +81,6 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(build_mock_db, mock_ba
         'https://auto.bazos.cz/inzerat/213355388/bmw-1-116d-85kw-f20-n47-kuze.php', 
         'https://auto.bazos.cz/inzerat/213281536/bmw-116d-f20.php']
 
-
-    
-
-
-
-
 def test_bazos_parser_doesnt_lose_older_ads_if_price_margins_changed():
     pass
 
