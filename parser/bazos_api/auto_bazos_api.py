@@ -3,6 +3,7 @@ from typing import TypedDict
 import aiohttp
 from bs4 import BeautifulSoup as bs
 import re
+import asyncio
 
 
 class AutoAdvertisementPage:
@@ -14,6 +15,7 @@ class AutoAdvertisementPage:
         self.link = link
         self.text: str
         self.location_link: str
+        self.parsed: bs
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -22,15 +24,32 @@ class AutoAdvertisementPage:
         match = re.search(pattern, self.link)
         if match:
             return {'id': match.group(1), 'name': match.group(2)}
+        
+    def is_toped(self) -> bool:
+        if not self.text:
+            asyncio.run(self.get_page_text())
+        topped_sign = self.parsed.find("span", class_="ztop", string="TOP")
+        if not topped_sign:
+            return False
+        return True
+        
+    def is_deleted(self) -> bool:
+        if not self.text:
+            asyncio.run(self.get_page_text())
+        breadcrumb = self.parsed.find("div", class_="drobky")
+        add_title = breadcrumb.find("b")
+        if not add_title:
+            return True
+        return False
 
     async def get_page_text(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.link) as response:
                 html = await response.text()
-                parsed = bs(html, "html.parser")
-                title = parsed.find("h1", class_="nadpisdetail").text
-                details = parsed.find("div", class_="popisdetail").text
-                self.location_link = parsed.find("a", {"title": "Přibližná lokalita"}).text
+                self.parsed = bs(html, "html.parser")
+                title = self.parsed.find("h1", class_="nadpisdetail").text
+                details = self.parsed.find("div", class_="popisdetail").text
+                self.location_link = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
                 # TODO: add here parsing of the PSC of the ad
                 self.text = f"{title}\n\n{details}"
 

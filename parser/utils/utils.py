@@ -1,28 +1,20 @@
 import re
-from typing import Iterable, List, overload
+from typing import Iterable, List
 
 INZERAT_ID_RE = re.compile(r"/inzerat/(\d+)/")
 
 
-@overload
-def extract_bazos_ids(link: str) -> int: ...
-    
+def extract_bazos_id(link: str) -> int:
+    match = INZERAT_ID_RE.search(link)
+    if not match:
+        raise ValueError(f"Wrong format of the link: {link}")
+    return int(match.group(1))
 
-@overload
-def extract_bazos_ids(links: Iterable[str]) -> List[int]: ...
 
-
-def extract_bazos_ids(links):
-    if isinstance(links, str):
-        match = INZERAT_ID_RE.search(links)
-        if not match:
-            raise ValueError(f"Not correct format of the link: {links}")
-        return int(match.group(1))
-
+def extract_bazos_ids(links: Iterable[str]) -> List[int]:
     ids: List[int] = []
+
     for link in links:
-        match = INZERAT_ID_RE.search(link)
-        if match:
-            ids.append(int(match.group(1)))
+        ids.append(extract_bazos_id(link))
 
     return ids

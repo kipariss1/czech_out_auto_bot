@@ -2,6 +2,7 @@ from src.database_utils import db_handler
 from sqlalchemy import select, distinct, func
 from src.models.models import CarSearch, CarModel, AdQueue
 from parser.bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
+import asyncio
 
 
 class BazosParser:
@@ -13,21 +14,46 @@ class BazosParser:
     def _get_searches(self) -> list[CarSearch]:
         return list(self.db.query(CarSearch).all())
     
-    def _get_price_range_for_car(self, car_id: int) -> dict[str, int]:
+    def _get_price_range_for_car(self, car_id: int) -> tuple[int, int]:
+        min_has_none = (
+            self.db.query(CarSearch)
+            .filter(CarSearch.car_model_id == car_id, CarSearch.price_range_from.is_(None))
+            .first()
+        )
+        max_has_none = (
+            self.db.query(CarSearch)
+            .filter(CarSearch.car_model_id == car_id, CarSearch.price_range_to.is_(None))
+            .first()
+        )
+        if min_has_none and max_has_none:
+            return None, None
+        max_to = (
+                self.db.query(func.max(CarSearch.price_range_to))
+                .filter(CarSearch.car_model_id == car_id)
+                .scalar()
+            )
         min_from = (
             self.db.query(func.min(CarSearch.price_range_from))
             .filter(CarSearch.car_model_id == car_id)
             .scalar()
         )
-        max_to = (
-            self.db.query(func.max(CarSearch.price_range_to))
-            .filter(CarSearch.car_model_id == car_id)
-            .scalar()
-        )
+        if min_has_none:
+            return 0, max_to
+        if max_has_none:
+            return min_from, 0  
         return min_from, max_to
     
+    def _find_last_valid_checked_id(car: CarModel) -> str:
+        checked_link_history = car.last_checked_links()
+        ad = None
+        for el in checked_link_history:
+            ad = AutoAdvertisementPage(el)
+            if not ad.is_deleted():
+                break
+        return ad.id
+    
     def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
-        last_checked_id = str(car.last_checked_id)
+        last_checked_id = self._find_last_valid_checked_id(car)
         car_ads = car_page_bazos.get_advertisements()
         car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
         car_ads_ids = [e.id for e in car_ads]
@@ -38,9 +64,6 @@ class BazosParser:
             car_ads_ids = [e.id for e in car_ads]
         page_with_last_checked_id = car_ads
         return last_checked_id, page_with_last_checked_id
-    
-    def _find_last_checked_index():
-        pass
     
     def _form_queue_to_check(self, car_page_bazos: AutoPage, last_checked_id: str | None, page_with_last_checked_id: list[AutoAdvertisementPage]) -> list[AutoAdvertisementPage]:
         if not last_checked_id: 
@@ -83,6 +106,7 @@ class BazosParser:
             car_page_bazos = AutoPage(**args)
             last_checked_id, page_with_last_checked_id = self._go_to_last_checked_id(car, car_page_bazos)
             queue_to_check = self._form_queue_to_check(car_page_bazos, last_checked_id, page_with_last_checked_id)
+            # TODO: check for TOPed adds from queue_to_check separately
             self._add_queue_to_db(car_id, queue_to_check)            
 
 
