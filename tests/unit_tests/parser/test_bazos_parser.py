@@ -84,8 +84,4 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(build_mock_db, mock_ba
 def test_bazos_parser_doesnt_lose_older_ads_if_price_margins_changed():
     pass
 
-def test_bazos_parser_correctly_sets_an_lower_price_range():
-    # 10% из верхней границы если нижняя не установлена
-    pass
-
 
