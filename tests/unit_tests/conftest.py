@@ -29,6 +29,6 @@ def build_mock_db() -> Callable[[str, JSON], Session]:
             model = Base.metadata.tables[table_name]
             convert_rows_to_correct_dtypes(rows)
             mock_db.execute(model.insert(), rows)
-        with patch(path, return_value=mock_db): 
-            return mock_db
+        patch(path, return_value=mock_db).start()
+        return mock_db
     return factory
