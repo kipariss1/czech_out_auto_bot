@@ -44,7 +44,7 @@ class BazosParser:
         return min_from, max_to
     
     def _find_last_valid_checked_id(car: CarModel) -> str:
-        checked_link_history = car.last_checked_links()
+        checked_link_history = car.last_checked_links
         ad = None
         for el in checked_link_history:
             ad = AutoAdvertisementPage(el)
@@ -89,6 +89,17 @@ class BazosParser:
             )
             self.db.add(row)
         self.db.commit()
+
+    def _process_toped_ads(queue: list[str], car: CarModel) -> list[str]:
+        ads = list(map(lambda el: AutoAdvertisementPage(el), queue))
+        first_not_toped = next(i for i, el in enumerate(ads) if not el.is_toped())
+        toped = queue[:first_not_toped]
+        not_toped = queue[first_not_toped:]
+        for el in toped:
+            if el in car.last_checked_toped_links:
+                toped.remove(el)
+        return toped + not_toped
+
         
     async def parse(self):
         unique_car_searches_query = select(distinct(CarSearch.car_model_id))
@@ -106,7 +117,7 @@ class BazosParser:
             car_page_bazos = AutoPage(**args)
             last_checked_id, page_with_last_checked_id = self._go_to_last_checked_id(car, car_page_bazos)
             queue_to_check = self._form_queue_to_check(car_page_bazos, last_checked_id, page_with_last_checked_id)
-            # TODO: check for TOPed adds from queue_to_check separately
+            queue_to_check = self._process_toped_ads(queue_to_check, car)
             self._add_queue_to_db(car_id, queue_to_check)            
 
 

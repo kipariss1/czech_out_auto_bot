@@ -32,6 +32,11 @@ class CarModel(Base):
         if settings.ENV == "production"
         else Column(JSON, nullable=True)
     )
+    _last_checked_toped_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
 
     def __mapper_configure__(cls, mapper):
         mapper.order_by = (cls.manufacturer, cls.model)
@@ -43,7 +48,16 @@ class CarModel(Base):
     @last_checked_links.setter
     def last_checked_links(self, value: list[str]):
         unique = list(dict.fromkeys(value))
-        self._last_checked_links = unique[-50:]
+        self._last_checked_links = unique[-10:]
+
+    @property
+    def last_checked_toped_links(self) -> list[str]:
+        return self._last_checked_toped_links
+    
+    @last_checked_toped_links.setter
+    def last_checked_links(self, value: list[str]):
+        unique = list[dict.fromkeys(value)]
+        self._last_checked_toped_links = unique[-25:]
 
 
 class CarSearchCreate(BaseModel):
