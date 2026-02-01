@@ -27,10 +27,23 @@ class CarModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer = Column(String(length=20))
     model = Column(String(length=40))
-    last_checked_id = Column(Integer, nullable=True)
+    _last_checked_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
 
     def __mapper_configure__(cls, mapper):
         mapper.order_by = (cls.manufacturer, cls.model)
+
+    @property
+    def last_checked_links(self) -> list[str]:
+        return self._last_checked_links
+
+    @last_checked_links.setter
+    def last_checked_links(self, value: list[str]):
+        unique = list(dict.fromkeys(value))
+        self._last_checked_links = unique[-50:]
 
 
 class CarSearchCreate(BaseModel):

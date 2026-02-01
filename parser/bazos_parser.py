@@ -39,6 +39,9 @@ class BazosParser:
         page_with_last_checked_id = car_ads
         return last_checked_id, page_with_last_checked_id
     
+    def _find_last_checked_index():
+        pass
+    
     def _form_queue_to_check(self, car_page_bazos: AutoPage, last_checked_id: str | None, page_with_last_checked_id: list[AutoAdvertisementPage]) -> list[AutoAdvertisementPage]:
         if not last_checked_id: 
                 queue_to_check = page_with_last_checked_id
