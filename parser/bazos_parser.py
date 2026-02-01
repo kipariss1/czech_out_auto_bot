@@ -27,7 +27,7 @@ class BazosParser:
         return min_from, max_to
     
     def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
-        last_checked_id = car.last_checked_id
+        last_checked_id = str(car.last_checked_id)
         car_ads = car_page_bazos.get_advertisements()
         car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
         car_ads_ids = [e.id for e in car_ads]
@@ -48,7 +48,7 @@ class BazosParser:
             while (car_page_bazos.go_previous_page()):
                 car_ads = car_page_bazos.get_advertisements()
                 car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
-                queue_to_check.append(car_ads)
+                queue_to_check = car_ads + queue_to_check
         return queue_to_check
     
     def _add_queue_to_db(self, car_id: str, queue_to_check: list[AutoAdvertisementPage]):
