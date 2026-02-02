@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from typing import Any, Dict, Callable
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine

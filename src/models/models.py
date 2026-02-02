@@ -55,7 +55,7 @@ class CarModel(Base):
         return self._last_checked_toped_links
     
     @last_checked_toped_links.setter
-    def last_checked_links(self, value: list[str]):
+    def last_checked_toped_links(self, value: list[str]):
         unique = list[dict.fromkeys(value)]
         self._last_checked_toped_links = unique[-25:]
 

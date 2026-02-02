@@ -80,6 +80,10 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_moc
         "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
         AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
+    monkeypatch.setattr(
+        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        AsyncMock(side_effect=lambda : False)
+    )
     bp = BazosParser()
     asyncio.run(bp.parse())
     queue = (
@@ -93,6 +97,9 @@ def test_bazos_parser_doesnt_lose_older_ads_if_price_margins_changed():
     pass
 
 def test_topped_adds_are_processed_separately():
+    pass
+
+def test_deleted_adds_in_last_checked_links_are_processed_correctly():
     pass
 
 

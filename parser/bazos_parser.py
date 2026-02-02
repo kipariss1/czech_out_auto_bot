@@ -43,19 +43,18 @@ class BazosParser:
             return min_from, 0  
         return min_from, max_to
     
-    def _find_last_valid_checked_id(self, car: CarModel) -> str | None:
-        checked_link_history = car.last_checked_links
-        if not checked_link_history:
+    async def _find_last_valid_checked_id(self, car: CarModel) -> str | None:
+        if not car.last_checked_links:
             return None
         ad = None
-        for el in checked_link_history:
+        for el in car.last_checked_links:
             ad = AutoAdvertisementPage(el)
-            if not ad.is_deleted():
+            if not await ad.is_deleted():
                 break
         return ad.id
     
-    def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
-        last_checked_id = self._find_last_valid_checked_id(car)
+    async def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
+        last_checked_id = await self._find_last_valid_checked_id(car)
         car_ads = car_page_bazos.get_advertisements()
         car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
         car_ads_ids = [e.id for e in car_ads]
@@ -93,7 +92,7 @@ class BazosParser:
         self.db.commit()
 
     async def _process_toped_ads(self, queue: list[str], car: CarModel) -> list[str]:
-        if not car.last_checked_links:
+        if not car.last_checked_toped_links:
             return queue
         res = await asyncio.gather(*[el.is_toped() for el in queue])
         first_not_toped = next(i for i, el in enumerate(res) if not el)
@@ -119,7 +118,7 @@ class BazosParser:
                 'price_to': max_to
             }
             car_page_bazos = AutoPage(**args)
-            last_checked_id, page_with_last_checked_id = self._go_to_last_checked_id(car, car_page_bazos)
+            last_checked_id, page_with_last_checked_id = await self._go_to_last_checked_id(car, car_page_bazos)
             queue_to_check = self._form_queue_to_check(car_page_bazos, last_checked_id, page_with_last_checked_id)
             queue_to_check = await self._process_toped_ads(queue_to_check, car)
             self._add_queue_to_db(car_id, queue_to_check)            
