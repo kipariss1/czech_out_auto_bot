@@ -12,10 +12,10 @@ class AutoAdvertisementPage:
     name: str
     
     def __init__(self, link: str):
-        self.link = link
-        self.text: str
         self.location_link: str
         self.parsed: bs
+        self.link = link
+        self.text: str = None
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -25,17 +25,17 @@ class AutoAdvertisementPage:
         if match:
             return {'id': match.group(1), 'name': match.group(2)}
         
-    def is_toped(self) -> bool:
+    async def is_toped(self) -> bool:
         if not self.text:
-            asyncio.run(self.get_page_text())
+            await self.get_page_text()
         topped_sign = self.parsed.find("span", class_="ztop", string="TOP")
         if not topped_sign:
             return False
         return True
         
-    def is_deleted(self) -> bool:
+    async def is_deleted(self) -> bool:
         if not self.text:
-            asyncio.run(self.get_page_text())
+            await self.get_page_text()
         breadcrumb = self.parsed.find("div", class_="drobky")
         add_title = breadcrumb.find("b")
         if not add_title:

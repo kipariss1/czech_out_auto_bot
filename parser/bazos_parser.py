@@ -2,6 +2,7 @@ from src.database_utils import db_handler
 from sqlalchemy import select, distinct, func
 from src.models.models import CarSearch, CarModel, AdQueue
 from parser.bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
+import asyncio
 
 
 class BazosParser:
@@ -42,8 +43,10 @@ class BazosParser:
             return min_from, 0  
         return min_from, max_to
     
-    def _find_last_valid_checked_id(car: CarModel) -> str:
+    def _find_last_valid_checked_id(self, car: CarModel) -> str | None:
         checked_link_history = car.last_checked_links
+        if not checked_link_history:
+            return None
         ad = None
         for el in checked_link_history:
             ad = AutoAdvertisementPage(el)
@@ -89,9 +92,11 @@ class BazosParser:
             self.db.add(row)
         self.db.commit()
 
-    def _process_toped_ads(queue: list[str], car: CarModel) -> list[str]:
-        ads = list(map(lambda el: AutoAdvertisementPage(el), queue))
-        first_not_toped = next(i for i, el in enumerate(ads) if not el.is_toped())
+    async def _process_toped_ads(self, queue: list[str], car: CarModel) -> list[str]:
+        if not car.last_checked_links:
+            return queue
+        res = await asyncio.gather(*[el.is_toped() for el in queue])
+        first_not_toped = next(i for i, el in enumerate(res) if not el)
         toped = queue[:first_not_toped]
         not_toped = queue[first_not_toped:]
         for el in toped:
@@ -116,7 +121,7 @@ class BazosParser:
             car_page_bazos = AutoPage(**args)
             last_checked_id, page_with_last_checked_id = self._go_to_last_checked_id(car, car_page_bazos)
             queue_to_check = self._form_queue_to_check(car_page_bazos, last_checked_id, page_with_last_checked_id)
-            queue_to_check = self._process_toped_ads(queue_to_check, car)
+            queue_to_check = await self._process_toped_ads(queue_to_check, car)
             self._add_queue_to_db(car_id, queue_to_check)            
 
 
