@@ -67,10 +67,26 @@ def asserted_queue():
         'https://auto.bazos.cz/inzerat/213355388/bmw-1-116d-85kw-f20-n47-kuze.php', 
         'https://auto.bazos.cz/inzerat/213281536/bmw-116d-f20.php']
 
-def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_mock_db, mock_bazos, asserted_queue):
+
+@pytest.fixture
+def asserted_queue_without_checked_toped_ads(asserted_queue):
+    return asserted_queue[2:]
+
+@pytest.fixture
+def mock_data_with_checked_toped_ads():
+    with open("tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/mock_data_toped.json") as f:
+        text = f.read()
+    mock_data = json.loads(text)
+    return mock_data
+
+@pytest.fixture
+def mock_data():
     with open("tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/mock_data.json") as f:
         text = f.read()
     mock_data = json.loads(text)
+    return mock_data
+
+def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
     car_id = mock_data["Car_Models"][0]["id"]
     mock_db = build_mock_db(
         "parser.bazos_parser.db_handler.get_db_connection",
@@ -93,11 +109,35 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_moc
     )
     assert queue == asserted_queue
 
-def test_bazos_parser_doesnt_lose_older_ads_if_price_margins_changed():
-    pass
-
-def test_topped_adds_are_processed_separately():
-    pass
+def test_topped_adds_are_processed_separately(
+        monkeypatch, 
+        build_mock_db, 
+        mock_bazos, 
+        asserted_queue_without_checked_toped_ads,
+        asserted_queue,
+        mock_data_with_checked_toped_ads,
+    ):
+    car_id = mock_data_with_checked_toped_ads["Car_Models"][0]["id"]
+    mock_db = build_mock_db(
+        "parser.bazos_parser.db_handler.get_db_connection",
+        mock_data_with_checked_toped_ads
+    )
+    monkeypatch.setattr(
+        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
+    )
+    monkeypatch.setattr(
+        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        AsyncMock(side_effect=lambda : False)
+    )
+    bp = BazosParser()
+    asyncio.run(bp.parse())
+    queue = (
+        mock_db.query(AdQueue.queue)
+        .filter(AdQueue.car_model_id == car_id)
+        .scalar()
+    )
+    assert queue == asserted_queue_without_checked_toped_ads
 
 def test_deleted_adds_in_last_checked_links_are_processed_correctly():
     pass

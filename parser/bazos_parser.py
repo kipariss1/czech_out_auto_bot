@@ -2,6 +2,7 @@ from src.database_utils import db_handler
 from sqlalchemy import select, distinct, func
 from src.models.models import CarSearch, CarModel, AdQueue
 from parser.bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
+from copy import deepcopy
 import asyncio
 
 
@@ -98,8 +99,8 @@ class BazosParser:
         first_not_toped = next(i for i, el in enumerate(res) if not el)
         toped = queue[:first_not_toped]
         not_toped = queue[first_not_toped:]
-        for el in toped:
-            if el in car.last_checked_toped_links:
+        for el in toped[:]:
+            if el.link in car.last_checked_toped_links:
                 toped.remove(el)
         return toped + not_toped
 
