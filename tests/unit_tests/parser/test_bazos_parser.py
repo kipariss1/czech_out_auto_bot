@@ -139,7 +139,28 @@ def test_topped_adds_are_processed_separately(
     )
     assert queue == asserted_queue_without_checked_toped_ads
 
-def test_deleted_adds_in_last_checked_links_are_processed_correctly():
-    pass
+def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
+    asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")
+    car_id = mock_data["Car_Models"][0]["id"]
+    mock_db = build_mock_db(
+        "parser.bazos_parser.db_handler.get_db_connection",
+        mock_data
+    )
+    monkeypatch.setattr(
+        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
+    )
+    monkeypatch.setattr(
+        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        AsyncMock(side_effect=[True, False, False])
+    )
+    bp = BazosParser()
+    asyncio.run(bp.parse())
+    queue = (
+        mock_db.query(AdQueue.queue)
+        .filter(AdQueue.car_model_id == car_id)
+        .scalar()
+    )
+    assert queue == asserted_queue
 
 
