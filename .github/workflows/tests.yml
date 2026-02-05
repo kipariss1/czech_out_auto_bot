@@ -76,7 +76,7 @@ jobs:
         run: cd tests/e2e_smoke_tests && npm ci
 
       - name: Install Playwright browsers
-        run: cd web_app/e2e_smoke_tests && npx playwright install --with-deps
+        run: cd tests/e2e_smoke_tests && npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: cd web_app/e2e_smoke_tests && npm run build && npm run test:playwright
+        run: cd tests/e2e_smoke_tests && npm run build && npm run test:playwright
