@@ -1,0 +1,31 @@
+{
+    "Users": [
+        {"id": 1, "language": "en"}
+    ],
+    "Car_Models": [
+        {"id": 1, "manufacturer": "BMW", "model": "F20", "_last_checked_links": [
+            "https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php",
+            "https://auto.bazos.cz/inzerat/213213449/bmw-f20-116i-automat-100kw-2014.php",
+            "https://auto.bazos.cz/inzerat/213173933/bmw-116i-benzin-100kw-136k-model-f20-120000km.php"
+        ]}
+    ],
+    "Car_Searches": [
+        {
+            "id": "1", 
+            "user_id": "1", 
+            "car_model_id": "1", 
+            "psc_code": "110 00", 
+            "psc_km_range": "25", 
+            "price_range_from": "100000", 
+            "price_range_to": "400000", 
+            "attributes": {
+                "input_year_range_from": "2010", 
+                "input_year_range_to": "2018", 
+                "input_mileage_range_from": "0", 
+                "input_mileage_range_to": "50000", 
+                "input_price_range_from": "100000", 
+                "input_price_range_to": "400000"
+            }, 
+            "created_at": "#ConvertStr2Datetime 2026-01-25 14:59:07"}
+    ]
+}

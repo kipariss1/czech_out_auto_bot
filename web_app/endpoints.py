@@ -85,13 +85,15 @@ def _construct_attributes(request: dict) -> dict:
 
 
 def _check_if_search_exists(
-    db, user_id, car_model_id, psc_code, psc_km_range, attributes
+    db, user_id, car_model_id, psc_code, psc_km_range, price_range_from, price_range_to, attributes
 ):
     existing_searches = db.query(CarSearch).filter(
         and_(
             CarSearch.user_id == user_id,
             CarSearch.car_model_id == car_model_id,
             CarSearch.psc_code == psc_code,
+            CarSearch.price_range_from == price_range_from,
+            CarSearch.price_range_to == price_range_to,
             CarSearch.psc_km_range == psc_km_range,
             CarSearch.attributes.contains(attributes),
         )
@@ -125,6 +127,8 @@ def post_create_search_view(
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
+        "price_range_from": int(request.input_price_range_from),
+        "price_range_to": int(request.input_price_range_from),
         "attributes": _construct_attributes(dict(request)),
     }
     if _check_if_search_exists(db, **new_search_args):

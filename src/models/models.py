@@ -1,6 +1,6 @@
 from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON
+from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 import re
@@ -27,9 +27,37 @@ class CarModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer = Column(String(length=20))
     model = Column(String(length=40))
+    _last_checked_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
+    _last_checked_toped_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
 
     def __mapper_configure__(cls, mapper):
         mapper.order_by = (cls.manufacturer, cls.model)
+
+    @property
+    def last_checked_links(self) -> list[str]:
+        return self._last_checked_links
+
+    @last_checked_links.setter
+    def last_checked_links(self, value: list[str]):
+        unique = list(dict.fromkeys(value))
+        self._last_checked_links = unique[-10:]
+
+    @property
+    def last_checked_toped_links(self) -> list[str]:
+        return self._last_checked_toped_links
+    
+    @last_checked_toped_links.setter
+    def last_checked_toped_links(self, value: list[str]):
+        unique = list[dict.fromkeys(value)]
+        self._last_checked_toped_links = unique[-25:]
 
 
 class CarSearchCreate(BaseModel):
@@ -59,7 +87,14 @@ class CarSearch(Base):
     car_model = relationship("CarModel")
     psc_code = Column(String(6), nullable=True)
     psc_km_range = Column(String(4), nullable=True)
+    price_range_from = Column(Integer, nullable=True)
+    price_range_to = Column(Integer, nullable=True)
     attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
 
     @validates("psc_code")
     def validate_psc_code(self, key, address):
@@ -98,3 +133,15 @@ class CarSearch(Base):
             "psc_km_range": self.psc_km_range,
             "attributes": self._construct_attributes(),
         }
+    
+class AdQueue(Base):
+
+    __tablename__ = "Advertisements_Queue"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("car_model_id", name="uq_car_model_queue"),
+    )
