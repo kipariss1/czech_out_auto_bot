@@ -1,6 +1,6 @@
 from src.database_utils import db_handler
 from src.models.models import AdQueue
-from parser.bazos_api.auto_bazos_api import AutoAdvertisementPage
+from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
 import asyncio
 
 class BazosWorker:
