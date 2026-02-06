@@ -19,4 +19,5 @@ class BazosWorker:
             ads = list(map(lambda el: AutoAdvertisementPage(el), queue))
             await asyncio.gather(*[ad.get_page_text() for ad in ads])
             # TODO: here process text in LLM and then check against all CarSearches with same car_id and send the ad to user
+            
 
