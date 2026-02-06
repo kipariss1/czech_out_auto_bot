@@ -1,7 +1,7 @@
 from src.database_utils import db_handler
 from sqlalchemy import select, distinct, func
 from src.models.models import CarSearch, CarModel, AdQueue
-from parser.bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
+from queue_svc.bazos_api.auto_bazos_api import AutoPage, AutoAdvertisementPage, AutoPageSearchArgs
 import asyncio
 
 
