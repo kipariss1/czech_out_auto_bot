@@ -9,7 +9,6 @@ Your task is to analyze the text and determine:
 2. Whether the car matches the following required attributes:
    - Brand: <CAR_BRAND>
    - Model: <CAR_MODEL>
-   - Additional characteristics: <ADDITIONAL_CHARACTERISTICS>
 
 If the advertisement is NOT a car sale advertisement, or does NOT match the required brand, model, or additional characteristics, respond with the following JSON and nothing else:
 
@@ -17,7 +16,7 @@ If the advertisement is NOT a car sale advertisement, or does NOT match the requ
   "is_car_sale": false
 }
 
-If the advertisement IS a car sale advertisement AND matches the required brand, model, and additional characteristics, respond with a JSON object in the exact format below and nothing else.
+If the advertisement IS a car sale advertisement AND matches the required brand, model respond with a JSON object in the exact format below and nothing else.
 
 Extract the following information from the text:
 - Engine size (e.g. "1.4", "2.0 TDI")
