@@ -87,9 +87,12 @@ class CarSearch(Base):
     car_model = relationship("CarModel")
     psc_code = Column(String(6), nullable=True)
     psc_km_range = Column(String(4), nullable=True)
+    year_range_from = Column(Integer, nullable=True)
+    year_range_to = Column(Integer, nullable=True)
+    milage_range_from = Column(Integer, nullable=True)
+    milage_range_to = Column(Integer, nullable=True)
     price_range_from = Column(Integer, nullable=True)
     price_range_to = Column(Integer, nullable=True)
-    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -110,17 +113,10 @@ class CarSearch(Base):
 
     def _construct_attributes(self):
         new_attrs = {
-            "Year range": f"{self.attributes['input_year_range_from']} - {self.attributes['input_year_range_to']}",
-            "Mileage range": f"{self.attributes['input_mileage_range_from']} - {self.attributes['input_mileage_range_to']}",
-            "Price range": f"{self.attributes['input_price_range_from']} - {self.attributes['input_price_range_to']}",
+            "Year range": f"{self.year_range_from} - {self.year_range_to}",
+            "Mileage range": f"{self.mileage_range_from} - {self.mileage_range_to}",
+            "Price range": f"{self.price_range_from} - {self.price_range_to}",
         }
-        new_attrs.update(
-            {
-                f"Unique trait #{int(k.split('_')[1]) + 1}": v
-                for k, v in self.attributes.items()
-                if "attributes_" in k
-            }
-        )
         return new_attrs
 
     def to_dict(self):
