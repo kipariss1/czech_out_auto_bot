@@ -6,17 +6,17 @@ import re
 
 
 class NotValidCarAd(TypedDict):
-    is_car_sale: Literal[False]
+    is_valid_ad: Literal[False]
 
 class ValidCarAd(TypedDict):
-    is_car_sale: Literal[True]
+    is_valid_ad: Literal[True]
     brand: str
     model: str
     engine: str
     year: str
     mileage: str
 
-CarSaleResult = Union[ValidCarAd, NotValidCarAd]
+CarAdParseResult = Union[ValidCarAd, NotValidCarAd]
 
 
 class OllamaClient:
@@ -37,7 +37,7 @@ class OllamaClient:
             template = re.sub(k, v, template)
         return template
 
-    def process(self, ad_text: str, car: CarModel) -> CarSaleResult:
+    def process(self, ad_text: str, car: CarModel) -> CarAdParseResult:
         prompt = self._generate_prompt(ad_text, car)
         response = requests.post(
             f"{self.url}/api/generate",

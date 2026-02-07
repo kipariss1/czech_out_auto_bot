@@ -42,7 +42,7 @@ class CarModel(Base):
         mapper.order_by = (cls.manufacturer, cls.model)
 
     @property
-    def last_checked_links(self) -> list[str]:
+    def last_checked_links(self) -> list[str] | None:
         return self._last_checked_links
 
     @last_checked_links.setter
@@ -51,7 +51,7 @@ class CarModel(Base):
         self._last_checked_links = unique[-10:]
 
     @property
-    def last_checked_toped_links(self) -> list[str]:
+    def last_checked_toped_links(self) -> list[str] | None:
         return self._last_checked_toped_links
     
     @last_checked_toped_links.setter
