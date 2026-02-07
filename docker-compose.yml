@@ -71,3 +71,25 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile.queue
+    command: ["python", "-m", "queue_svc.parser.main"]
+    environment:
+      <<: *common-env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.queue
+    command: ["python", "-m", "queue_svc.worker.main"]
+    environment:
+      <<: *common-env
+    depends_on:
+      postgres_db:
+        condition: service_healthy

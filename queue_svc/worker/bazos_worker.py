@@ -12,7 +12,7 @@ class BazosWorker:
         self.ollama = OllamaClient()
 
     @staticmethod
-    def _fits_to_search_criteria(search: CarSearch, car_parse_res: ValidCarAd) -> bool:
+    def _fits_to_search_criteria(car_parse_res: ValidCarAd, search: CarSearch) -> bool:
         return (
             search.milage_range_from < int(car_parse_res['mileage']) < search.milage_range_to and
             search.year_range_from < int(car_parse_res['year']) < search.year_range_to
@@ -50,7 +50,7 @@ Here is the link: {ad.link}
             res = self.ollama.process(ad_text=ad.text, car=car)
             if res.is_valid_ad:
                 for search in searches:
-                    if self._fits_to_search_criteria(search, res):
+                    if self._fits_to_search_criteria(res, search):
                         self._send_new_ad_notification(search, ad, car)
                         await self._add_checked_ad_to_history(ad, car)
 
