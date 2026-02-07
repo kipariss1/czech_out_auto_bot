@@ -50,14 +50,28 @@ class CarModel(Base):
         unique = list(dict.fromkeys(value))
         self._last_checked_links = unique[-10:]
 
+    def add_last_checked_link(self, link: str):
+        current = self.last_checked_links
+        if not current:
+            self.last_checked_links = [link]
+            return
+        self.last_checked_links = current + [link]
+
     @property
     def last_checked_toped_links(self) -> list[str] | None:
         return self._last_checked_toped_links
     
     @last_checked_toped_links.setter
     def last_checked_toped_links(self, value: list[str]):
-        unique = list[dict.fromkeys(value)]
+        unique = list(dict.fromkeys(value))
         self._last_checked_toped_links = unique[-25:]
+
+    def add_last_checked_toped_link(self, link: str):
+        current = self.last_checked_toped_links
+        if not current:
+            self.last_checked_toped_links = [link]
+            return
+        self.last_checked_toped_links = current + [link]
 
 
 class CarSearchCreate(BaseModel):

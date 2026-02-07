@@ -1,5 +1,5 @@
 from src.database_utils import db_handler
-from src.models.models import AdQueue, CarModel, CarSearch, User
+from src.models.models import AdQueue, CarModel, CarSearch
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
 from queue_svc.ollama_api.ollama_client import OllamaClient, ValidCarAd
 from telegram_bot import bot
@@ -12,7 +12,7 @@ class BazosWorker:
         self.ollama = OllamaClient()
 
     @staticmethod
-    def fits_to_search_criteria(search: CarSearch, car_parse_res: ValidCarAd) -> bool:
+    def _fits_to_search_criteria(search: CarSearch, car_parse_res: ValidCarAd) -> bool:
         return (
             search.milage_range_from < int(car_parse_res['mileage']) < search.milage_range_to and
             search.year_range_from < int(car_parse_res['year']) < search.year_range_to
@@ -21,7 +21,7 @@ class BazosWorker:
     def _send_new_ad_notification(self, search: CarSearch, ad: AutoAdvertisementPage, car: CarModel):
         attrs = search.to_dict()['attributes']
         message = f"""
-🚨🏎️ We found new car advertisement, for searching: {car.manufacturer} {car.model}
+🚨🏎️ We found new car advertisement, for: {car.manufacturer} {car.model}
 with criteria:
     - Year range:   {attrs['Year range']}
     - Milage range: {attrs['Milage range']}
@@ -33,6 +33,12 @@ Here is the link: {ad.link}
             chat_id=search.user_id,
             text=message
         )
+
+    async def _add_checked_ad_to_history(ad: AutoAdvertisementPage, car: CarModel):
+        if await ad.is_toped() and ad.link not in car.last_checked_toped_links:
+            car.add_last_checked_toped_link(ad.link)
+        if ad.link not in car.last_checked_links:
+            car.add_last_checked_link(ad.link)
     
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue
@@ -44,9 +50,10 @@ Here is the link: {ad.link}
             res = self.ollama.process(ad_text=ad.text, car=car)
             if res.is_valid_ad:
                 for search in searches:
-                    if self.fits_to_search_criteria(search, res):
+                    if self._fits_to_search_criteria(search, res):
                         self._send_new_ad_notification(search, ad, car)
-                        # TODO: here write checked adds and toped adds to history
+                        await self._add_checked_ad_to_history(ad, car)
+
 
     async def process_queue(self):
         queue_rows = (
