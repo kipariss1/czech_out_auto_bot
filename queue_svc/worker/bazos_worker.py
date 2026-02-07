@@ -1,7 +1,8 @@
 from src.database_utils import db_handler
-from src.models.models import AdQueue, CarModel, CarSearch
+from src.models.models import AdQueue, CarModel, CarSearch, User
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
 from queue_svc.ollama_api.ollama_client import OllamaClient, ValidCarAd
+from telegram_bot import bot
 import asyncio
 
 class BazosWorker:
@@ -17,6 +18,22 @@ class BazosWorker:
             search.year_range_from < int(car_parse_res['year']) < search.year_range_to
         )
     
+    def _send_new_ad_notification(self, search: CarSearch, ad: AutoAdvertisementPage, car: CarModel):
+        attrs = search.to_dict()['attributes']
+        message = f"""
+🚨🏎️ We found new car advertisement, for searching: {car.manufacturer} {car.model}
+with criteria:
+    - Year range:   {attrs['Year range']}
+    - Milage range: {attrs['Milage range']}
+    - Price range:  {attrs['Price range']}
+
+Here is the link: {ad.link}
+"""
+        bot.send_message(
+            chat_id=search.user_id,
+            text=message
+        )
+    
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue
         car = self.db.query(CarModel).filter(CarModel.id == row.car_model_id)
@@ -28,8 +45,7 @@ class BazosWorker:
             if res.is_valid_ad:
                 for search in searches:
                     if self.fits_to_search_criteria(search, res):
-                        # TODO: here send ad to the owner of the search
-                        pass
+                        self._send_new_ad_notification(search, ad, car)
                         # TODO: here write checked adds and toped adds to history
 
     async def process_queue(self):
