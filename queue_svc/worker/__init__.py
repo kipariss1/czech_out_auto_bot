@@ -1,3 +1,3 @@
-from worker.bazos_worker import BazosWorker
+from queue_svc.worker.bazos_worker import BazosWorker
 
 bw = BazosWorker()
