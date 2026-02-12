@@ -42,7 +42,7 @@ Here is the link: {ad.link}
     
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue
-        car = self.db.query(CarModel).filter(CarModel.id == row.car_model_id)
+        car = self.db.query(CarModel).filter(CarModel.id == row.car_model_id).first()
         searches = self.db.query(CarSearch).filter(CarSearch.car_model_id == row.car_model_id)
         ads = list(map(lambda el: AutoAdvertisementPage(el), queue))
         await asyncio.gather(*[ad.get_page_text() for ad in ads])
