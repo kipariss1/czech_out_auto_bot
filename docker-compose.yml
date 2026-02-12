@@ -90,6 +90,7 @@ services:
     command: ["python", "-m", "queue_svc.worker.main"]
     environment:
       <<: *common-env
+      BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       postgres_db:
         condition: service_healthy
