@@ -62,5 +62,5 @@ Here is the link: {ad.link}
             .all()
         )
         for row in queue_rows:
-            self._process_row_in_queue(row)
+            await self._process_row_in_queue(row)
 
