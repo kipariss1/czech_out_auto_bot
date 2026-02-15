@@ -9,9 +9,9 @@ from src.database_utils import db_handler
 
 def get_or_create_user(user_id):
     db = db_handler.get_db_connection()
-    user = db.query(User).filter_by(id=user_id).first()
+    user = db.query(User).filter_by(telegram_id=user_id).first()
     if user is None:
-        user = User(id=user_id)
+        user = User(telegram_id=user_id)
         db.add(user)
         db.commit()
     return user
