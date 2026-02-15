@@ -13,12 +13,7 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    telegram_id = Column(String, primary_key=True, unique=True)
-    language = Column(String(2), nullable=False, default="en")
-
-    __table_args__ = (
-        CheckConstraint("language IN ('ru', 'en', 'cz')", name="check_language"),
-    )
+    telegram_id = Column(Integer, unique=True, nullable=False)
 
 
 class CarModel(Base):
