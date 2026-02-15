@@ -66,6 +66,8 @@ services:
       restart: unless-stopped
       volumes:
         - ./ollama_data:/root/.ollama
+      environment:
+        OLLAMA_HOST: 0.0.0.0
       healthcheck:
         test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
         interval: 10s
