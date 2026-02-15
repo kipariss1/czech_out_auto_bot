@@ -4,12 +4,14 @@ from src.models.models import CarSearch, User
 
 def create_new_users(db=db_handler.get_db_connection()):
     new_user = User(
-        id=1
+        id=1,
+        telegram_id=368512732
     )
     db.add(new_user)
     db.commit()
     new_user = User(
-        id=2
+        id=2,
+        telegram_id=1111111111
     )
     db.add(new_user)
     db.commit()
