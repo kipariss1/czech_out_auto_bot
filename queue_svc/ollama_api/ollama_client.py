@@ -2,6 +2,8 @@ import requests
 from pathlib import Path
 from typing import TypedDict, Literal, Union
 from src.models.models import CarModel
+from src.settings.settings import settings
+import os
 import re
 
 
@@ -22,7 +24,7 @@ CarAdParseResult = Union[ValidCarAd, NotValidCarAd]
 class OllamaClient:
     
     def __init__(self):
-        self.url = "http://ollama:11434"
+        self.url = "http://ollama:11434" if settings.env == 'production' else "http://localhost:11434" 
         self.prompt_path = Path(__file__).parent / "prompts" / "ollama_prompt.txt"
 
     def _generate_prompt(self, ad_text: str, car: CarModel) -> str:
