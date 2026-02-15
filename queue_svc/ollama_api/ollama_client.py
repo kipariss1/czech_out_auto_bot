@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TypedDict, Literal, Union
 from src.models.models import CarModel
 from src.settings.settings import settings
-import os
+import json
 import re
 
 
@@ -45,7 +45,15 @@ class OllamaClient:
             f"{self.url}/api/generate",
             json={
                 "model": "gemma3:4b",
-                "prompt": prompt
+                "prompt": prompt,
+                "stream": False
             }
         )
-        return response.json()["response"]
+        response = response.json()
+        try:
+            response = response["response"]
+            response = response.strip('`').strip('json').strip('\n')
+            response = json.loads(response)
+        except KeyError:
+            raise("Response from Ollama didn't have \"response\" field")
+        return response

@@ -48,7 +48,7 @@ Here is the link: {ad.link}
         await asyncio.gather(*[ad.get_page_text() for ad in ads])
         for ad in ads:
             res = self.ollama.process(ad_text=ad.text, car=car)
-            if res.is_valid_ad:
+            if res['is_valid_ad']:
                 for search in searches:
                     if self._fits_to_search_criteria(res, search):
                         self._send_new_ad_notification(search, ad, car)
