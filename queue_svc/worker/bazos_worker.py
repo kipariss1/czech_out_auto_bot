@@ -39,7 +39,7 @@ class BazosWorker:
             parse_mode="HTML",
         )
 
-    async def _add_checked_ad_to_history(ad: AutoAdvertisementPage, car: CarModel):
+    async def _add_checked_ad_to_history(self, ad: AutoAdvertisementPage, car: CarModel):
         if await ad.is_toped() and ad.link not in car.last_checked_toped_links:
             car.add_last_checked_toped_link(ad.link)
         if ad.link not in car.last_checked_links:
