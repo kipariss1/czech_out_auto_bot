@@ -21,18 +21,22 @@ class BazosWorker:
     def _send_new_ad_notification(self, search: CarSearch, ad: AutoAdvertisementPage, car: CarModel):
         attrs = search.to_dict()['attributes']
         message = f"""
-🚨🏎️  We found new car advertisement, for: {car.manufacturer} {car.model}
-       with criteria:
-            - Year range:   {attrs['Year range']}
-            - Mileage range: {attrs['Mileage range']}
-            - Price range:  {attrs['Price range']}
+🚨 <b>New car found!</b>
 
-Here is the link: {ad.link}
+🏎️ <b>{car.manufacturer} {car.model}</b>
+
+<b>Search criteria:</b>
+• Year: {attrs.get('Year range', '—')}
+• Mileage: {attrs.get('Mileage range', '—')}
+• Price: {attrs.get('Price range', '—')}
+
+🔗 <a href="{ad.link}">View advertisement</a>
 """
         user = self.db.query(User).filter(User.id == search.user_id).first()
         bot.send_message(
             chat_id=user.telegram_id,
-            text=message
+            text=message,
+            parse_mode="HTML",
         )
 
     async def _add_checked_ad_to_history(ad: AutoAdvertisementPage, car: CarModel):
