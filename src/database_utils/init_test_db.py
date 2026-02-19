@@ -25,7 +25,7 @@ def create_new_searches(db=db_handler.get_db_connection()):
         year_range_from="2010",
         year_range_to="2018",
         milage_range_from="0",
-        milage_range_to="50000",
+        milage_range_to="200000",
         price_range_from="800000",
         price_range_to="1000000",
     )
