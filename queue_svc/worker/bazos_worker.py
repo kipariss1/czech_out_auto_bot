@@ -80,7 +80,7 @@ class BazosWorker:
                     if self._fits_to_search_criteria(res, search):
                         self._send_new_ad_notification(search, ad, car)
                         await self._add_checked_ad_to_history(ad, car)
-            queue = queue.remove(ad.link)
+            queue.remove(ad.link)
             row.queue = queue
             self.db.commit()
 
@@ -93,6 +93,4 @@ class BazosWorker:
         )
         for row in queue_rows:
             await self._process_row_in_queue(row)
-            row.queue = None
-            self.db.commit()
 
