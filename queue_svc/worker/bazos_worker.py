@@ -1,5 +1,5 @@
 from src.database_utils import db_handler
-from src.models.models import AdQueue, CarModel, CarSearch
+from src.models.models import AdQueue, CarModel, CarSearch, User
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
 from queue_svc.ollama_api.ollama_client import OllamaClient, ValidCarAd
 from telegram_bot import bot
@@ -29,8 +29,9 @@ with criteria:
 
 Here is the link: {ad.link}
 """
+        user = self.db.query(User).filter(User.id == search.user_id).first()
         bot.send_message(
-            chat_id=search.user_id,
+            chat_id=user.telegram_id,
             text=message
         )
 
