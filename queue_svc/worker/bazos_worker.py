@@ -63,4 +63,6 @@ Here is the link: {ad.link}
         )
         for row in queue_rows:
             await self._process_row_in_queue(row)
+            row.queue = None
+            self.db.commit()
 
