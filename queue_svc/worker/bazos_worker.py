@@ -39,11 +39,33 @@ class BazosWorker:
             parse_mode="HTML",
         )
 
-    async def _add_checked_ad_to_history(self, ad: AutoAdvertisementPage, car: CarModel):
+    @staticmethod
+    async def _should_be_added_to_toped_history(ad: AutoAdvertisementPage, car: CarModel):
+        if await ad.is_toped() and not car.last_checked_toped_links:
+            return True
         if await ad.is_toped() and ad.link not in car.last_checked_toped_links:
-            car.add_last_checked_toped_link(ad.link)
+            return True
+        return False
+    
+    @staticmethod
+    def _should_be_added_to_history(ad: AutoAdvertisementPage, car: CarModel):
+        if not car.last_checked_links:
+            return True
         if ad.link not in car.last_checked_links:
+            return True
+        return False
+
+    async def _add_checked_ad_to_history(self, ad: AutoAdvertisementPage, car: CarModel):
+        if await self._should_be_added_to_toped_history(ad, car):
+            car.add_last_checked_toped_link(ad.link)
+            # TODO: unite adding and commiting to one function somehow
+            self.db.commit()
+            return
+        if self._should_be_added_to_history(ad, car):
             car.add_last_checked_link(ad.link)
+            # TODO: unite adding and commiting to one function somehow
+            self.db.commit()
+            return
     
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue
