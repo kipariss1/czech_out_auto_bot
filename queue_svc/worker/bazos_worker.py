@@ -21,11 +21,11 @@ class BazosWorker:
     def _send_new_ad_notification(self, search: CarSearch, ad: AutoAdvertisementPage, car: CarModel):
         attrs = search.to_dict()['attributes']
         message = f"""
-🚨🏎️ We found new car advertisement, for: {car.manufacturer} {car.model}
-with criteria:
-    - Year range:   {attrs['Year range']}
-    - Mileage range: {attrs['Mileage range']}
-    - Price range:  {attrs['Price range']}
+🚨🏎️  We found new car advertisement, for: {car.manufacturer} {car.model}
+       with criteria:
+            - Year range:   {attrs['Year range']}
+            - Mileage range: {attrs['Mileage range']}
+            - Price range:  {attrs['Price range']}
 
 Here is the link: {ad.link}
 """
