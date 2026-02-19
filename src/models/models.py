@@ -104,8 +104,8 @@ class CarSearch(Base):
     psc_km_range = Column(String(4), nullable=True)
     year_range_from = Column(Integer, nullable=True)
     year_range_to = Column(Integer, nullable=True)
-    milage_range_from = Column(Integer, nullable=True)
-    milage_range_to = Column(Integer, nullable=True)
+    mileage_range_from = Column(Integer, nullable=True)
+    mileage_range_to = Column(Integer, nullable=True)
     price_range_from = Column(Integer, nullable=True)
     price_range_to = Column(Integer, nullable=True)
     created_at = Column(

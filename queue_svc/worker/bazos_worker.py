@@ -14,7 +14,7 @@ class BazosWorker:
     @staticmethod
     def _fits_to_search_criteria(car_parse_res: ValidCarAd, search: CarSearch) -> bool:
         return (
-            search.milage_range_from < int(car_parse_res['mileage']) < search.milage_range_to and
+            search.mileage_range_from < int(car_parse_res['mileage']) < search.mileage_range_to and
             search.year_range_from < int(car_parse_res['year']) < search.year_range_to
         )
     
@@ -24,7 +24,7 @@ class BazosWorker:
 🚨🏎️ We found new car advertisement, for: {car.manufacturer} {car.model}
 with criteria:
     - Year range:   {attrs['Year range']}
-    - Milage range: {attrs['Milage range']}
+    - Mileage range: {attrs['Mileage range']}
     - Price range:  {attrs['Price range']}
 
 Here is the link: {ad.link}

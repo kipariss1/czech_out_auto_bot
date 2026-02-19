@@ -24,8 +24,8 @@ def create_new_searches(db=db_handler.get_db_connection()):
         psc_km_range="25",
         year_range_from="2018",
         year_range_to="2026",
-        milage_range_from="0",
-        milage_range_to="200000",
+        mileage_range_from="0",
+        mileage_range_to="200000",
         price_range_from="800000",
         price_range_to="1000000",
     )
@@ -39,8 +39,8 @@ def create_new_searches(db=db_handler.get_db_connection()):
         psc_km_range="25",
         year_range_from="2010",
         year_range_to="2018",
-        milage_range_from="0",
-        milage_range_to="50000",
+        mileage_range_from="0",
+        mileage_range_to="50000",
         price_range_from="300000",
         price_range_to="7000000",
     )
@@ -54,8 +54,8 @@ def create_new_searches(db=db_handler.get_db_connection()):
         psc_km_range="25",
         year_range_from="2010",
         year_range_to="2018",
-        milage_range_from="0",
-        milage_range_to="50000",
+        mileage_range_from="0",
+        mileage_range_to="50000",
         price_range_from="800000",
         price_range_to="1000000",
     )
