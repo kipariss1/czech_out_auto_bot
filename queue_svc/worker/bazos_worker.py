@@ -13,6 +13,8 @@ class BazosWorker:
 
     @staticmethod
     def _fits_to_search_criteria(car_parse_res: ValidCarAd, search: CarSearch, car: CarModel) -> bool:
+        if car_parse_res['brand'] != car.manufacturer or car_parse_res['model'] != car.model:
+            return False
         # TODO: here check if PSC and range fits as well
         return (
             search.mileage_range_from < int(car_parse_res['mileage']) < search.mileage_range_to and
