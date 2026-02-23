@@ -44,14 +44,10 @@ class AutoAdvertisementPage:
         return False
     
     def _find_price(self) -> int:
-        price_label = self.parsed.find("td", string=lambda x: x and "Cena:" in x)
-        if price_label:
-            row = price_label.find_parent("tr")
-            price_span = row.find("span", attrs={"translate": "no"})
-            if price_span:
-                price_text = price_span.get_text(strip=True)
-                price = re.sub(r"\D", "", price_text)
-                return int(price)
+        left_table = self.parsed.find("td", class_="listadvlevo")
+        price_text = left_table.contents[1].contents[9].text
+        price = re.sub(r"\D", "", price_text)
+        return int(price)
 
     async def get_page_text(self):
         async with aiohttp.ClientSession() as session:
