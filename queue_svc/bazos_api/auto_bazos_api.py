@@ -12,7 +12,7 @@ class AutoAdvertisementPage:
     name: str
     
     def __init__(self, link: str):
-        self.location_link: str
+        self.psc: str
         self.parsed: bs
         self.link = link
         self.text: str = None
@@ -52,8 +52,7 @@ class AutoAdvertisementPage:
                 if title:
                     title = title.text
                     details = self.parsed.find("div", class_="popisdetail").text
-                    self.location_link = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
-                    # TODO: add here parsing of the PSC of the ad
+                    self.psc = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
                     self.text = f"{title}\n\n{details}"
                 else:
                     self.is_deleted = True
