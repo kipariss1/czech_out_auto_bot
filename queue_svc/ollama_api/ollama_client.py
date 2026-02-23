@@ -17,6 +17,7 @@ class ValidCarAd(TypedDict):
     engine: str
     year: str
     mileage: str
+    price: str
 
 CarAdParseResult = Union[ValidCarAd, NotValidCarAd]
 

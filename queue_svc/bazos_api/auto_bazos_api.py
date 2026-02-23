@@ -3,7 +3,6 @@ from typing import TypedDict
 import aiohttp
 from bs4 import BeautifulSoup as bs
 import re
-import asyncio
 
 
 class AutoAdvertisementPage:
@@ -16,6 +15,7 @@ class AutoAdvertisementPage:
         self.parsed: bs
         self.link = link
         self.text: str = None
+        self.price: str = None
         self.is_deleted: bool = False
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
@@ -42,6 +42,16 @@ class AutoAdvertisementPage:
         if not add_title:
             return True
         return False
+    
+    def _find_price(self) -> int:
+        price_label = self.parsed.find("td", string=lambda x: x and "Cena:" in x)
+        if price_label:
+            row = price_label.find_parent("tr")
+            price_span = row.find("span", attrs={"translate": "no"})
+            if price_span:
+                price_text = price_span.get_text(strip=True)
+                price = re.sub(r"\D", "", price_text)
+                return int(price)
 
     async def get_page_text(self):
         async with aiohttp.ClientSession() as session:
@@ -53,6 +63,7 @@ class AutoAdvertisementPage:
                     title = title.text
                     details = self.parsed.find("div", class_="popisdetail").text
                     self.psc = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
+                    self.price = self._find_price() 
                     self.text = f"{title}\n\n{details}"
                 else:
                     self.is_deleted = True
