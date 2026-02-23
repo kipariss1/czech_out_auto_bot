@@ -16,6 +16,7 @@ class AutoAdvertisementPage:
         self.parsed: bs
         self.link = link
         self.text: str = None
+        self.is_deleted: bool = False
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -47,11 +48,15 @@ class AutoAdvertisementPage:
             async with session.get(self.link) as response:
                 html = await response.text()
                 self.parsed = bs(html, "html.parser")
-                title = self.parsed.find("h1", class_="nadpisdetail").text
-                details = self.parsed.find("div", class_="popisdetail").text
-                self.location_link = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
-                # TODO: add here parsing of the PSC of the ad
-                self.text = f"{title}\n\n{details}"
+                title = self.parsed.find("h1", class_="nadpisdetail")
+                if title:
+                    title = title.text
+                    details = self.parsed.find("div", class_="popisdetail").text
+                    self.location_link = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
+                    # TODO: add here parsing of the PSC of the ad
+                    self.text = f"{title}\n\n{details}"
+                else:
+                    self.is_deleted = True
 
 
 class AutoPageSearchArgs(TypedDict):
