@@ -49,7 +49,7 @@ class BazosParser:
         ad = None
         for el in car.last_checked_links:
             ad = AutoAdvertisementPage(el)
-            if not await ad.is_deleted():
+            if not (await ad.is_deleted()):
                 break
         return ad.id
     

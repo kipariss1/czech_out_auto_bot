@@ -16,7 +16,7 @@ class AutoAdvertisementPage:
         self.link = link
         self.text: str = None
         self.price: str = None
-        self.is_deleted: bool = False
+        self._is_deleted: bool | None = None
         for key, value in self._get_attrs_from_link().items():
             setattr(self, key, value)
 
@@ -33,15 +33,17 @@ class AutoAdvertisementPage:
         if not topped_sign:
             return False
         return True
-        
+
     async def is_deleted(self) -> bool:
-        if not self.text:
+        if self._is_deleted is None:
             await self.get_page_text()
-        breadcrumb = self.parsed.find("div", class_="drobky")
-        add_title = breadcrumb.find("b")
-        if not add_title:
-            return True
-        return False
+            breadcrumb = self.parsed.find("div", class_="drobky")
+            add_title = breadcrumb.find("b")
+            if not add_title:
+                self._is_deleted = True
+            else:
+                self._is_deleted = False
+        return self._is_deleted
     
     def _find_price(self) -> int:
         left_table = self.parsed.find("td", class_="listadvlevo")
@@ -62,7 +64,7 @@ class AutoAdvertisementPage:
                     self.price = self._find_price() 
                     self.text = f"{title}\n\n{details}"
                 else:
-                    self.is_deleted = True
+                    self._is_deleted = True
 
 
 class AutoPageSearchArgs(TypedDict):
