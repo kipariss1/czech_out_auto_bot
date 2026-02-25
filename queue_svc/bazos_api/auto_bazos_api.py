@@ -63,6 +63,7 @@ class AutoAdvertisementPage:
                     self.psc = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
                     self.price = self._find_price() 
                     self.text = f"{title}\n\n{details}"
+                    self._is_deleted = False
                 else:
                     self._is_deleted = True
 
