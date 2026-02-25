@@ -5,6 +5,22 @@ from bs4 import BeautifulSoup as bs
 import re
 
 
+def get(link):
+    response = requests.get(link)
+    text = response.text
+    if response.status_code != 200:
+        raise AssertionError(f"[{response.status_code}] Get request to {link} was not successful, reason: \n{text}")
+    return text
+
+
+async def aget(link):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(link) as response:
+            text = await response.text()
+            if response.status != 200:
+                raise AssertionError(f"[{response.status}] Async Get request to {link} was not successful, reason: \n{text}")
+            return text
+
 class AutoAdvertisementPage:
 
     id: str
@@ -52,20 +68,18 @@ class AutoAdvertisementPage:
         return int(price)
 
     async def get_page_text(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(self.link) as response:
-                html = await response.text()
-                self.parsed = bs(html, "html.parser")
-                title = self.parsed.find("h1", class_="nadpisdetail")
-                if title:
-                    title = title.text
-                    details = self.parsed.find("div", class_="popisdetail").text
-                    self.psc = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
-                    self.price = self._find_price() 
-                    self.text = f"{title}\n\n{details}"
-                    self._is_deleted = False
-                else:
-                    self._is_deleted = True
+        html = await aget(self.link)
+        self.parsed = bs(html, "html.parser")
+        title = self.parsed.find("h1", class_="nadpisdetail")
+        if title:
+            title = title.text
+            details = self.parsed.find("div", class_="popisdetail").text
+            self.psc = self.parsed.find("a", {"title": "Přibližná lokalita"}).text
+            self.price = self._find_price() 
+            self.text = f"{title}\n\n{details}"
+            self._is_deleted = False
+        else:
+            self._is_deleted = True
 
 
 class AutoPageSearchArgs(TypedDict):
@@ -87,8 +101,7 @@ class AutoPage:
 
     def _get_html(self):
         self.url = self._construct_link(self.page)
-        response = requests.get(self.url)
-        return response.text
+        return get(self.url)
 
     def _construct_link(self, page=0):
         url = f'{self.base_url}/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' \
