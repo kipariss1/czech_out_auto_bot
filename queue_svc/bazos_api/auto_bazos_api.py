@@ -45,10 +45,10 @@ class AutoAdvertisementPage:
     async def is_toped(self) -> bool:
         if not self.text:
             await self.get_page_text()
-        topped_sign = self.parsed.find("span", class_="ztop", string="TOP")
-        if not topped_sign:
-            return False
-        return True
+        topped_signs = self.parsed.find_all("span", class_="ztop")
+        if len(topped_signs) > 0 and topped_signs[0].text == 'TOP':
+            return True
+        return False
 
     async def is_deleted(self) -> bool:
         if self._is_deleted is None:

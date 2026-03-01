@@ -91,13 +91,12 @@ class BazosParser:
             self.db.add(row)
         self.db.commit()
 
-    async def _process_toped_ads(self, queue: list[str], car: CarModel) -> list[str]:
+    async def _process_toped_ads(self, queue: list[AutoAdvertisementPage], car: CarModel) -> list[str]:
         if not car.last_checked_toped_links:
             return queue
-        res = await asyncio.gather(*[el.is_toped() for el in queue])
-        first_not_toped = next(i for i, el in enumerate(res) if not el)
-        toped = queue[:first_not_toped]
-        not_toped = queue[first_not_toped:]
+        is_toped_mask = await asyncio.gather(*[el.is_toped() for el in queue])
+        toped = [el for el, is_toped in zip(queue, is_toped_mask) if is_toped]
+        not_toped = [el for el, is_toped in zip(queue, is_toped_mask) if not is_toped]
         for el in toped[:]:
             if el.link in car.last_checked_toped_links:
                 toped.remove(el)
