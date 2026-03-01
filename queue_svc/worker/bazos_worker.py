@@ -3,6 +3,7 @@ from src.models.models import AdQueue, CarModel, CarSearch, User
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
 from queue_svc.ollama_api.ollama_client import OllamaClient, ValidCarAd
 from telegram_bot import bot
+from typing import Any
 import asyncio
 
 class BazosWorker:
@@ -12,14 +13,22 @@ class BazosWorker:
         self.ollama = OllamaClient()
 
     @staticmethod
+    def _in_range(data: dict[str, Any], key: str, min_value: int, max_value: int) -> bool:
+        try:
+            element = int(data[key])
+        except (KeyError, TypeError):
+            return True
+        return min_value < element < max_value
+
+    @staticmethod
     def _fits_to_search_criteria(car_parse_res: ValidCarAd, search: CarSearch, car: CarModel) -> bool:
         if car_parse_res['brand'] != car.manufacturer or car_parse_res['model'] != car.model:
             return False
         # TODO: here check if PSC and range fits as well
         return (
-            search.mileage_range_from < int(car_parse_res['mileage']) < search.mileage_range_to and
-            search.year_range_from < int(car_parse_res['year']) < search.year_range_to and
-            search.price_range_from < int(car_parse_res['price']) < search.price_range_to
+            BazosWorker._in_range(car_parse_res, 'mileage', search.mileage_range_from, search.mileage_range_to) and
+            BazosWorker._in_range(car_parse_res, 'year', search.year_range_from, search.year_range_to) and
+            BazosWorker._in_range(car_parse_res, 'price', search.price_range_from, search.price_range_to)
         )
     
     def _send_new_ad_notification(self, search: CarSearch, ad: AutoAdvertisementPage, car: CarModel):
