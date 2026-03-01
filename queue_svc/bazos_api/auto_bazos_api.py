@@ -104,9 +104,16 @@ class AutoPage:
         return get(self.url)
 
     def _construct_link(self, page=0):
-        url = f'{self.base_url}/{f"{page*20}/" if page else ""}?hledat={self.model.replace(" ", "+")}&' \
-            + f"rubriky=auto&hlokalita={self.locality}&humkreis={self.range}&" \
-            + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
+        model = self.model.replace(" ", "+")
+        locality = self.locality if self.locality is not None else ""
+        range = self.range if self.range is not None else 25
+        if page == 0:
+            url = f'{self.base_url}/?hledat={model}&' \
+                + f"rubriky=auto&hlokalita={locality}&humkreis={range}&" \
+                + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
+        else:
+            url = f"{self.base_url}/{page*20}/?hledat={model}&hlokalita={locality}&" \
+                  + f"humkreis={range}&cenaod={self.price_from}&cenado={self.price_to}&order="
         return url
 
     def get_advertisements(self) -> list[str]:
