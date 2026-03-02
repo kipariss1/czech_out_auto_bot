@@ -1,1 +1,0 @@
-# TODO: here test integraion between parser and worker
