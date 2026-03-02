@@ -1,44 +1,39 @@
-from parser.bazos_parser import BazosParser
+from queue_svc.parser.bazos_parser import BazosParser
 from src.models.models import AdQueue
+from typing import List
 from unittest.mock import AsyncMock
+from tests.pytest_fixtures.common import MockURL
 import pytest
 import json
 import responses
 import asyncio
 
-
 @pytest.fixture
-def mock_bazos():
-    with responses.RequestsMock() as rsps:
-        url_page_1 = (
-            "https://auto.bazos.cz/"
-            "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis=None"
-            "&cenaod=100000&cenado=400000&Submit=Hledat"
-            "&order=&crp=&kitx=ano"
-        )
-        url_page_2 = (
-            "https://auto.bazos.cz/20/"
-            "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis=None"
-            "&cenaod=100000&cenado=400000&&Submit=Hledat"
-            "&order=&crp=&kitx=ano"
-        )
-        with open("tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page1.html", encoding="utf-8") as f:
-            page1 = f.read()
-        with open("tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html", encoding="utf-8") as f:
-            page2 = f.read()
-        rsps.add(
-            responses.GET,
-            url_page_1,
-            body=page1,
-            status=200,
-        )
-        rsps.add(
-            responses.GET,
-            url_page_2,
-            body=page2,
-            status=200,
-        )
-        yield rsps
+def mock_bazos(build_mock_bazos):
+    urls2mock = [
+        {
+            'type': responses.GET,
+            'mock_url': (
+                "https://auto.bazos.cz/"
+                "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis=None"
+                "&cenaod=100000&cenado=400000&Submit=Hledat"
+                "&order=&crp=&kitx=ano"
+            ),
+            'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page1.html",
+            'status': 200
+        },
+        {
+            'type': responses.GET,
+            'mock_url': (
+                "https://auto.bazos.cz/20/"
+                "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis="
+                "&cenaod=100000&cenado=400000&order="
+            ),
+            'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html",
+            'status': 200
+        }
+    ]
+    yield build_mock_bazos(urls2mock)
 
 @pytest.fixture
 def asserted_queue():

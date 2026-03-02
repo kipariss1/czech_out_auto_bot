@@ -4,7 +4,6 @@ from typing import Any, Dict, Callable, TypedDict, Literal, List
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
 from src.models.models import Base
-from pathlib import path
 from datetime import datetime
 import responses
 import pathlib
@@ -44,16 +43,16 @@ def build_mock_db() -> Callable[[str, JSON], Session]:
 
 @pytest.fixture(scope='function')
 def build_mock_bazos() -> Callable[[List[MockURL]], responses.RequestsMock]:
-    def factory(url2mock: List[MockURL]) -> responses.RequestsMock:
+    def factory(urls2mock: List[MockURL]) -> responses.RequestsMock:
         with responses.RequestsMock() as rsps:
-            for obj in url2mock:
-                with open(obj.mock_html_path, encoding="utf-8") as f:
+            for obj in urls2mock:
+                with open(obj['mock_html_path'], encoding="utf-8") as f:
                     html = f.read()
                 rsps.add(
-                    obj.type,
-                    obj.mock_url,
+                    obj['type'],
+                    obj['mock_url'],
                     body=html,
-                    status=obj.status
+                    status=obj['status']
                 )
         return rsps
     return factory
