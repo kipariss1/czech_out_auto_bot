@@ -24,7 +24,8 @@ CarAdParseResult = Union[ValidCarAd, NotValidCarAd]
 
 class OllamaClient:
     
-    def __init__(self):
+    def __init__(self, model: str="gemma3:4b"):
+        self.model = model
         self.url = "http://ollama:11434" if settings.env == 'production' else "http://localhost:11434" 
         self.prompt_path = Path(__file__).parent / "prompts" / "ollama_prompt.txt"
 
@@ -45,7 +46,7 @@ class OllamaClient:
         response = requests.post(
             f"{self.url}/api/generate",
             json={
-                "model": "gemma3:4b",
+                "model": self.model,
                 "prompt": prompt,
                 "stream": False
             }

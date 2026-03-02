@@ -10,7 +10,7 @@ class BazosWorker:
     
     def __init__(self):
         self.db = db_handler.get_db_connection()
-        self.ollama = OllamaClient()
+        self.ollama = OllamaClient("gemma3:12b")
 
     @staticmethod
     def _in_range(data: dict[str, Any], key: str, min_value: int, max_value: int) -> bool:
