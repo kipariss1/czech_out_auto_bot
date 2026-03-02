@@ -1,12 +1,21 @@
 import pytest
 from unittest.mock import patch
-from typing import Any, Dict, Callable
+from typing import Any, Dict, Callable, TypedDict, Literal, List
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
 from src.models.models import Base
+from pathlib import path
 from datetime import datetime
+import responses
+import pathlib
 
 JSON = Dict[str, Any]
+
+class MockURL(TypedDict):
+    type: Literal[responses.GET, responses.POST, responses.PUT, responses.PATCH, responses.DELETE]
+    mock_url: str
+    mock_html_path: pathlib.Path 
+    status: int
 
 @pytest.fixture(scope='function')
 def build_mock_db() -> Callable[[str, JSON], Session]:
@@ -31,4 +40,20 @@ def build_mock_db() -> Callable[[str, JSON], Session]:
             mock_db.execute(model.insert(), rows)
         patch(path, return_value=mock_db).start()
         return mock_db
+    return factory
+
+@pytest.fixture(scope='function')
+def build_mock_bazos() -> Callable[[List[MockURL]], responses.RequestsMock]:
+    def factory(url2mock: List[MockURL]) -> responses.RequestsMock:
+        with responses.RequestsMock() as rsps:
+            for obj in url2mock:
+                with open(obj.mock_html_path, encoding="utf-8") as f:
+                    html = f.read()
+                rsps.add(
+                    obj.type,
+                    obj.mock_url,
+                    body=html,
+                    status=obj.status
+                )
+        return rsps
     return factory
