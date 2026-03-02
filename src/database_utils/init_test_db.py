@@ -5,13 +5,13 @@ from src.models.models import CarSearch, User
 def create_new_users(db=db_handler.get_db_connection()):
     new_user = User(
         id=1,
-        telegram_id=368512732
+        telegram_id=-5173650900
     )
     db.add(new_user)
     db.commit()
     new_user = User(
         id=2,
-        telegram_id=1111111111
+        telegram_id=-5180431900
     )
     db.add(new_user)
     db.commit()
