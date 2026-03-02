@@ -16,7 +16,7 @@ class BazosWorker:
     def _in_range(data: dict[str, Any], key: str, min_value: int, max_value: int) -> bool:
         try:
             element = int(data[key])
-        except (KeyError, TypeError):
+        except (KeyError, ValueError):
             return True
         return min_value < element < max_value
 
