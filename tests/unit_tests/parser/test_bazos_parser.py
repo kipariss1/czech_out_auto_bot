@@ -84,15 +84,15 @@ def mock_data():
 def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
     car_id = mock_data["Car_Models"][0]["id"]
     mock_db = build_mock_db(
-        "parser.bazos_parser.db_handler.get_db_connection",
+        "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
         AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
         AsyncMock(side_effect=lambda : False)
     )
     bp = BazosParser()
@@ -114,15 +114,15 @@ def test_topped_adds_are_processed_separately(
     ):
     car_id = mock_data_with_checked_toped_ads["Car_Models"][0]["id"]
     mock_db = build_mock_db(
-        "parser.bazos_parser.db_handler.get_db_connection",
+        "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data_with_checked_toped_ads
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        "queue_svc.queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
         AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        "queue_svc.parser.auto_bazos_api.AutoAdvertisementPage.is_deleted",
         AsyncMock(side_effect=lambda : False)
     )
     bp = BazosParser()
@@ -138,15 +138,15 @@ def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch,
     asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")
     car_id = mock_data["Car_Models"][0]["id"]
     mock_db = build_mock_db(
-        "parser.bazos_parser.db_handler.get_db_connection",
+        "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
         AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
     monkeypatch.setattr(
-        "parser.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
         AsyncMock(side_effect=[True, False, False])
     )
     bp = BazosParser()
