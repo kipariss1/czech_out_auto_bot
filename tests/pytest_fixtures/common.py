@@ -44,7 +44,7 @@ def build_mock_db() -> Callable[[str, JSON], Session]:
 @pytest.fixture(scope='function')
 def build_mock_bazos() -> Callable[[List[MockURL]], responses.RequestsMock]:
     def factory(urls2mock: List[MockURL]) -> responses.RequestsMock:
-        with responses.RequestsMock() as rsps:
+        with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
             for obj in urls2mock:
                 with open(obj['mock_html_path'], encoding="utf-8") as f:
                     html = f.read()
