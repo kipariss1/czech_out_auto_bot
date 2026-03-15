@@ -15,7 +15,7 @@ def mock_bazos(build_mock_bazos):
             'type': responses.GET,
             'mock_url': (
                 "https://auto.bazos.cz/"
-                "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis=None"
+                "?hledat=BMW+F20&rubriky=auto&hlokalita=&humkreis=25"
                 "&cenaod=100000&cenado=400000&Submit=Hledat"
                 "&order=&crp=&kitx=ano"
             ),
@@ -26,7 +26,7 @@ def mock_bazos(build_mock_bazos):
             'type': responses.GET,
             'mock_url': (
                 "https://auto.bazos.cz/20/"
-                "?hledat=BMW+F20&rubriky=auto&hlokalita=None&humkreis="
+                "?hledat=BMW+F20&hlokalita=&humkreis=25"
                 "&cenaod=100000&cenado=400000&order="
             ),
             'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html",
@@ -118,11 +118,11 @@ def test_topped_adds_are_processed_separately(
         mock_data_with_checked_toped_ads
     )
     monkeypatch.setattr(
-        "queue_svc.queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
         AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
     monkeypatch.setattr(
-        "queue_svc.parser.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
         AsyncMock(side_effect=lambda : False)
     )
     bp = BazosParser()
