@@ -16,8 +16,33 @@ REGULAR_AD_1 = "https://auto.bazos.cz/inzerat/214330574/bmw-rada-1-bmw-f20-116ed
 REGULAR_AD_2 = "https://auto.bazos.cz/inzerat/214321960/predam-kompletny-motor-s-oznacenym-n47d20d-160kw.php"
 REGULAR_AD_3 = "https://auto.bazos.cz/inzerat/214321906/predam-kompletny-motor-n55-n55b30a-nove-rozvody-loziska.php"
 REGULAR_AD_4 = "https://auto.bazos.cz/inzerat/214306962/bmw-f20-116d-20d-85-kw.php"
+REGULAR_AD_5 = "https://auto.bazos.cz/inzerat/214228476/bmw-f20-116d-85-kw.php"
+REGULAR_AD_6 = "https://auto.bazos.cz/inzerat/213774086/bmw-f20-f21-m135i-f22-m235i-motor-n55-n55b30a.php"
+REGULAR_AD_7 = "https://auto.bazos.cz/inzerat/213596962/bmw-f20-f21-f22-motor-n55b30a-nove-rozvody-240kw.php"
+REGULAR_AD_8 = "https://auto.bazos.cz/inzerat/212838480/bmw-116d-urban-model-f20.php"
+REGULAR_AD_9 = "https://auto.bazos.cz/inzerat/214032404/bmw-116i-80-kw.php"
+REGULAR_AD_10 = "https://auto.bazos.cz/inzerat/213467912/bmw-1-118d-f20-2013-m-paket.php"
+REGULAR_AD_11 = "https://auto.bazos.cz/inzerat/212932605/bmw-116-i-2012.php"
+REGULAR_AD_12 = "https://auto.bazos.cz/inzerat/212677088/bmw-1-f20-116d-rv-2015-99-tis-kmm-paket.php"
+REGULAR_AD_13 = "https://auto.bazos.cz/inzerat/213788116/bmw-120d-f20.php"
+REGULAR_AD_14 = "https://auto.bazos.cz/inzerat/213761480/bmw-e92-335i.php"
+REGULAR_AD_15 = "https://auto.bazos.cz/inzerat/213759936/bmw-rada-1-20d-rv-32013-najeto-201130-km.php"
+REGULAR_AD_16 = "https://auto.bazos.cz/inzerat/212022352/bmw-f20-118d-20d-105kw-zf.php"
 PAGE2_AD_1 = "https://auto.bazos.cz/inzerat/213641524/bmw-f20-20d-2013.php"
+PAGE2_AD_2 = "https://auto.bazos.cz/inzerat/213355388/bmw-1-116d-85kw-f20-n47-kuze.php"
+PAGE2_AD_3 = "https://auto.bazos.cz/inzerat/213281536/bmw-116d-f20.php"
 PAGE2_AD_4 = "https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php"
+PAGE2_AD_5 = "https://auto.bazos.cz/inzerat/213213449/bmw-f20-116i-automat-100kw-2014.php"
+PAGE2_AD_6 = "https://auto.bazos.cz/inzerat/213173933/bmw-116i-benzin-100kw-136k-model-f20-120000km.php"
+PAGE2_AD_7 = "https://auto.bazos.cz/inzerat/213152605/bmw-f20-120xd-xdrive-135-kw-4x4-manual-carplay.php"
+PAGE2_AD_8 = "https://auto.bazos.cz/inzerat/212214828/bmw-m135i-xdrive-f20crservis-historier-2013166-tkm.php"
+PAGE2_AD_9 = "https://auto.bazos.cz/inzerat/212654616/bmw-118d-f20-20d-105kw.php"
+PAGE2_AD_10 = "https://auto.bazos.cz/inzerat/212478971/a.php"
+PAGE2_AD_11 = "https://auto.bazos.cz/inzerat/212270350/bmw-f20-125d-m-paket.php"
+PAGE2_AD_12 = "https://auto.bazos.cz/inzerat/212192049/bmw-rad-1-116d-f20.php"
+PAGE2_AD_13 = "https://auto.bazos.cz/inzerat/212122463/bmw-f20-xdrive-118d-sport-line-rok-2014.php"
+PAGE2_AD_14 = "https://auto.bazos.cz/inzerat/211941833/bmw-rady-1.php"
+PAGE2_AD_15 = "https://auto.bazos.cz/inzerat/211728369/bmw-116i-2011.php"
 
 TOPED_ADS = {TOPED_AD_1, TOPED_AD_2, TOPED_AD_3, TOPED_AD_4}
 
@@ -116,7 +141,6 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "id": 1,
                 "manufacturer": "BMW",
                 "model": "F20",
-                "_last_checked_links": [PAGE2_AD_4],
             },
         ],
         "Car_Searches": [
