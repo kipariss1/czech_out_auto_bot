@@ -26,7 +26,7 @@ class BazosParser:
             .first()
         )
         if min_has_none and max_has_none:
-            return None, None
+            return None, None   # type: ignore
         max_to = (
                 self.db.query(func.max(CarSearch.price_range_to))
                 .filter(CarSearch.car_model_id == car_id)
@@ -51,7 +51,7 @@ class BazosParser:
             ad = AutoAdvertisementPage(el)
             if not await ad.is_deleted():
                 break
-        return ad.id
+        return ad.id    # type: ignore
     
     async def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
         last_checked_id = await self._find_last_valid_checked_id(car)
@@ -82,7 +82,7 @@ class BazosParser:
         links = [e.link for e in queue_to_check]
         row = self.db.query(AdQueue).filter_by(car_model_id=car_id).one_or_none()
         if row:
-            row.queue = links
+            row.queue = links   # type: ignore
         else:
             row = AdQueue(
                 car_model_id=car_id,
@@ -93,14 +93,14 @@ class BazosParser:
 
     async def _process_toped_ads(self, queue: list[AutoAdvertisementPage], car: CarModel) -> list[str]:
         if not car.last_checked_toped_links:
-            return queue
+            return queue            # type: ignore
         is_toped_mask = await asyncio.gather(*[el.is_toped() for el in queue])
         toped = [el for el, is_toped in zip(queue, is_toped_mask) if is_toped]
         not_toped = [el for el, is_toped in zip(queue, is_toped_mask) if not is_toped]
         for el in toped[:]:
             if el.link in car.last_checked_toped_links:
                 toped.remove(el)
-        return toped + not_toped
+        return toped + not_toped    # type: ignore
 
         
     async def parse(self):
@@ -110,16 +110,16 @@ class BazosParser:
             car = self.db.query(CarModel).filter(CarModel.id == car_id).first()
             min_from, max_to = self._get_price_range_for_car(car_id)
             args: AutoPageSearchArgs = {
-                'model': f"{car.manufacturer} {car.model}",
+                'model': f"{car.manufacturer} {car.model}", # type: ignore
                 'locality': None,
                 'range': None,
                 'price_from': min_from,
                 'price_to': max_to
             }
-            car_page_bazos = AutoPage(**args)
+            car_page_bazos = AutoPage(**args)                           # type: ignore
             last_checked_id, page_with_last_checked_id = await self._go_to_last_checked_id(car, car_page_bazos)
             queue_to_check = self._form_queue_to_check(car_page_bazos, last_checked_id, page_with_last_checked_id)
             queue_to_check = await self._process_toped_ads(queue_to_check, car)
-            self._add_queue_to_db(car_id, queue_to_check)            
+            self._add_queue_to_db(car_id, queue_to_check)             # type: ignore
 
 
