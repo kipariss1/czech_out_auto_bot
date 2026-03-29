@@ -283,53 +283,43 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     OKAY_PRICE_FOR_SECOND_SEARCH = 600000
     NOT_OKAY_PRICE_FOR_SECOND_SEARCH = 900000
     ad_payloads = {
-        TOPED_AD_1: {"text": "unchecked-toped-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
-        TOPED_AD_3: {"text": "checked-toped-miss", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
-        TOPED_AD_4: {"text": "checked-toped-fit", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
+        TOPED_AD_1: {"text": "toped-unchecked-toped-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        TOPED_AD_3: {"text": "toped-checked-toped-miss", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        TOPED_AD_4: {"text": "toped-checked-toped-fit", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
         REGULAR_AD_1: {"text": "unchecked-regular-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
         REGULAR_AD_2: {"text": "unchecked-regular-miss", "price": NOT_OKAY_PRICE_FOR_FIRST_SEARCH},
-        REGULAR_AD_3: {"text": "unchecked-regular-fit-2", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
-        REGULAR_AD_4: {"text": "unchecked-regular-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
-        PAGE2_AD_1: {"text": "unchecked-regular-miss", "price": NOT_OKAY_PRICE_FOR_FIRST_SEARCH},
+        REGULAR_AD_3: {"text": "unchecked-regular-fit2", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
+        PAGE2_AD_1: {"text": "unchecked-regular-miss2", "price": NOT_OKAY_PRICE_FOR_SECOND_SEARCH},
         PAGE2_AD_10: {"text": "checked-page2-fit1", "price": OKAY_PRICE_FOR_FIRST_SEARCH}
     }
     default_response = {"is_valid_ad": False}
     ollama_responses = {
-        "checked-toped-fit": {
+        "toped-unchecked-toped-fit": {
             "is_valid_ad": True,
             "brand": "BMW",
             "model": "F20",
             "engine": "B48",
             "year": "2018",
             "mileage": "20000",
-            "price": "220000",
+            "price": str(OKAY_PRICE_FOR_FIRST_SEARCH),
         },
-        "unchecked-toped-miss": {
+        "toped-checked-toped-miss": {
             "is_valid_ad": True,
             "brand": "BMW",
             "model": "F20",
             "engine": "N55",
             "year": "2011",
             "mileage": "90000",
-            "price": "90000",
+            "price": str(OKAY_PRICE_FOR_FIRST_SEARCH),
         },
-        "unchecked-toped-fit": {
+        "toped-checked-toped-fit": {
             "is_valid_ad": True,
             "brand": "BMW",
             "model": "F20",
             "engine": "B38",
-            "year": "2017",
-            "mileage": "45000",
-            "price": "230000",
-        },
-        "checked-regular-fit": {
-            "is_valid_ad": True,
-            "brand": "BMW",
-            "model": "F20",
-            "engine": "B47",
-            "year": "2016",
-            "mileage": "70000",
-            "price": "180000",
+            "year": "2024",
+            "mileage": "5000",
+            "price": str(OKAY_PRICE_FOR_SECOND_SEARCH),
         },
         "unchecked-regular-fit": {
             "is_valid_ad": True,
@@ -338,16 +328,43 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
             "engine": "B47",
             "year": "2016",
             "mileage": "70000",
-            "price": "210000",
+            "price": str(OKAY_PRICE_FOR_FIRST_SEARCH),
         },
         "unchecked-regular-miss": {
             "is_valid_ad": True,
             "brand": "BMW",
             "model": "F20",
             "engine": "B47",
+            "year": "2016",
+            "mileage": "70000",
+            "price": str(NOT_OKAY_PRICE_FOR_FIRST_SEARCH),
+        },
+        "unchecked-regular-fit2": {
+            "is_valid_ad": True,
+            "brand": "BMW",
+            "model": "F20",
+            "engine": "B47",
+            "year": "2024",
+            "mileage": "5000",
+            "price": str(OKAY_PRICE_FOR_SECOND_SEARCH),
+        },
+        "unchecked-regular-miss2": {
+            "is_valid_ad": True,
+            "brand": "BMW",
+            "model": "F20",
+            "engine": "B47",
             "year": "2014",
             "mileage": "80000",
-            "price": "90000",
+            "price": str(NOT_OKAY_PRICE_FOR_SECOND_SEARCH),
+        },
+        "checked-page2-fit1": {
+            "is_valid_ad": True,
+            "brand": "BMW",
+            "model": "F20",
+            "engine": "B47",
+            "year": "2016",
+            "mileage": "70000",
+            "price": str(OKAY_PRICE_FOR_FIRST_SEARCH),
         },
     }
 
@@ -378,11 +395,10 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     asyncio.run(worker.process_queue())
 
     calls = _notification_calls(send_message)
-    assert len(calls) == 4
+    assert len(calls) == 3
     assert any(call["chat_id"] == 111111111 and TOPED_AD_1 in call["text"] for call in calls)
     assert any(call["chat_id"] == 111111111 and REGULAR_AD_1 in call["text"] for call in calls)
     assert any(call["chat_id"] == 222222222 and REGULAR_AD_3 in call["text"] for call in calls)
-    assert any(call["chat_id"] == 111111111 and REGULAR_AD_4 in call["text"] for call in calls)
     assert all(TOPED_AD_3 not in call["text"] for call in calls)
     assert all(TOPED_AD_4 not in call["text"] for call in calls)
     assert all(REGULAR_AD_2 not in call["text"] for call in calls)
