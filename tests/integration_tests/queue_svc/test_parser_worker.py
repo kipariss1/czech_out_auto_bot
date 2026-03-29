@@ -34,8 +34,7 @@ def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
                     "&order=&crp=&kitx=ano"
                 ),
                 "mock_html_path": (
-                    "tests/unit_tests/test_data/"
-                    "test_bazos_parser_correctly_finds_the_last_checked_ad/page1.html"
+                    "tests/integration_tests/test_data/test_parser_worker/page1.html"
                 ),
                 "status": 200,
             },
@@ -46,7 +45,7 @@ def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
                     "?hledat=BMW+F20&hlokalita=&humkreis=25"
                     f"&cenaod={min_from_price}&cenado={max_to_price}&order="
                 ),
-                'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html",
+                'mock_html_path': "tests/integration_tests/test_data/test_parser_worker/page2.html",
                 'status': 200
             }
         ]
