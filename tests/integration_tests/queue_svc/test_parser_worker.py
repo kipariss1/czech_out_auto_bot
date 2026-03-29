@@ -244,8 +244,8 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "id": 1,
                 "manufacturer": "BMW",
                 "model": "F20",
-                "_last_checked_toped_links": [TOPED_AD_1, TOPED_AD_2],
-                "_last_checked_links": [PAGE2_AD_4, REGULAR_AD_1, REGULAR_AD_2, REGULAR_AD_3],
+                "_last_checked_toped_links": [TOPED_AD_3, TOPED_AD_4],
+                "_last_checked_links": [PAGE2_AD_10, PAGE2_AD_11, PAGE2_AD_12, PAGE2_AD_13, PAGE2_AD_14, PAGE2_AD_15],
             },
         ],
         "Car_Searches": [
@@ -278,15 +278,20 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
         ],
     }
     _mock_bazos_pages(build_mock_bazos, 100000, 800000)
+    OKAY_PRICE_FOR_FIRST_SEARCH = 220000
+    NOT_OKAY_PRICE_FOR_FIRST_SEARCH = 450000
+    OKAY_PRICE_FOR_SECOND_SEARCH = 600000
+    NOT_OKAY_PRICE_FOR_SECOND_SEARCH = 900000
     ad_payloads = {
-        TOPED_AD_1: {"text": "checked-toped-fit", "price": 220000},
-        TOPED_AD_3: {"text": "unchecked-toped-miss", "price": 90000},
-        TOPED_AD_4: {"text": "unchecked-toped-fit", "price": 230000},
-        REGULAR_AD_1: {"text": "checked-regular-fit", "price": 180000},
-        REGULAR_AD_2: {"text": "checked-regular-miss", "price": 450000},
-        REGULAR_AD_3: {"text": "checked-regular-miss-2", "price": 470000},
-        REGULAR_AD_4: {"text": "unchecked-regular-fit", "price": 210000},
-        PAGE2_AD_1: {"text": "unchecked-regular-miss", "price": 90000},
+        TOPED_AD_1: {"text": "unchecked-toped-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        TOPED_AD_3: {"text": "checked-toped-miss", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        TOPED_AD_4: {"text": "checked-toped-fit", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
+        REGULAR_AD_1: {"text": "unchecked-regular-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        REGULAR_AD_2: {"text": "unchecked-regular-miss", "price": NOT_OKAY_PRICE_FOR_FIRST_SEARCH},
+        REGULAR_AD_3: {"text": "unchecked-regular-fit-2", "price": OKAY_PRICE_FOR_SECOND_SEARCH},
+        REGULAR_AD_4: {"text": "unchecked-regular-fit", "price": OKAY_PRICE_FOR_FIRST_SEARCH},
+        PAGE2_AD_1: {"text": "unchecked-regular-miss", "price": NOT_OKAY_PRICE_FOR_FIRST_SEARCH},
+        PAGE2_AD_10: {"text": "checked-page2-fit1", "price": OKAY_PRICE_FOR_FIRST_SEARCH}
     }
     default_response = {"is_valid_ad": False}
     ollama_responses = {
@@ -361,20 +366,26 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     asyncio.run(parser.parse())
 
     row = mock_db.query(AdQueue).filter(AdQueue.car_model_id == 1).first()
-    assert TOPED_AD_1 not in row.queue
-    assert TOPED_AD_2 not in row.queue
-    assert REGULAR_AD_1 in row.queue
-    assert REGULAR_AD_2 in row.queue
-    assert REGULAR_AD_3 in row.queue
-    assert TOPED_AD_4 in row.queue
-    assert REGULAR_AD_4 in row.queue
+    assert TOPED_AD_3 not in row.queue
+    assert TOPED_AD_4 not in row.queue
+    assert PAGE2_AD_10 not in row.queue
+    assert PAGE2_AD_11 not in row.queue
+    assert PAGE2_AD_12 not in row.queue
+    assert PAGE2_AD_13 not in row.queue
+    assert PAGE2_AD_14 not in row.queue
+    assert PAGE2_AD_15 not in row.queue
 
     asyncio.run(worker.process_queue())
 
     calls = _notification_calls(send_message)
-    assert len(calls) == 2
-    assert any(call["chat_id"] == 111111111 and TOPED_AD_4 in call["text"] for call in calls)
+    assert len(calls) == 4
+    assert any(call["chat_id"] == 111111111 and TOPED_AD_1 in call["text"] for call in calls)
+    assert any(call["chat_id"] == 111111111 and REGULAR_AD_1 in call["text"] for call in calls)
+    assert any(call["chat_id"] == 222222222 and REGULAR_AD_3 in call["text"] for call in calls)
     assert any(call["chat_id"] == 111111111 and REGULAR_AD_4 in call["text"] for call in calls)
-    assert all(TOPED_AD_1 not in call["text"] for call in calls)
-    assert all(REGULAR_AD_1 not in call["text"] for call in calls)
+    assert all(TOPED_AD_3 not in call["text"] for call in calls)
+    assert all(TOPED_AD_4 not in call["text"] for call in calls)
+    assert all(REGULAR_AD_2 not in call["text"] for call in calls)
+    assert all(PAGE2_AD_1 not in call["text"] for call in calls)
+    assert all(PAGE2_AD_10 not in call["text"] for call in calls)
     assert row.queue == []
