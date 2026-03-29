@@ -79,6 +79,11 @@ class BazosWorker:
             # TODO: unite adding and commiting to one function somehow
             self.db.commit()
             return
+
+    async def _was_already_checked(self, ad: AutoAdvertisementPage, car: CarModel) -> bool:
+        if await ad.is_toped():
+            return ad.link in (car.last_checked_toped_links or [])
+        return ad.link in (car.last_checked_links or [])
     
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue
@@ -87,6 +92,11 @@ class BazosWorker:
         ads = list(map(lambda el: AutoAdvertisementPage(el), queue))
         await asyncio.gather(*[ad.get_page_text() for ad in ads])
         for ad in ads:
+            if await self._was_already_checked(ad, car):
+                queue.remove(ad.link)
+                row.queue = queue
+                self.db.commit()
+                continue
             res = self.ollama.process(ad_text=ad.text, car=car)
             if res['is_valid_ad']:
                 res['price'] = ad.price
@@ -107,4 +117,3 @@ class BazosWorker:
         )
         for row in queue_rows:
             await self._process_row_in_queue(row)
-
