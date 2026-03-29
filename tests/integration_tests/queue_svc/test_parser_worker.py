@@ -22,7 +22,7 @@ PAGE2_AD_4 = "https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php"
 TOPED_ADS = {TOPED_AD_1, TOPED_AD_2, TOPED_AD_3, TOPED_AD_4}
 
 
-def _mock_bazos_pages(build_mock_bazos):
+def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
     return build_mock_bazos(
         [
             {
@@ -30,7 +30,7 @@ def _mock_bazos_pages(build_mock_bazos):
                 "mock_url": (
                     "https://auto.bazos.cz/"
                     "?hledat=BMW+F20&rubriky=auto&hlokalita=&humkreis=25"
-                    "&cenaod=100000&cenado=400000&Submit=Hledat"
+                    f"&cenaod={min_from_price}&cenado={max_to_price}&Submit=Hledat"
                     "&order=&crp=&kitx=ano"
                 ),
                 "mock_html_path": (
@@ -40,18 +40,15 @@ def _mock_bazos_pages(build_mock_bazos):
                 "status": 200,
             },
             {
-                "type": responses.GET,
-                "mock_url": (
+                'type': responses.GET,
+                'mock_url': (
                     "https://auto.bazos.cz/20/"
                     "?hledat=BMW+F20&hlokalita=&humkreis=25"
-                    "&cenaod=100000&cenado=400000&order="
+                    f"&cenaod={min_from_price}&cenado={max_to_price}&order="
                 ),
-                "mock_html_path": (
-                    "tests/unit_tests/test_data/"
-                    "test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html"
-                ),
-                "status": 200,
-            },
+                'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html",
+                'status': 200
+            }
         ]
     )
 
@@ -110,7 +107,6 @@ def _notification_calls(send_message):
 
 
 def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
-    _mock_bazos_pages(build_mock_bazos)
     mock_data = {
         "Users": [
             {"id": 1, "telegram_id": 111111111},
@@ -153,6 +149,7 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
             },
         ],
     }
+    _mock_bazos_pages(build_mock_bazos, 120000, 260000)
     ad_payloads = {
         TOPED_AD_1: {"text": "ad-for-user-1", "price": 220000},
         TOPED_AD_2: {"text": "miss-toped", "price": 450000},
@@ -214,7 +211,6 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
 
 
 def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
-    _mock_bazos_pages(build_mock_bazos)
     mock_data = {
         "Users": [
             {"id": 1, "telegram_id": 111111111},
@@ -258,6 +254,7 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
             },
         ],
     }
+    _mock_bazos_pages(build_mock_bazos, 100000, 800000)
     ad_payloads = {
         TOPED_AD_1: {"text": "checked-toped-fit", "price": 220000},
         TOPED_AD_3: {"text": "unchecked-toped-miss", "price": 90000},
