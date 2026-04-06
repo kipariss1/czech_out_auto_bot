@@ -27,21 +27,13 @@ The backend then:
 
 ## Architecture
 
-Main runtime services:
-- `web_app`: FastAPI UI for creating and viewing searches
-- `telegram_bot`: notification channel for matched ads
-- `postgres_db`: main persistent database
-- `ollama`: local LLM endpoint used for ad validation
-- `parser`: finds new Bazos ads and fills `Advertisements_Queue`
-- `worker`: processes queued ads and notifies users
-
 Relevant code areas:
-- [web_app](./web_app)
-- [telegram_bot](./telegram_bot)
-- [queue_svc/parser](./queue_svc/parser)
-- [queue_svc/worker](./queue_svc/worker)
-- [src/models](./src/models)
-- [src/database_utils](./src/database_utils)
+- [web_app](./web_app) - FastAPI web UI for creating and viewing car searches.
+- [telegram_bot](./telegram_bot) - Telegram bot integration used for sending matched-ad notifications.
+- [queue_svc/parser](./queue_svc/parser) - parser logic that scans Bazos and pushes new ads into the processing queue.
+- [queue_svc/worker](./queue_svc/worker) - worker pipeline that validates queued ads and matches them against user searches.
+- [src/models](./src/models) - shared database and domain models used across services.
+- [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
 
 ## Local Run
 
