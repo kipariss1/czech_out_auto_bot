@@ -36,12 +36,12 @@ Main runtime services:
 - `worker`: processes queued ads and notifies users
 
 Relevant code areas:
-- [web_app](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/web_app)
-- [telegram_bot](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/telegram_bot)
-- [queue_svc/parser](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/queue_svc/parser)
-- [queue_svc/worker](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/queue_svc/worker)
-- [src/models](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/src/models)
-- [src/database_utils](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/src/database_utils)
+- [web_app](./web_app)
+- [telegram_bot](./telegram_bot)
+- [queue_svc/parser](./queue_svc/parser)
+- [queue_svc/worker](./queue_svc/worker)
+- [src/models](./src/models)
+- [src/database_utils](./src/database_utils)
 
 ## Local Run
 
@@ -53,7 +53,7 @@ Relevant code areas:
 
 ## CI
 
-The GitHub Actions workflow in [tests.yml](/Users/ayx106060/Documents/Personal/czech_out_auto_bot/.github/workflows/tests.yml) currently runs:
+The GitHub Actions workflow in [tests.yml](./.github/workflows/tests.yml) currently runs:
 - unit tests
 - integration tests
 - smoke e2e tests
