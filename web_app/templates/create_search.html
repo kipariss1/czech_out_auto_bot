@@ -20,17 +20,6 @@
                 <option selected>Select model!</option>
             </select>
         </div>
-        <div class="row mx-3 mb-3" id="id-row-with-attributes">
-            <label for="id-attributes-0" class="form-label">Type here optional attributes: </label>
-            <div class="row mb-1">
-                <div class="col-8">
-                    <textarea class="form-control" id="id-attribute-0" n="0" rows="1" placeholder="M paket, 2.0 TDI"></textarea>
-                </div>
-                <div class="col-2">
-                    <button class="btn btn-success" type="button" id="id-attributes-submit-btn-0" n="0">✓</button>
-                </div>
-            </div>
-        </div>
         <div class="row mx-3 my-3">
             <label for="id-slider-year" class="form-label">
                 <div class="row">
@@ -100,72 +89,7 @@
 <script type="module">
     import { show_alert_message, get_cookie } from "../static/js/utils.js"
 
-    var attributes_idx = 1;
-    var btn_submit_first_attribute = document.getElementById('id-attributes-submit-btn-0');
-    var attributes = document.getElementById('id-row-with-attributes');
     var search_form = document.getElementById('id-submit-search-form');
-
-    
-    function construct_new_attribute() {
-        const rowDiv = document.createElement("div");
-        rowDiv.classList.add("row");
-        rowDiv.classList.add("mb-1");
-        rowDiv.id = `id-added-attribute-${attributes_idx}`;
-
-        const textareaDiv = document.createElement("div");
-        textareaDiv.classList.add("col-8");
-        const sbmtBtnAreaDiv = document.createElement("div");
-        sbmtBtnAreaDiv.classList.add("col-2");
-        const dltBtnAreaDiv = document.createElement("div");
-        dltBtnAreaDiv.classList.add("col-2");
-
-        const textarea = document.createElement("textarea");
-        textarea.classList.add("form-control");
-        textarea.setAttribute("rows", 1);
-        textarea.setAttribute('placeholder', "M paket, 2.0 TDI")
-        textarea.id = `id-attribute-${attributes_idx}`;
-        textarea.setAttribute("n", attributes_idx);
-        textareaDiv.appendChild(textarea);
-
-        const submit_attr_btn = document.createElement('button');
-        submit_attr_btn.classList.add('btn', 'btn-success');
-        submit_attr_btn.id = `id-attributes-submit-btn-${attributes_idx}`;
-        submit_attr_btn.setAttribute("n", attributes_idx);
-        submit_attr_btn.setAttribute("type", "button");
-        submit_attr_btn.addEventListener('click', add_new_attribute);
-        submit_attr_btn.textContent = "✓";
-        sbmtBtnAreaDiv.appendChild(submit_attr_btn);
-
-        const delete_attr_btn = document.createElement('button');
-        delete_attr_btn.classList.add('btn', 'btn-danger');
-        delete_attr_btn.id = `id-attributes-delete-btn-${attributes_idx}`;
-        delete_attr_btn.setAttribute("n", attributes_idx);
-        delete_attr_btn.setAttribute("type", "button");
-        delete_attr_btn.addEventListener('click', delete_attribute);
-        delete_attr_btn.textContent = "X";
-        dltBtnAreaDiv.appendChild(delete_attr_btn);
-
-        rowDiv.appendChild(textareaDiv);
-        rowDiv.appendChild(sbmtBtnAreaDiv);
-        rowDiv.appendChild(dltBtnAreaDiv);
-
-        attributes_idx = attributes_idx + 1;
-        return rowDiv;
-    }
-
-    function add_new_attribute(event) {
-        var new_row = construct_new_attribute();
-        attributes.appendChild(new_row);
-
-    }
-
-    function delete_attribute(event) {
-        var n = event.target.getAttribute('n');
-        var row_to_delete = document.getElementById(`id-added-attribute-${n}`);
-        row_to_delete.remove();
-    }
-
-    btn_submit_first_attribute.addEventListener('click', add_new_attribute);
 
     search_form.addEventListener('submit', validate_search_form);
     function validate_search_form(event) {
@@ -203,9 +127,6 @@
             form_data_dict[key] = value;
         });
 
-        for (let i = 0; i < attributes_idx; i++) {
-            form_data_dict[`attributes_${i}`] = form[`id-attribute-${i}`].value 
-        }
         form_data_dict['enc_user_id'] = get_cookie('enc_user_id');
 
         fetch("create_search", {
