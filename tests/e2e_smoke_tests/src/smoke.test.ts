@@ -1,21 +1,20 @@
-import { test, expect } from 'playwright/test'
+import { test } from 'playwright/test'
 import { sqliteDBhandler, cipherHandler } from './index';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
 import { assertTextPresent, assertAlertPresent } from './assertions';
 
 const testUser = {
-        id: '111111111',
-        language: 'en'
+        id: 111111111,
+        telegramId: 420000111
 }
 
-const enc_user_id = cipherHandler.encode(testUser.id);
+const enc_user_id = cipherHandler.encode(String(testUser.id));
 
 const baseUrl = 'http://localhost:8000/';
 
 const inputData: SearchFormInputs = {
         carManufacturer: 'Audi',
         carModel: 'A3',
-        optionalAttributes: ['Sline', '2.0 TDI'],
         mileageFrom: 150_000,
         mileageTo: 250_000,
         priceFrom: 150_000,
@@ -47,8 +46,6 @@ test('Happy path test', async ({ page }) => {
     await assertTextPresent(page, `Year range: ${inputData.yearFromInput} - ${inputData.yearToInput}`);
     await assertTextPresent(page, `Mileage range: ${inputData.mileageFrom} - ${inputData.mileageTo}`);
     await assertTextPresent(page, `Price range (Kč): ${inputData.priceFrom} - ${inputData.priceTo}`);
-    await assertTextPresent(page, `Unique trait #1: ${inputData.optionalAttributes![0]}`);
-    await assertTextPresent(page, `Unique trait #2: ${inputData.optionalAttributes![1]}`);
 });
 
 test('Assert user can\'t create the same search two times', async ({ page }) => {
