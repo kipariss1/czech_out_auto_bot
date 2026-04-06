@@ -1,6 +1,6 @@
 {
     "Users": [
-        {"id": 1, "language": "en"}
+        {"id": 1, "language": "en", "telegram_id": 111111111}
     ],
     "Car_Models": [
         {"id": 1, "manufacturer": "BMW", "model": "F20", "_last_checked_links": [

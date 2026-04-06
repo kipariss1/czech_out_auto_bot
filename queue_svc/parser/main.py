@@ -1,4 +1,4 @@
-from parser import bp
+from queue_svc.parser import bp
 import asyncio
 import click
 

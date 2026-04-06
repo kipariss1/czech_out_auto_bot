@@ -1,7 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 ollama serve &
-sleep 5
+while curl -s http://localhost:11434/api/tags > /dev/null; do
+    sleep 1
+done
 ollama pull gemma3:4b
+ollama pull gemma3:12b
 wait

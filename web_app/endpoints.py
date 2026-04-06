@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
-from sqlalchemy import distinct, and_
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from src.database_utils import db_handler 
 from src.settings.security import cipher_handler
@@ -67,35 +67,31 @@ def create_search_view(
     return templates.TemplateResponse("create_search.html", render_dict)
 
 
-def _construct_attributes(request: dict) -> dict:
-    attributes_keys = [
-        "input_year_range_from",
-        "input_year_range_to",
-        "input_mileage_range_from",
-        "input_mileage_range_to",
-        "input_price_range_from",
-        "input_price_range_to",
-    ]
-    attributes = {
-        k: v
-        for k, v in request.items()
-        if k in attributes_keys or ("attributes_" in k and len(v) > 0)
-    }
-    return attributes
-
-
 def _check_if_search_exists(
-    db, user_id, car_model_id, psc_code, psc_km_range, price_range_from, price_range_to, attributes
+    db,
+    user_id,
+    car_model_id,
+    psc_code,
+    psc_km_range,
+    year_range_from,
+    year_range_to,
+    mileage_range_from,
+    mileage_range_to,
+    price_range_from,
+    price_range_to,
 ):
     existing_searches = db.query(CarSearch).filter(
         and_(
             CarSearch.user_id == user_id,
             CarSearch.car_model_id == car_model_id,
             CarSearch.psc_code == psc_code,
+            CarSearch.year_range_from == year_range_from,
+            CarSearch.year_range_to == year_range_to,
+            CarSearch.mileage_range_from == mileage_range_from,
+            CarSearch.mileage_range_to == mileage_range_to,
             CarSearch.price_range_from == price_range_from,
             CarSearch.price_range_to == price_range_to,
             CarSearch.psc_km_range == psc_km_range,
-            CarSearch.attributes.contains(attributes),
         )
     )
     if len(list(existing_searches)) > 0:
@@ -127,9 +123,12 @@ def post_create_search_view(
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
+        "year_range_from": int(request.input_year_range_from),
+        "year_range_to": int(request.input_year_range_to),
+        "mileage_range_from": int(request.input_mileage_range_from),
+        "mileage_range_to": int(request.input_mileage_range_to),
         "price_range_from": int(request.input_price_range_from),
-        "price_range_to": int(request.input_price_range_from),
-        "attributes": _construct_attributes(dict(request)),
+        "price_range_to": int(request.input_price_range_to),
     }
     if _check_if_search_exists(db, **new_search_args):
         return JSONResponse(

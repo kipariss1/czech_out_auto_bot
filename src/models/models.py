@@ -12,11 +12,12 @@ class User(Base):
 
     __tablename__ = "Users"
 
-    id = Column(Integer, primary_key=True)
-    language = Column(String(2), nullable=False, default="en")
-
-    __table_args__ = (
-        CheckConstraint("language IN ('ru', 'en', 'cz')", name="check_language"),
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    telegram_id = Column(Integer, unique=True, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
     )
 
 
@@ -42,7 +43,7 @@ class CarModel(Base):
         mapper.order_by = (cls.manufacturer, cls.model)
 
     @property
-    def last_checked_links(self) -> list[str]:
+    def last_checked_links(self) -> list[str] | None:
         return self._last_checked_links
 
     @last_checked_links.setter
@@ -50,14 +51,28 @@ class CarModel(Base):
         unique = list(dict.fromkeys(value))
         self._last_checked_links = unique[-10:]
 
+    def add_last_checked_link(self, link: str):
+        current = self.last_checked_links
+        if not current:
+            self.last_checked_links = [link]
+            return
+        self.last_checked_links = current + [link]
+
     @property
-    def last_checked_toped_links(self) -> list[str]:
+    def last_checked_toped_links(self) -> list[str] | None:
         return self._last_checked_toped_links
     
     @last_checked_toped_links.setter
     def last_checked_toped_links(self, value: list[str]):
-        unique = list[dict.fromkeys(value)]
+        unique = list(dict.fromkeys(value))
         self._last_checked_toped_links = unique[-25:]
+
+    def add_last_checked_toped_link(self, link: str):
+        current = self.last_checked_toped_links
+        if not current:
+            self.last_checked_toped_links = [link]
+            return
+        self.last_checked_toped_links = current + [link]
 
 
 class CarSearchCreate(BaseModel):
@@ -87,9 +102,12 @@ class CarSearch(Base):
     car_model = relationship("CarModel")
     psc_code = Column(String(6), nullable=True)
     psc_km_range = Column(String(4), nullable=True)
+    year_range_from = Column(Integer, nullable=True)
+    year_range_to = Column(Integer, nullable=True)
+    mileage_range_from = Column(Integer, nullable=True)
+    mileage_range_to = Column(Integer, nullable=True)
     price_range_from = Column(Integer, nullable=True)
     price_range_to = Column(Integer, nullable=True)
-    attributes = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -110,17 +128,10 @@ class CarSearch(Base):
 
     def _construct_attributes(self):
         new_attrs = {
-            "Year range": f"{self.attributes['input_year_range_from']} - {self.attributes['input_year_range_to']}",
-            "Mileage range": f"{self.attributes['input_mileage_range_from']} - {self.attributes['input_mileage_range_to']}",
-            "Price range": f"{self.attributes['input_price_range_from']} - {self.attributes['input_price_range_to']}",
+            "Year range": f"{self.year_range_from} - {self.year_range_to}",
+            "Mileage range": f"{self.mileage_range_from} - {self.mileage_range_to}",
+            "Price range": f"{self.price_range_from} - {self.price_range_to}",
         }
-        new_attrs.update(
-            {
-                f"Unique trait #{int(k.split('_')[1]) + 1}": v
-                for k, v in self.attributes.items()
-                if "attributes_" in k
-            }
-        )
         return new_attrs
 
     def to_dict(self):

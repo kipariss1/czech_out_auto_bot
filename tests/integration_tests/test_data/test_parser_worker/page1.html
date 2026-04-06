@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="cs"><head>
+<title>Bmw f20 bazar - Auto | Bazoš.cz</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="description" content="Auto - Bmw f20 bazar. Vybírejte z 35 inzerátů. Prodej snadno a rychle na Bazoši. Přes půl milionů uživatelů za den."><meta property="og:title" content="Bmw f20 bazar - Auto">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bazos.cz">
+<meta property="og:description" content="Auto - Bmw f20 bazar. Vybírejte z 35 inzerátů. Prodej snadno a rychle na Bazoši. Přes půl milionů uživatelů za den.">
+<link rel="canonical" href="https://auto.bazos.cz/?hledat=bmw+f20&amp;hlokalita=&amp;humkreis=25&amp;cenaod=100000&amp;cenado=400000&amp;order="><meta property="fb:admins" content="1055875657">
+<meta name="ROBOTS" content="NOINDEX">
+<link rel="stylesheet" href="https://www.bazos.cz/bazos66s.css" type="text/css"><link rel="preload" as="image" href="https://www.bazos.cz/obrazky/bazos.svg">
+<link rel="stylesheet" href="https://www.bazos.cz/bazosprint.css" type="text/css" media="print">
+<link rel="icon" href="https://www.bazos.cz/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="https://www.bazos.cz/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="https://www.bazos.cz/apple-touch-icon.png">
+<script async="async" src="https://www.google.com/adsense/search/ads.js"></script>
+<script type="text/javascript" charset="utf-8">
+(function(g,o){g[o]=g[o]||function(){(g[o]['q']=g[o]['q']||[]).push(
+  arguments)},g[o]['t']=1*new Date})(window,'_googCsa');
+</script><script>
+var xhr = new XMLHttpRequest();
+var naseptavac_value = '';
+function naseptavac(value) {
+  if (value=='')  {
+  	naseptavac_value = '';
+  	document.getElementById('vysledek').innerHTML='';
+  	}
+else {
+	if (naseptavac_value == value) {
+		return false;
+	}
+	naseptavac_value = value;
+	setTimeout(function () {
+		if (naseptavac_value != value) {
+			return false;
+		}
+		xhr.onreadystatechange = function() {
+ 		 if (this.readyState == 4 && naseptavac_value == value){
+				document.getElementById('vysledek').innerHTML = this.responseText;
+			}
+ 		 };
+		xhr.open("POST", '/suggest.php');
+		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		xhr.send('rubnas=AU&catnas=&qnas='+encodeURIComponent(naseptavac_value));
+	}, 250);
+}
+}
+
+var naseptavacpsc_value = '';
+function naseptavacpsc(value) {
+  if (value=='')  {
+  	naseptavacpsc_value = '';
+  	document.getElementById('vysledekpsc').innerHTML='<table cellpadding=\"3\" cellspacing=\"0\" class=\"tablenaspsc\"><tr><td class=\"act\" onclick=\"getLocation();\"><b>Inzeráty v okolí</b></td></tr></table>';
+  	}
+else {
+	if (naseptavacpsc_value == value) {
+		return false;
+	}
+	naseptavacpsc_value = value;
+	setTimeout(function () {
+		if (naseptavacpsc_value != value) {
+			return false;
+		}
+		xhr.onreadystatechange = function() {
+ 		 if (this.readyState == 4 && naseptavacpsc_value == value){
+				document.getElementById('vysledekpsc').innerHTML = this.responseText;
+			}
+ 		 };
+		xhr.open("POST", '/suggestpsc.php');
+		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		xhr.send('qnaspsc='+encodeURIComponent(naseptavacpsc_value));
+	}, 250);
+}
+}
+
+function getLocation() {
+if (navigator.geolocation) {navigator.geolocation.getCurrentPosition(showPosition);}
+else {document.getElementById('hlokalita').value = '';}
+}
+function showPosition(position) {
+		xhr.onreadystatechange = function() {
+ 		 if (this.readyState == 4){
+				document.getElementById('hlokalita').value = this.responseText;
+				document.forms['formt'].submit();
+			}
+ 		 };
+		xhr.open("POST", '/zip.php');
+		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		xhr.send('latitude='+encodeURIComponent(position.coords.latitude)+'&longitude='+encodeURIComponent(position.coords.longitude));
+}
+
+var agent_value = '';
+function agentclick() {
+  if (document.getElementById('agentmail').value=='')  {
+  	document.getElementById("agentmail").focus();
+    return false;
+  	}
+else {
+agent_value = document.getElementById('agentmail').value;
+xhr.onreadystatechange = function() {
+  if (this.readyState == 4){
+				document.getElementById('overlay').innerHTML = this.responseText;
+			}
+  };
+xhr.open("POST", '/agent.php');
+xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xhr.send('hledat=bmw f20&rubrikav=AU&hlokalita=&humkreis=25&cenaod=100000&cenado=400000&cat=&typ=&agentmail='+encodeURIComponent(agent_value));
+}
+}
+
+function odeslatrequest(value,params) {
+xhr.onreadystatechange = function() {
+  if (this.readyState == 4){
+				document.getElementById('overlay').innerHTML = this.responseText;
+			}
+  };
+xhr.open("POST", value);
+xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xhr.send(params);
+}
+function overlay() {
+	el = document.getElementById("overlay");
+	el.style.display = (el.style.display == "inline") ? "none" : "inline";
+}
+function odeslatakci(postaction,value1,value2,value3) {
+document.getElementById('postaction').value = postaction;
+document.getElementById("postv1").value = value1;
+document.getElementById("postv2").value = value2;
+document.getElementById("postv3").value = value3;
+document.formaction.submit();
+}
+</script>
+</head>
+
+<body>
+
+
+<div class="sirka">
+<div class="listalogor">
+<div class="listalogol"><a href="https://www.bazos.cz/" title="Bazos.cz - Inzerce, bazar"><img src="https://www.bazos.cz/obrazky/bazos.svg" width="199" height="34" alt="Bazos.cz - Inzerce, inzeráty"></a></div>
+<div class="listalogom"><b>... bazar pro každého</b></div>
+<div class="listalogop"><a href="https://www.bazos.cz/oblibene.php"><b>Oblíbené inzeráty</b></a> <a href="https://www.bazos.cz/moje-inzeraty.php"><b>Moje inzeráty</b></a> <a href="/pridat-inzerat.php"><b><span class="pridati">Přidat inzerát</span></b></a></div>
+</div>
+<form name="formt" id="formt" method="get">
+<div class="listah">
+<div class="rubriky">
+<b>
+Co: <span class="vysokoli"><span id="vysledek"></span><input type="search" onkeyup="naseptavac(this.value);" id="hledat" name="hledat" size="17" maxlength="256" value="bmw f20" autocomplete="off" title="Co? Vyhledávaný výraz"></span>
+
+<select name="rubriky" onchange="this.form.submit();" title="Vyber rubriku">
+<option value="www">Všechny rubriky</option>
+<option value="auto" selected="">Auto</option><option value="deti">Děti</option><option value="dum">Dům a zahrada</option><option value="elektro">Elektro</option><option value="foto">Foto</option><option value="hudba">Hudba</option><option value="knihy">Knihy</option><option value="mobil">Mobily</option><option value="motorky">Motorky</option><option value="nabytek">Nábytek</option><option value="obleceni">Oblečení</option><option value="pc">PC</option><option value="prace">Práce</option><option value="reality">Reality</option><option value="sluzby">Služby</option><option value="sport">Sport</option><option value="stroje">Stroje</option><option value="vstupenky">Vstupenky</option><option value="zvirata">Zvířata</option><option value="ostatni">Ostatní</option></select>
+
+Lokalita: <span class="vysokolipsc"><span id="vysledekpsc"></span><input type="search" name="hlokalita" id="hlokalita" onkeyup="naseptavacpsc(this.value);" onclick="naseptavacpsc(this.value);" value="" size="4" maxlength="25" autocomplete="off" title="Kde? PSČ (místo)" style="-webkit-appearance: none;"></span>
+Okolí: <input name="humkreis" title="Okolí v km" value="25" size="3" style="width: 25px;"> km
+Cena od: <input name="cenaod" title="Cena od Kč" maxlength="12" size="5" value="100000"> - do: <input name="cenado" title="Cena do Kč" maxlength="12" size="5" value="400000"> Kč <input type="submit" name="Submit" value="Hledat">
+<input type="hidden" name="order" id="order"><input type="hidden" name="crp" id="crp"><input type="hidden" id="kitx" name="kitx" value="ano"></b>
+</div>
+</div>
+</form>
+<div class="drobky"><a href="https://www.bazos.cz/" title="Inzerce Bazoš">Hlavní stránka</a>  &gt; <a href="https://auto.bazos.cz">Auto</a> &gt; <h1 class="nadpiskategorie">bmw f20</h1></div>
+<br>
+
+
+<div class="flexmain"><div class="menuleft"><div class="nadpismenu">Osobní auta</div>
+<div class="barvalmenu">
+<div class="barvaleva">
+<a href="/alfa/">Alfa Romeo</a>
+<a href="/audi/">Audi</a>
+<a href="/bmw/">BMW</a>
+<a href="/citroen/">Citroën</a>
+<a href="/dacia/">Dacia</a>
+<a href="/fiat/">Fiat</a>
+<a href="/ford/">Ford</a>
+<a href="/honda/">Honda</a>
+<a href="/hyundai/">Hyundai</a>
+<a href="/chevrolet/">Chevrolet</a>
+<a href="/kia/">Kia</a>
+<a href="/mazda/">Mazda</a>
+<a href="/mercedes/">Mercedes-Benz</a>
+<a href="/mitsubishi/">Mitsubishi</a>
+<a href="/nissan/">Nissan</a>
+<a href="/opel/">Opel</a>
+<a href="/peugeot/">Peugeot</a>
+<a href="/renault/">Renault</a>
+<a href="/seat/">Seat</a>
+<a href="/suzuki/">Suzuki</a>
+<a href="/skoda/">Škoda</a>
+<a href="/toyota/">Toyota</a>
+<a href="/volkswagen/">Volkswagen</a>
+<a href="/volvo/">Volvo</a>
+<a href="/ostatni/">Ostatní značky</a>
+<br>
+<a href="https://elektro.bazos.cz/autoradia/">Autorádia</a>
+<a href="https://pc.bazos.cz/gps/">GPS navigace</a>
+<a href="/havarovana/">Havarovaná auta</a>
+<a href="/nahradnidily/">Náhradní díly</a>
+<a href="/pneumatiky/">Pneumatiky, kola</a>
+<a href="/prislusenstvi/">Příslušenství</a>
+<a href="/tuning/">Tuning</a>
+<a href="/veterani/">Veteráni</a>
+</div></div>
+
+<br>
+<div class="nadpismenu">Užitková vozidla</div>
+<div class="barvalmenu">
+<div class="barvaleva">
+<a href="/autobusy/">Autobusy</a>
+<a href="/dodavka/">Dodávky</a>
+<a href="/mikrobus/">Mikrobusy</a>
+<a href="/karavany/">Karavany, vozíky</a>
+<a href="/nakladni/">Nákladní auta</a>
+<a href="/pickup/">Pick-up</a>
+<a href="https://stroje.bazos.cz/">Stroje</a>
+<a href="/ostatniuzitkova/">Ostatní</a>
+<br>
+<a href="/havarovanauzitkova/">Havarovaná</a>
+<a href="/nahradnidilyuzitkova/">Náhradní díly</a>
+</div>
+</div>
+<br>
+
+<div class="nadpismenu">Moto</div>
+<div class="barvalmenu">
+<div class="barvaleva">
+<a href="https://motorky.bazos.cz/">Motorky, Skútry</a>
+</div></div>
+
+</div><div class="maincontent">
+
+
+<div class="listainzerat inzeratyflex">
+<div class="inzeratynadpis"><img src="https://www.bazos.cz/obrazky/list.gif" width="18" height="16" alt="List inzerátů" class="gallerylista"> <form name="formgal" id="formgal" method="post" style="display: inline;"><input type="hidden" name="gal" value="g"><input type="image" alt="Submit" src="https://www.bazos.cz/obrazky/gallery.gif" width="18" height="16" class="gallerylist inputgal"></form> Zobrazeno 1-20 inzerátů z 35</div>
+<div class="inzeratycena"><b><span onclick="document.getElementById('order').value=1;document.forms['formt'].submit();" class="paction">Cena</span></b></div>
+<div class="inzeratylok">Lokalita</div>
+<div class="inzeratyview"><span onclick="document.getElementById('order').value=3;document.forms['formt'].submit();" class="paction">Zobrazeno</span></div>
+</div><form name="formaction" method="post" style="display: inline;"><input type="hidden" id="postaction" name="postaction" value=""><input type="hidden" id="postv1" name="postv1" value=""><input type="hidden" id="postv2" name="postv2" value=""><input type="hidden" id="postv3" name="postv3" value=""></form><button type="button" onclick="odeslatrequest('/agent.php','teloverit=');overlay();">Nové inzeráty e-mailem</button>
+	<div id="overlay">
+     <div></div>
+</div>
+
+<div id="container_one"></div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213142446/f20-188i-urban-line.php"><img src="https://www.bazos.cz/img/1t/446/213142446.jpg?t=1769610756" class="obrazek" alt="F20 - 118i  Urban Line" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213142446/f20-188i-urban-line.php">F20 - 118i  Urban Line</a></h2><span class="velikost10"> - <span title="TOP 2x Platí do 3.2. 2026" class="ztop">TOP</span> - [1.2. 2026]</span><br>
+<div class="popis">2016
+100 kw - 136 HP
+Převodovka: Manuální 
+Palivo: Benzín
+Objem: 1 499 ccm 
+
+<b>bmw</b> - 2016 - 118i Jsem druhý majitel, koupeno při 98 000 km. Po koupi vyměněna spojková sada. První majitel servisoval pouze v autorizovaném <b>bmw</b>, záznamy jsou k dispoz ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  250 000 Kč</span></b></div>
+<div class="inzeratylok">Praha 4<br>143 00</div>
+<div class="inzeratyview">765 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213142446');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213142446');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','9166196','7233243','Oguzalp+Ertunc');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213142446');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214086678/prodam-motor-b47d20b-z-bmw-x5-f15-25dx-170kw-najeto-70tis-km.php"><img src="https://www.bazos.cz/img/1t/678/214086678.jpg?t=1769420996" class="obrazek" alt="Prodám motor B47D20B z BMW X5 F15 25dx 170kw najeto 70tis km" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214086678/prodam-motor-b47d20b-z-bmw-x5-f15-25dx-170kw-najeto-70tis-km.php">Prodám motor B47D20B z BMW X5 F15 25dx 170kw najeto 70tis km</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 2.2. 2026" class="ztop">TOP</span> - [1.2. 2026]</span><br>
+<div class="popis">Prodám motor B47D20B, pasuje do 125d 325d 425d 525d <b>f20</b> f21 f30 f31 f32 f34 f36 f10 g30 f11 g31
+
+Můžeme jej namontovat v našem servisu za 25 000 Kč.
+
+Poskytujeme 10denní záruku na vyzkoušení. Cena platí za holý motor při protiúčtu za váš rozbitý  ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  165 000 Kč</span></b></div>
+<div class="inzeratylok">Mladá Boleslav<br>294 28</div>
+<div class="inzeratyview">46 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214086678');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214086678');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','8202466','6291730','BMW+Chot%C4%9Btov');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214086678');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214085280/prodam-motor-n55b30a-f30-335i-f31-f20-135i-f10-535i-f25-35i.php"><img src="https://www.bazos.cz/img/1t/280/214085280.jpg?t=1769419538" class="obrazek" alt="Prodám motor N55B30A F30 335i F31 F20 135i F10 535i F25 35i" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214085280/prodam-motor-n55b30a-f30-335i-f31-f20-135i-f10-535i-f25-35i.php">Prodám motor N55B30A F30 335i F31 F20 135i F10 535i F25 35i</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 2.2. 2026" class="ztop">TOP</span> - [1.2. 2026]</span><br>
+<div class="popis">Prodám motor N55B30A najeto 90tis km
+
+Můžeme jej namontovat v našem servisu za 25 000 Kč.
+
+Poskytujeme 10denní záruku na vyzkoušení. Cena platí za holý motor při protiúčtu za váš rozbitý motor.
+
+Kontakt: WhatsApp +420 776 799 777 nebo odpovědí  ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  160 000 Kč</span></b></div>
+<div class="inzeratylok">Mladá Boleslav<br>294 28</div>
+<div class="inzeratyview">64 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214085280');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214085280');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','8202466','6291730','BMW+Chot%C4%9Btov');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214085280');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213577477/bmw-f20-118i-b38-mpaket.php"><img src="https://www.bazos.cz/img/1t/477/213577477.jpg?t=1769351287" class="obrazek" alt="BMW F20 118i b38 mpaket" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213577477/bmw-f20-118i-b38-mpaket.php">BMW F20 118i b38 mpaket</a></h2><span class="velikost10"> - <span title="TOP 2x Platí do 1.2. 2026" class="ztop">TOP</span> - [1.2. 2026]</span><br>
+<div class="popis">Prodám <b>bmw</b> <b>f20</b> 118i b38
+
+Rok výroby: 2017
+Převodovka: automatická ZF8HP 
+Najeto: 198.800km 
+Stk 10/2026
+
+ 
+V autě je už bezproblémový motor s označením “B”
+
+Výbava: mpaket, parkovací senzory, sportsize interiér, vyhřívané sedadla atp. 
+<b>bmw</b> ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  259 000 Kč</span></b></div>
+<div class="inzeratylok">Pardubice<br>530 09</div>
+<div class="inzeratyview">1742 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213577477');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213577477');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','4798011','1692363','Michal');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213577477');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214330574/bmw-rada-1-bmw-f20-116ed-2013-manual.php"><img src="https://www.bazos.cz/img/1t/574/214330574.jpg?t=1769938695" class="obrazek" alt="BMW Řada 1,  BMW F20 116ED, 2013 – Manuál" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214330574/bmw-rada-1-bmw-f20-116ed-2013-manual.php">BMW Řada 1,  BMW F20 116ED, 2013 – Manuál</a></h2><span class="velikost10"> - [31.1. 2026]</span><br>
+<div class="popis">Prodám <b>bmw</b> <b>f20</b> 116ED (2013) – po servisu, nízká spotřeba, nová STK • Najeto: 307 xxx km • Motor: 85 kW, manuál 6 st. • Pohon: zadní kola • 3 jízdní režimy (komfort / sport) • Spotřeba: 5 l/100 km • Klimatizace, tempomat, rádio, elektrická okénka • ST ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  140 000 Kč</span></b></div>
+<div class="inzeratylok">Zlín<br>760 01</div>
+<div class="inzeratyview">86 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214330574');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214330574');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','9264564','7376927','Barbora');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214330574');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214321960/predam-kompletny-motor-s-oznacenym-n47d20d-160kw.php"><img src="https://www.bazos.cz/img/1t/960/214321960.jpg" class="obrazek" alt="Predám kompletný motor s označeným N47D20D 160kw" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214321960/predam-kompletny-motor-s-oznacenym-n47d20d-160kw.php">Predám kompletný motor s označeným N47D20D 160kw</a></h2><span class="velikost10"> - [31.1. 2026]</span><br>
+<div class="popis">Predám motor s označeným N47D20D N47S1 160kw
+
+Motor pôvodne z <b>bmw</b> F30 325d
+
+Pasuje taktiež do :
+
+<b>f20</b> F21 125d F30 F31 325d F32 425d F10 F11 525d 525xd X3 F25 25D X5 F15 25D ...
+
+Motor v originál stave , neopravovaný , všetko NOMINAL .
+
+Naja ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  110 000 Kč</span></b></div>
+<div class="inzeratylok">Slovensko<br>987 65</div>
+<div class="inzeratyview">15 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214321960');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214321960');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','0','3165819','Bavaria+Part');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214321960');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214321906/predam-kompletny-motor-n55-n55b30a-nove-rozvody-loziska.php"><img src="https://www.bazos.cz/img/1t/906/214321906.jpg" class="obrazek" alt="Predám kompletný motor N55 N55B30A - nové rozvody - ložiská" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214321906/predam-kompletny-motor-n55-n55b30a-nove-rozvody-loziska.php">Predám kompletný motor N55 N55B30A - nové rozvody - ložiská</a></h2><span class="velikost10"> - [31.1. 2026]</span><br>
+<div class="popis">Predám kompletný motor s označeným N55 N55B30A 225kw
+
+Najazdené 135000km , motor pôvodne s <b>bmw</b> <b>f20</b> M135i , motor v perfektnom stave , pred vybratim z auta odskúšaný .. Na požiadanie pošlem VIN
+Dostupný taktiež motor z <b>bmw</b> F12 N55B30A 640i r. 2012  ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  156 000 Kč</span></b></div>
+<div class="inzeratylok">Slovensko<br>987 65</div>
+<div class="inzeratyview">12 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214321906');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214321906');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','0','3165819','Bavaria+Part');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214321906');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214306962/bmw-f20-116d-20d-85-kw.php"><img src="https://www.bazos.cz/img/1t/962/214306962.jpg" class="obrazek" alt="BMW F20 116d 2.0d 85 kW" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214306962/bmw-f20-116d-20d-85-kw.php">BMW F20 116d 2.0d 85 kW</a></h2><span class="velikost10"> - [31.1. 2026]</span><br>
+<div class="popis"><b>bmw</b> <b>f20</b> 116d 2.0d 85 kW | Sportovní sedačky | Xenony | iDrive | 2013 
+
+Nabízím k prodeji/výměně <b>bmw</b> řady 1 (<b>f20</b>) 116d s úsporným a spolehlivým čtyřválcovým 2.0d motorem (85 kW) – nejedná se o slabší tříválec!
+Rok výroby 2013, najeto 175 000 km, po ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  147 000 Kč</span></b></div>
+<div class="inzeratylok">Ostrava<br>711 00</div>
+<div class="inzeratyview">58 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214306962');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214306962');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','4985904','2048655','Ondrej');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214306962');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214228476/bmw-f20-116d-85-kw.php"><img src="https://www.bazos.cz/img/1t/476/214228476.jpg?t=1769698217" class="obrazek" alt="BMW F20 116d , 85 kW" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214228476/bmw-f20-116d-85-kw.php">BMW F20 116d , 85 kW</a></h2><span class="velikost10"> - [29.1. 2026]</span><br>
+<div class="popis">Prodám spolehlivé <b>bmw</b> řady 1 <b>f20</b> s úsporným naftovým motorem 2.0d (85 kW) a manuální převodovkou. Nízký nájezd, skvělá výbava a bez nutných investic.
+
+VÝBAVA :
+- Bi-Xenonové světlomety + ostřikovače světel
+- Přední + zadní parkovací asistent
+- V ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  155 000 Kč</span></b></div>
+<div class="inzeratylok">Plzeň-sever<br>330 21</div>
+<div class="inzeratyview">126 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214228476');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214228476');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','7406709','3825832','Tom%C3%A1%C5%A1');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214228476');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213774086/bmw-f20-f21-m135i-f22-m235i-motor-n55-n55b30a.php"><img src="https://www.bazos.cz/img/1t/086/213774086.jpg?t=1768836633" class="obrazek" alt="BMW F20 F21 M135i  F22 M235i Motor N55 N55B30A Nové rozvody" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213774086/bmw-f20-f21-m135i-f22-m235i-motor-n55-n55b30a.php">BMW F20 F21 M135i  F22 M235i Motor N55 N55B30A Nové rozvody</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 26.1. 2026" class="ztop">TOP</span> - [26.1. 2026]</span><br>
+<div class="popis">Prodám originální motor <b>bmw</b> N55 / N55B30A s nájezdem 119.000 km.
+Motor je plně funkční, bez poškození, vhodný pro:
+<b>bmw</b> <b>f20</b> / F21 M135i
+<b>bmw</b> F22 M235i
+K dispozici ve dvou verzích – holý motor (110.000,-Kč) nebo kompletní motor.
+Technické údaje
+•  ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  170 000 Kč</span></b></div>
+<div class="inzeratylok">Karviná<br>735 42</div>
+<div class="inzeratyview">62 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213774086');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213774086');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','4057345','7073329','Motory+BMW');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213774086');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213596962/bmw-f20-f21-f22-motor-n55b30a-nove-rozvody-240kw.php"><img src="https://www.bazos.cz/img/1t/962/213596962.jpg?t=1768835498" class="obrazek" alt="BMW F20 F21 F22 Motor N55B30A Nové rozvody 240kW" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213596962/bmw-f20-f21-f22-motor-n55b30a-nove-rozvody-240kw.php">BMW F20 F21 F22 Motor N55B30A Nové rozvody 240kW</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 26.1. 2026" class="ztop">TOP</span> - [26.1. 2026]</span><br>
+<div class="popis">Prodám originální motor <b>bmw</b> N55 / N55B30A s nájezdem 139.000 km.
+Motor je ve výborném stavu, bez poškození.
+Vhodný pro:
+<b>bmw</b> <b>f20</b> / F21 M135i
+<b>bmw</b> F22 M235i
+
+• Kód motoru: N55 / N55B30A
+• Objem: 3.0 benzín – řadový 6-válec
+• Výkon: 322 HP (240 k ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  110 000 Kč</span></b></div>
+<div class="inzeratylok">Karviná<br>735 42</div>
+<div class="inzeratyview">68 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213596962');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213596962');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','4057345','7073329','Motory+BMW');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213596962');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/212838480/bmw-116d-urban-model-f20.php"><img src="https://www.bazos.cz/img/1t/480/212838480.jpg?t=1768820536" class="obrazek" alt="BMW 116d Urban model F20" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/212838480/bmw-116d-urban-model-f20.php">BMW 116d Urban model F20</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 26.1. 2026" class="ztop">TOP</span> - [26.1. 2026]</span><br>
+<div class="popis"><b>bmw</b> 116d Urban line, model <b>f20</b>
+
+Rok výroby 11/2012, najeto cca. 185 tisíc km, spolehlivý motor 2.0D typ N47D20C.
+
+Edice Urban, polokožený interiér, vyhřívané sedačky, parkovací asistent vpředu i vzadu, digiklima, elektronická serviska, dvě sady k ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  159 000 Kč</span></b></div>
+<div class="inzeratylok">Rakovník<br>269 01</div>
+<div class="inzeratyview">639 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','212838480');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','212838480');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','7217336','5411347','Auta');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','212838480');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/214032404/bmw-116i-80-kw.php"><img src="https://www.bazos.cz/img/1t/404/214032404.jpg" class="obrazek" alt="BMW 116i 80 kW" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/214032404/bmw-116i-80-kw.php">BMW 116i 80 kW</a></h2><span class="velikost10"> - [25.1. 2026]</span><br>
+<div class="popis"><b>bmw</b> 1' <b>f20</b> LCI 116i 
+r. v. 2017
+najeto: 179 000 km
+barva Mediterran Blue Metallic 
+STK 10/26
+6st. manuální převodovka 
+
+Multifunkční kožený volant, parkovací čidla, dešťový senzor, tónovaná zadní skla, LED mlhovky a světlomety, černá stropnice ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  259 000 Kč</span></b></div>
+<div class="inzeratylok">Kroměříž<br>768 61</div>
+<div class="inzeratyview">168 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','214032404');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','214032404');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','6225389','3860322','PZ');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','214032404');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213467912/bmw-1-118d-f20-2013-m-paket.php"><img src="https://www.bazos.cz/img/1t/912/213467912.jpg?t=1768582351" class="obrazek" alt="BMW 1 118d F20 2013 M-paket" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213467912/bmw-1-118d-f20-2013-m-paket.php">BMW 1 118d F20 2013 M-paket</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 23.1. 2026" class="ztop">TOP</span> - [23.1. 2026]</span><br>
+<div class="popis">Nabízím <b>bmw</b> řady 1 118d <b>f20</b> r.v. 2013 s 2.0l naftovým motorem o výkonu 105kW s kompletním M paketem (exteriér i interiér). Původ ČR, já 3. majitel. Nájezd 182xxx km. Čerstvá STK. Celkově velice hezký stav, až na drobnou kosmetiku laku. Nové zimní pne ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  229 999 Kč</span></b></div>
+<div class="inzeratylok">Uherské Hradiště<br>687 51</div>
+<div class="inzeratyview">611 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213467912');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213467912');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','3106933','2641631','Michal');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213467912');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/212932605/bmw-116-i-2012.php"><img src="https://www.bazos.cz/img/1t/605/212932605.jpg?t=1767992418" class="obrazek" alt="BMW 116 I 2012" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/212932605/bmw-116-i-2012.php">BMW 116 I 2012</a></h2><span class="velikost10"> - <span title="TOP 3x Platí do 21.1. 2026" class="ztop">TOP</span> - [21.1. 2026]</span><br>
+<div class="popis"><b>bmw</b> 116i 100 kW – 2012 – krásný stav, manuál, servisní kniha
+
+Prodám <b>bmw</b> 116i (<b>f20</b>) s benzinovým turbomotorem 100 kW a 6 manuální převodovkou.
+Auto je v krásném kosmetickém stavu, lak lesklý, bez větších vad, interiér čistý a zachovalý.
+
+Technicky je ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  145 000 Kč</span></b></div>
+<div class="inzeratylok">Hradec Králové<br>500 02</div>
+<div class="inzeratyview">1567 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','212932605');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','212932605');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','9156191','7221900','M');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','212932605');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/212677088/bmw-1-f20-116d-rv-2015-99-tis-kmm-paket.php"><img src="https://www.bazos.cz/img/1t/088/212677088.jpg?t=1768327565" class="obrazek" alt="BMW 1 f20, 116d, r.v 2015, 99 tis km,M-PAKET" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/212677088/bmw-1-f20-116d-rv-2015-99-tis-kmm-paket.php">BMW 1 f20, 116d, r.v 2015, 99 tis km,M-PAKET</a></h2><span class="velikost10"> - <span title="TOP 1x Platí do 20.1. 2026" class="ztop">TOP</span> - [20.1. 2026]</span><br>
+<div class="popis">Motor 1.5d,85kw
+M-Paket venku i uvnitř 
+M-alu kola+ zimní 
+Tempomat 
+Klima
+Slušná výbava 
+Po servisu
+Nová STK</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  269 000 Kč</span></b></div>
+<div class="inzeratylok">České Budějovice<br>370 08</div>
+<div class="inzeratyview">910 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','212677088');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','212677088');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','3084460','144847','Radek+Med');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','212677088');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213788116/bmw-120d-f20.php"><img src="https://www.bazos.cz/img/1t/116/213788116.jpg" class="obrazek" alt="BMW 120D f20" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213788116/bmw-120d-f20.php">BMW 120D f20</a></h2><span class="velikost10"> - [20.1. 2026]</span><br>
+<div class="popis">Prodám <b>bmw</b> 120D 140kw automat, 2017, 165.000km, nehavarované v pěkné výbavě. Více info po telefonu či email. Cena 320.000kč</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  320 000 Kč</span></b></div>
+<div class="inzeratylok">Beroun<br>267 51</div>
+<div class="inzeratyview">382 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213788116');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213788116');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','7715007','5581089','BMW');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213788116');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213761480/bmw-e92-335i.php"><img src="https://www.bazos.cz/img/1t/480/213761480.jpg" class="obrazek" alt="BMW e92 335i" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213761480/bmw-e92-335i.php">BMW e92 335i</a></h2><span class="velikost10"> - [19.1. 2026]</span><br>
+<div class="popis">Dobrý den, prodám svého mazlika. Jedná se o <b>bmw</b> E92 335i lci s motorem N55 v automatu z roku 2011.
+Aktuálně má najeto 217 tis. km. Nicméně je stále ve velmi dobré kondici. Na motoru jsou dělány viditelné úpravy: sání vzduchu, vetší cooler, robustněj ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  400 000 Kč</span></b></div>
+<div class="inzeratylok">Praha 5<br>156 00</div>
+<div class="inzeratyview">954 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213761480');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213761480');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','8211342','6145826','Shini');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213761480');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/213759936/bmw-rada-1-20d-rv-32013-najeto-201130-km.php"><img src="https://www.bazos.cz/img/1t/936/213759936.jpg" class="obrazek" alt="BMW Řada 1 2.0D, r.v. 3/2013, najeto 201.130 km" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/213759936/bmw-rada-1-20d-rv-32013-najeto-201130-km.php">BMW Řada 1 2.0D, r.v. 3/2013, najeto 201.130 km</a></h2><span class="velikost10"> - [19.1. 2026]</span><br>
+<div class="popis">🔥 <b>bmw</b> 1 • 2.0D • NAVI • ALU • CZ • SERVISKA • TOP STAV 🔥
+
+⭐ 2013 • 201 tis. km • Manuál • 85 kW • Bílé RWD
+
+💥 PROČ PRÁVĚ TAHLE JEDNIČKA?
+💎 Zachovalý stav – bez investic
+🛠️ Po předprodejní kontrole (podvozek, klima, technika)
+🇨🇿 Původ ČR + serv ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  159 900 Kč</span></b></div>
+<div class="inzeratylok">Ústí nad Labem<br>400 04</div>
+<div class="inzeratyview">471 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','213759936');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','213759936');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','2871139','118926','Perfekt-Auto');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','213759936');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+
+<div class="inzeraty inzeratyflex">
+<div class="inzeratynadpis"><a href="/inzerat/212022352/bmw-f20-118d-20d-105kw-zf.php"><img src="https://www.bazos.cz/img/1t/352/212022352.jpg?t=1767638304" class="obrazek" alt="BMW f20 118d 2.0d 105kw zf" width="170" height="128"></a>
+<h2 class="nadpis"><a href="/inzerat/212022352/bmw-f20-118d-20d-105kw-zf.php">BMW f20 118d 2.0d 105kw zf</a></h2><span class="velikost10"> - <span title="TOP 2x Platí do 18.1. 2026" class="ztop">TOP</span> - [18.1. 2026]</span><br>
+<div class="popis">Prodám <b>bmw</b> <b>f20</b> 118d 
+2.0 diesel 105kw 
+8 stupňový automat ZF 
+Najeto 208 000km 
+Rok 2012 
+
+Černá kůže 
+Černý strop 
+M paked doplňky 
+Apple CarPlay 
+Vyhřívané přední sedadla 
+Bi-xenon světla
+Interiér zachovaly 
+
+Auto jede moc hezky
+Auto ...</div><br><br>
+</div>
+<div class="inzeratycena"><b><span translate="no">  195 000 Kč</span></b></div>
+<div class="inzeratylok">Beroun<br>267 27</div>
+<div class="inzeratyview">1577 x</div>
+<div class="inzeratyakce">
+<span onclick="odeslatakci('spam','212022352');return false;" class="akce paction">Označit špatný inzerát</span> <span onclick="odeslatakci('category','212022352');return false;" class="akce paction">Chybnou kategorii</span> <span onclick="odeslatakci('rating','7976939','5368464','Martin');return false;" class="akce paction">Ohodnotit uživatele</span> <span onclick="odeslatakci('edit','212022352');return false;" class="akce paction">Smazat/Upravit/Topovat</span>
+</div>
+</div>
+<div id="container_two"></div><script type="text/javascript" charset="utf-8">
+var pageOptions = {
+  'pubId': 'pub-3645948300403337',
+  'query' : 'bmw f20',
+  "channel": "4719857758",  'linkTarget' : '_blank',
+  'personalizedAds' : 'false',
+  'ivt': false,
+'styleId' : '6171314811',  'hl': 'cs'
+};
+
+var adblock1 = {
+  'container': 'container_one',
+  'width': 'auto',
+  'maxTop' : 2
+};
+
+var adblock2 = {
+  'container': 'container_two',
+  'width': 'auto',
+  'number' : 2
+};
+
+_googCsa('ads', pageOptions, adblock2);</script>
+
+<br><div class="strankovani">Stránka: <b><span class="cisla">1</span></b> <a href="/20/?hledat=bmw+f20&amp;hlokalita=&amp;humkreis=25&amp;cenaod=100000&amp;cenado=400000&amp;order=">2</a> <a href="/20/?hledat=bmw+f20&amp;hlokalita=&amp;humkreis=25&amp;cenaod=100000&amp;cenado=400000&amp;order="><b>Další</b></a></div><br><br><br>
+
+
+</div></div><br>
+
+©2026 Bazoš -  <b>Inzerce, Bazar </b><br>
+<a href="https://www.bazos.cz/napoveda.php">Nápověda</a>, <a href="https://www.bazos.cz/dotazy.php">Dotazy</a>, <a href="https://www.bazos.cz/hodnoceni.php">Hodnocení</a>, <a href="https://www.bazos.cz/kontakt.php">Kontakt</a>, <a href="https://www.bazos.cz/reklama.php">Reklama</a>, <a href="https://www.bazos.cz/podminky.php">Podmínky</a>, <a href="https://www.bazos.cz/ochrana-udaju.php">Ochrana údajů</a>, <span onclick="odeslatakci('rss','&amp;humkreis=25&amp;hledat=bmw+f20&amp;cenaod=100000&amp;cenado=400000');return false;" class="paction">RSS</span>, <form name="formvkm" id="formvkm" method="post" style="display: inline;"><input type="hidden" name="vkm" value="m"><input type="submit" class="vkm" value="Mobilní verze"></form><br>
+
+Inzeráty Auto celkem: <b>391593</b>, za 24 hodin: <b>19498</b><br><br>
+<a href="https://www.bazos.cz/mapa-kategorie.php">Mapa kategorií</a>, <a href="https://auto.bazos.cz/mapa-search.php">Nejvyhledávanější výrazy</a>
+<br>
+Země: <a href="https://auto.bazos.cz">Česká republika</a>, <a href="https://auto.bazos.sk">Slovensko</a>, <a href="https://auto.bazos.pl">Polsko</a>, <a href="https://auto.bazos.at">Rakousko</a>
+<br>
+<br>
+</div>
+
+<script src="https://www.bazos.cz/cookie-consent.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({"notice_banner_type":"simple","consent_type":"express","palette":"light","language":"cs","page_load_consent_levels":["strictly-necessary"],"notice_banner_reject_button_hide":false,"preferences_center_close_button_hide":false,"page_refresh_confirmation_buttons":false,"cookie_domain": "bazos.cz"});
+});
+</script>
+<a href="#" id="open_preferences_center"> </a>
+
+
+<!-- Google tag (gtag.js) -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NZW1QTHKBB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NZW1QTHKBB');
+</script>
+
+
+</body></html>

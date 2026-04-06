@@ -3,8 +3,8 @@ import { smokeTestsDir } from "../index";
 import path from "path";
 
 type TestUser = {
-    id: string;
-    language: string;
+    id: number;
+    telegramId: number;
 };
 
 export class SQLiteDBhandler {
@@ -18,8 +18,8 @@ export class SQLiteDBhandler {
     }
 
     insertUser(usr: TestUser) {
-        const insert = this.db.prepare("INSERT INTO Users (id, language) VALUES (?, ?)");
-        insert.run(usr.id, usr.language);
+        const insert = this.db.prepare("INSERT INTO Users (id, telegram_id) VALUES (?, ?)");
+        insert.run(usr.id, usr.telegramId);
     }
 
 
