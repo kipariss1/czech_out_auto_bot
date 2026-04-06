@@ -1,4 +1,3 @@
-from src.settings.security import cipher_handler
 from telegram_bot import bot
 from telebot import types
 from telebot.types import WebAppInfo
@@ -28,9 +27,7 @@ def start(message):
     )
     markup.add(
         types.InlineKeyboardButton(
-            web_app=WebAppInfo(
-                url=f"{settings.base_url}/?enc_user_id={cipher_handler.url_safe_encode(str(message.from_user.id))}"
-            ),
+            web_app=WebAppInfo(url=settings.base_url),
             text=open_btn_text,
         )
     )

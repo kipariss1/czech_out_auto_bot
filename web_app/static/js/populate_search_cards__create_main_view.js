@@ -40,7 +40,7 @@ export function populate_search_cards(list_searches) {
 
         const form = document.createElement("form");
         form.method = "post";
-        form.action = `/delete_search/${search.id}/${search.user_id}`;
+        form.action = `/delete_search/${search.id}`;
         form.className = "d-inline";
 
         const btn = document.createElement("button");
