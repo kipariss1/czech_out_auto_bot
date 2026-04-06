@@ -1,5 +1,5 @@
 import { test } from 'playwright/test'
-import { sqliteDBhandler, cipherHandler } from './index';
+import { sqliteDBhandler } from './index';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
 import { assertTextPresent, assertAlertPresent } from './assertions';
 
@@ -7,8 +7,6 @@ const testUser = {
         id: 111111111,
         telegramId: 420000111
 }
-
-const enc_user_id = cipherHandler.encode(String(testUser.id));
 
 const baseUrl = 'http://localhost:8000/';
 
@@ -25,8 +23,27 @@ const inputData: SearchFormInputs = {
         kmRangeFromPSC: 25
     }
 
-test.beforeEach(async ({}) => {
+test.beforeEach(async ({ page }) => {
     sqliteDBhandler.insertUser(testUser);
+    await page.addInitScript((telegramUser) => {
+        (window as typeof window & {
+            Telegram?: {
+                WebApp?: {
+                    initDataUnsafe?: {
+                        user?: { id: number }
+                    }
+                }
+            }
+        }).Telegram = {
+            WebApp: {
+                initDataUnsafe: {
+                    user: {
+                        id: telegramUser.id
+                    }
+                }
+            }
+        };
+    }, { id: testUser.telegramId });
 });
 
 test.afterEach(async ({}) => {
@@ -37,7 +54,7 @@ test('Happy path test', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
 
-    await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    await page.goto(baseUrl);
     await landingPage.waitForPageToLoad();
     await landingPage.createSearchBtn.click();
     await createSearchPage.createNewSearch(inputData);
@@ -52,7 +69,7 @@ test('Assert user can\'t create the same search two times', async ({ page }) => 
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
 
-    await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    await page.goto(baseUrl);
     await landingPage.waitForPageToLoad();
     await landingPage.createSearchBtn.click();
     await createSearchPage.createNewSearch(inputData);
@@ -66,7 +83,7 @@ test('Assert user can\'t create the same search two times', async ({ page }) => 
 test('Assert form validation works', async ({ page }) => {
     const landingPage = new LandingPage(page);
     const createSearchPage = new CreateSearchPage(page);
-    await page.goto(`${baseUrl}?enc_user_id=${enc_user_id}`);
+    await page.goto(baseUrl);
     await test.step('Assert form requires selection of model', async () => {
         await landingPage.createSearchBtn.click();
         await createSearchPage.waitForPageToLoad();

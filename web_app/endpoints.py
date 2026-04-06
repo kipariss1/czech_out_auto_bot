@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from src.database_utils import db_handler 
-from src.settings.security import cipher_handler
-from src.models.models import CarModel
+from src.models.models import CarModel, User
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
@@ -16,13 +15,21 @@ router = APIRouter()
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
-@router.get("/searches/{enc_user_id}")
+def _get_user_by_telegram_id(db: Session, telegram_user_id: int) -> User | None:
+    return db.query(User).filter(User.telegram_id == telegram_user_id).first()
+
+
+@router.get("/searches/{telegram_user_id}")
 def get_searches_by_id(
-    enc_user_id: str, db: Session = Depends(db_handler.get_db_connection)
+    telegram_user_id: int, db: Session = Depends(db_handler.get_db_connection)
 ):
+    user = _get_user_by_telegram_id(db, telegram_user_id)
+    if user is None:
+        return JSONResponse([])
+
     searches = (
         db.query(CarSearch)
-        .filter(CarSearch.user_id == cipher_handler.decode_from_url(enc_user_id))
+        .filter(CarSearch.user_id == user.id)
         .all()
     )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))
@@ -31,7 +38,6 @@ def get_searches_by_id(
 @router.get("/")
 def main_view(
     request: Request,
-    enc_user_id: str = None,
     new_search_created: bool = False,
     search_already_exists: bool = False,
 ):
@@ -40,15 +46,7 @@ def main_view(
         "new_search_created": new_search_created,
         "search_already_exists": search_already_exists,
     }
-    response = templates.TemplateResponse("index.html", render_dict)
-    if enc_user_id:
-        response.set_cookie(
-            key="enc_user_id",
-            value=enc_user_id,
-            samesite="strict",
-            max_age=3600,
-        )
-    return response
+    return templates.TemplateResponse("index.html", render_dict)
 
 
 @router.get("/create_search", response_class=HTMLResponse)
@@ -117,9 +115,13 @@ def post_create_search_view(
     request: CarSearchCreate,
     db: Session = Depends(db_handler.get_db_connection),
 ):
+    user = _get_user_by_telegram_id(db, request.telegram_user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
     cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
-        "user_id": cipher_handler.decode(request.enc_user_id),
+        "user_id": user.id,
         "car_model_id": cars[0].id,
         "psc_code": request.psc_code,
         "psc_km_range": request.psc_km_range,
@@ -140,18 +142,15 @@ def post_create_search_view(
     return JSONResponse({"search_created": True})
 
 
-@router.post("/delete_search/{search_id}/{user_id}")
+@router.post("/delete_search/{search_id}")
 def delete_search(
     search_id: str,
-    user_id: str,
     db: Session = Depends(db_handler.get_db_connection),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     db.delete(car_search)
     db.commit()
-    return RedirectResponse(
-        f"/?enc_user_id={cipher_handler.url_safe_encode(user_id)}", status_code=303
-    )
+    return RedirectResponse("/", status_code=303)
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
