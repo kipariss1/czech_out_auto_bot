@@ -55,7 +55,12 @@ export function populate_search_cards(list_searches) {
                     return;
                 }
 
-                const response = await fetch(`/delete_search/${search.id}`, {
+                const deleteUrl = new URL(
+                    `/delete_search/${encodeURIComponent(String(search.id))}`,
+                    window.location.origin
+                );
+
+                const response = await fetch(deleteUrl, {
                     method: "POST",
                 });
 
