@@ -4,6 +4,6 @@ USER root
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 COPY ./entrypoints/ollama_entrypoint.sh /ollama_entrypoint.sh
-RUN chmod +x ollama_entrypoint.sh
+RUN sed -i 's/\r$//' /ollama_entrypoint.sh && chmod +x /ollama_entrypoint.sh
 
-ENTRYPOINT ["sh", "/ollama_entrypoint.sh"]
+ENTRYPOINT ["/ollama_entrypoint.sh"]
