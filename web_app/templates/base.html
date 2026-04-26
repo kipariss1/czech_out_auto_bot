@@ -6,6 +6,7 @@
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/nouislider.min.css') }}">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         .header-img {
           max-width: 40px;
@@ -40,6 +41,13 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script>
+        const telegramWebApp = window.Telegram?.WebApp;
+        if (telegramWebApp) {
+            telegramWebApp.ready();
+            telegramWebApp.expand();
+        }
+    </script>
     <script src="{{ url_for('static', path='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
