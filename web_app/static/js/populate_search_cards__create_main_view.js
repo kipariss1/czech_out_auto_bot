@@ -49,13 +49,39 @@ export function populate_search_cards(list_searches) {
             btn.disabled = true;
 
             try {
+                if (search.id === undefined || search.id === null) {
+                    btn.disabled = false;
+                    show_error_message("Failed to delete search: search id is missing.");
+                    return;
+                }
+
                 const response = await fetch(`/delete_search/${search.id}`, {
                     method: "POST",
                 });
 
+                let payload = null;
+                try {
+                    payload = await response.json();
+                } catch {
+                    payload = null;
+                }
+
                 if (!response.ok) {
                     btn.disabled = false;
-                    show_error_message("Failed to delete search.");
+                    const backendReason = payload?.reason
+                        ? ` ${payload.reason}.`
+                        : "";
+                    show_error_message(
+                        `Failed to delete search ${search.id}. HTTP ${response.status}.${backendReason}`
+                    );
+                    return;
+                }
+
+                if (payload?.deleted !== true) {
+                    btn.disabled = false;
+                    show_error_message(
+                        `Failed to delete search ${search.id}.`
+                    );
                     return;
                 }
 

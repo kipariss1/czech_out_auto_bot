@@ -144,13 +144,19 @@ def post_create_search_view(
 
 @router.post("/delete_search/{search_id}")
 def delete_search(
-    search_id: str,
+    search_id: int,
     db: Session = Depends(db_handler.get_db_connection),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
+    if car_search is None:
+        return JSONResponse(
+            {"deleted": False, "reason": f"search {search_id} not found"},
+            status_code=404,
+        )
+
     db.delete(car_search)
     db.commit()
-    return RedirectResponse("/", status_code=303)
+    return JSONResponse({"deleted": True, "search_id": search_id})
 
 
 @router.get("/get_models/{manufacturer}", response_model=List[str])
