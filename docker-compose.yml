@@ -74,8 +74,8 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-      ports:
-      - "11434:11434"   # just for testing
+      # ports:
+      # - "11434:11434"   # just for testing
 
   parser:
     build:
