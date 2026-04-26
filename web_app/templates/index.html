@@ -14,7 +14,7 @@
 <div class="my-3"></div>
 
 <script type="module">
-    import { show_alert_message, show_success_message } from "../static/js/utils.js"
+    import { show_alert_message, show_error_message, show_success_message } from "../static/js/utils.js"
     import { populate_search_cards } from "../static/js/populate_search_cards__create_main_view.js"
 
     const new_search_created = {{ new_search_created | tojson }};
@@ -38,7 +38,10 @@
         ).then((res) =>
             res.json()
         ).then((res) => {
-            populate_search_cards(res);
+            populate_search_cards(res, {
+                onDeleteSuccess: show_success_message,
+                onDeleteError: show_error_message,
+            });
         }).catch((err) => {
             show_alert_message(String(err));
         });

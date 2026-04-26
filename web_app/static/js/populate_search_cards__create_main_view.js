@@ -1,5 +1,12 @@
-export function populate_search_cards(list_searches) {
+export function populate_search_cards(
+    list_searches,
+    {
+        onDeleteSuccess = () => {},
+        onDeleteError = () => {},
+    } = {},
+) {
     const container = document.getElementById("search-cards-container");
+    container.innerHTML = "";
 
     list_searches.forEach((search, index) => {
         const card = document.createElement("div");
@@ -38,26 +45,40 @@ export function populate_search_cards(list_searches) {
             ul.appendChild(li);
         }
 
-        const form = document.createElement("form");
-        form.method = "post";
-        form.action = `/delete_search/${search.id}`;
-        form.className = "d-inline";
-
         const btn = document.createElement("button");
-        btn.type = "submit";
+        btn.type = "button";
         btn.className = "btn btn-outline-danger btn-sm";
         btn.innerText = "🗑️ Delete";
+        btn.addEventListener("click", async () => {
+            btn.disabled = true;
 
-        form.appendChild(btn);
+            try {
+                const response = await fetch(`/delete_search/${search.id}`, {
+                    method: "POST",
+                });
+
+                if (!response.ok) {
+                    btn.disabled = false;
+                    onDeleteError("Failed to delete search.");
+                    return;
+                }
+
+                card.remove();
+                onDeleteSuccess("Search deleted.");
+            } catch (error) {
+                btn.disabled = false;
+                onDeleteError(String(error));
+            }
+        });
 
         body.appendChild(title);
         body.appendChild(pscCode);
         body.appendChild(pscRange);
         body.appendChild(attrTitle);
         body.appendChild(ul);
-        body.appendChild(form);
+        body.appendChild(btn);
 
         card.appendChild(body);
         container.appendChild(card);
-    })
+    });
 }
