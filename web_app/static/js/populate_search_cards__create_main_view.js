@@ -1,10 +1,6 @@
-export function populate_search_cards(
-    list_searches,
-    {
-        onDeleteSuccess = () => {},
-        onDeleteError = () => {},
-    } = {},
-) {
+import { show_error_message, show_success_message } from "./utils.js";
+
+export function populate_search_cards(list_searches) {
     const container = document.getElementById("search-cards-container");
     container.innerHTML = "";
 
@@ -59,15 +55,15 @@ export function populate_search_cards(
 
                 if (!response.ok) {
                     btn.disabled = false;
-                    onDeleteError("Failed to delete search.");
+                    show_error_message("Failed to delete search.");
                     return;
                 }
 
                 card.remove();
-                onDeleteSuccess("Search deleted.");
+                show_success_message("Search deleted.");
             } catch (error) {
                 btn.disabled = false;
-                onDeleteError(String(error));
+                show_error_message(String(error));
             }
         });
 
