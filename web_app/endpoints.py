@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from starlette import requests
 from sqlalchemy import and_
@@ -17,6 +17,16 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 def _get_user_by_telegram_id(db: Session, telegram_user_id: int) -> User | None:
     return db.query(User).filter(User.telegram_id == telegram_user_id).first()
+
+
+def _get_or_create_user_by_telegram_id(db: Session, telegram_user_id: int) -> User:
+    user = _get_user_by_telegram_id(db, telegram_user_id)
+    if user is None:
+        user = User(telegram_id=telegram_user_id)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    return user
 
 
 @router.get("/searches/{telegram_user_id}")
@@ -115,9 +125,7 @@ def post_create_search_view(
     request: CarSearchCreate,
     db: Session = Depends(db_handler.get_db_connection),
 ):
-    user = _get_user_by_telegram_id(db, request.telegram_user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+    user = _get_or_create_user_by_telegram_id(db, request.telegram_user_id)
 
     cars = _find_car_by_model(request.manufacturer, request.model)
     new_search_args = {
