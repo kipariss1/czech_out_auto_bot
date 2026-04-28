@@ -35,6 +35,8 @@ Relevant code areas:
 - [src/models](./src/models) - shared database and domain models used across services.
 - [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
 
+`parser` and `worker` run automatically in Docker every 2 hours after `docker compose up`.
+
 ## Local Run
 
 ### Requirements

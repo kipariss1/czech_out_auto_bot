@@ -81,7 +81,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.queue
-    command: ["python", "-m", "queue_svc.parser.main"]
+    restart: unless-stopped
+    command: ["/app/entrypoints/run_every_2_hours.sh", "python", "-m", "queue_svc.parser.main"]
     environment:
       <<: *common-env
     depends_on:
@@ -92,7 +93,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.queue
-    command: ["python", "-m", "queue_svc.worker.main"]
+    restart: unless-stopped
+    command: ["/app/entrypoints/run_every_2_hours.sh", "python", "-m", "queue_svc.worker.main"]
     environment:
       <<: *common-env
       BOT_TOKEN: ${BOT_TOKEN}
