@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src /app/src
 COPY telegram_bot /app/telegram_bot
 COPY queue_svc /app/queue_svc
-COPY entrypoints /app/entrypoints
-
-RUN chmod +x /app/entrypoints/run_every_2_hours.sh
 
 ENV PYTHONPATH=/app
 
