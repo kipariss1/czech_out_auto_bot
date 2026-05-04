@@ -5,6 +5,12 @@ x-common-env: &common-env
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_DB: ${POSTGRES_DB}
 
+x-stdout-file-logging: &stdout-file-logging
+  driver: "local"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 
 services:
 
@@ -26,6 +32,7 @@ services:
         condition: service_healthy
       telegram_bot:
         condition: service_started
+    logging: *stdout-file-logging
 
 
   telegram_bot:
@@ -43,6 +50,7 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+    logging: *stdout-file-logging
 
 
   postgres_db:
@@ -58,6 +66,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    logging: *stdout-file-logging
 
   ollama:
       build:
@@ -76,11 +85,13 @@ services:
         retries: 5
       # ports:
       # - "11434:11434"   # just for testing
+      logging: *stdout-file-logging
 
   parser:
     build:
       context: .
       dockerfile: Dockerfile.queue
+    container_name: parser
     restart: unless-stopped
     command:
       - /bin/sh
@@ -91,11 +102,13 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+    logging: *stdout-file-logging
 
   worker:
     build:
       context: .
       dockerfile: Dockerfile.queue
+    container_name: worker
     restart: unless-stopped
     command:
       - /bin/sh
@@ -107,3 +120,4 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
+    logging: *stdout-file-logging
