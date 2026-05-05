@@ -234,15 +234,16 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     row = mock_db.query(AdQueue).filter(AdQueue.car_model_id == 1).first()
     assert TOPED_AD_1 in row.queue
     assert REGULAR_AD_1 in row.queue
-    assert PAGE2_AD_1 not in row.queue  # if search is newly created, checks only first page to save tokens and not go back all 1000...000 pages
+    assert PAGE2_AD_1 in row.queue
+    assert row.queue.index(PAGE2_AD_1) < row.queue.index(TOPED_AD_1)
 
     asyncio.run(worker.process_queue())
 
     calls = _notification_calls(send_message)
-    assert len(calls) == 2
+    assert len(calls) == 3
     assert any(call["chat_id"] == 111111111 and TOPED_AD_1 in call["text"] for call in calls)
     assert any(call["chat_id"] == 222222222 and REGULAR_AD_1 in call["text"] for call in calls)
-    assert any(PAGE2_AD_1 not in call["text"] for call in calls)
+    assert any(call["chat_id"] == 222222222 and PAGE2_AD_1 in call["text"] for call in calls)
     assert row.queue == []
 
 

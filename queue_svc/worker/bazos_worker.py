@@ -135,9 +135,10 @@ class BazosWorker:
                 self.db.commit()
                 continue
             logger.debug(
-                "Processing ad with Ollama car_model_id=%s ad_id=%s",
+                "Processing ad with Ollama car_model_id=%s ad_id=%s ad_link=%s",
                 row.car_model_id,
                 ad.id,
+                ad.link
             )
             res = self.ollama.process(ad_text=ad.text, car=car)
             if res['is_valid_ad']:
@@ -148,6 +149,13 @@ class BazosWorker:
                     ad.link
                 )
                 res['price'] = ad.price
+                logger.debug(
+                    "Ad parse result car_model_id=%s ad_id=%s ad_link=%s parse_res=%s",
+                    row.car_model_id,
+                    ad.id,
+                    ad.link,
+                    res,
+                )
                 matched_searches = 0
                 for search in searches:
                     if self._fits_to_search_criteria(res, search, car):

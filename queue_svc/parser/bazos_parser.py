@@ -52,7 +52,6 @@ class BazosParser:
         if not car.last_checked_links:
             logger.debug("No checked ad history for car_model_id=%s", car.id)
             return None
-        ad = None
         for el in car.last_checked_links:
             ad = AutoAdvertisementPage(el)
             if not await ad.is_deleted():
@@ -61,18 +60,23 @@ class BazosParser:
                     car.id,
                     ad.id,
                 )
-                break
+                return ad.id
             logger.debug(
                 "Skipping deleted checked ad car_model_id=%s link=%s",
                 car.id,
                 el,
             )
-        return ad.id    # type: ignore
+        logger.debug("No valid checked ad history for car_model_id=%s", car.id)
+        return None
+    
+    @staticmethod
+    def _get_ads_from_current_page(car_page_bazos: AutoPage) -> list[AutoAdvertisementPage]:
+        car_ads = car_page_bazos.get_advertisements()
+        return list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
     
     async def _go_to_last_checked_id(self, car: CarModel, car_page_bazos: AutoPage) -> tuple[str | None, list[AutoAdvertisementPage]]:
         last_checked_id = await self._find_last_valid_checked_id(car)
-        car_ads = car_page_bazos.get_advertisements()
-        car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
+        car_ads = self._get_ads_from_current_page(car_page_bazos)
         car_ads_ids = [e.id for e in car_ads]
         logger.debug(
             "Loaded Bazos page car_model_id=%s page=%s ads=%s last_checked_id=%s",
@@ -88,9 +92,16 @@ class BazosParser:
                 last_checked_id,
                 car_page_bazos.page,
             )
-            car_page_bazos.go_next_page()
-            car_ads = car_page_bazos.get_advertisements()
-            car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
+            if not car_page_bazos.go_next_page():
+                logger.warning(
+                    "Last checked ad was not found on available pages; falling back to full queue car_model_id=%s last_checked_id=%s current_page=%s",
+                    car.id,
+                    last_checked_id,
+                    car_page_bazos.page,
+                )
+                last_checked_id = None
+                break
+            car_ads = self._get_ads_from_current_page(car_page_bazos)
             car_ads_ids = [e.id for e in car_ads]
             logger.debug(
                 "Loaded Bazos page car_model_id=%s page=%s ads=%s",
@@ -108,15 +119,35 @@ class BazosParser:
         )
         return last_checked_id, page_with_last_checked_id
     
+    def _form_queue_for_new_search(self, car_page_bazos: AutoPage) -> list[AutoAdvertisementPage]:
+        while car_page_bazos.go_next_page():
+            logger.info(
+                "New search has older Bazos page; moving forward before queueing current_page=%s",
+                car_page_bazos.page,
+            )
+
+        queue_to_check: list[AutoAdvertisementPage] = []
+        while True:
+            car_ads = self._get_ads_from_current_page(car_page_bazos)
+            queue_to_check.extend(car_ads)
+            logger.debug(
+                "Added Bazos page to new search queue page=%s ads=%s total_ads=%s",
+                car_page_bazos.page,
+                len(car_ads),
+                len(queue_to_check),
+            )
+            if not car_page_bazos.go_previous_page():
+                break
+        return queue_to_check
+    
     def _form_queue_to_check(self, car_page_bazos: AutoPage, last_checked_id: str | None, page_with_last_checked_id: list[AutoAdvertisementPage]) -> list[AutoAdvertisementPage]:
         if not last_checked_id: 
-                queue_to_check = page_with_last_checked_id
+            queue_to_check = self._form_queue_for_new_search(car_page_bazos)
         else:
             idx_of_last_checked_add = next(i for i, e in enumerate(page_with_last_checked_id) if e.id == last_checked_id)
             queue_to_check = page_with_last_checked_id[:idx_of_last_checked_add]
             while (car_page_bazos.go_previous_page()):
-                car_ads = car_page_bazos.get_advertisements()
-                car_ads = list(map(lambda ad: AutoAdvertisementPage(ad), car_ads))
+                car_ads = self._get_ads_from_current_page(car_page_bazos)
                 queue_to_check = car_ads + queue_to_check
         return queue_to_check
     
@@ -206,4 +237,3 @@ class BazosParser:
                 raise
         logger.info("Parser run finished")
         logger.info("+" + "-" * 30 + "+")
-
