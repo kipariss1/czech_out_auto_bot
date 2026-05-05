@@ -142,9 +142,10 @@ class BazosWorker:
             res = self.ollama.process(ad_text=ad.text, car=car)
             if res['is_valid_ad']:
                 logger.info(
-                    "Ollama marked ad as valid car_model_id=%s ad_id=%s",
+                    "Ollama marked ad as valid car_model_id=%s ad_id=%s ad_link=%s",
                     row.car_model_id,
                     ad.id,
+                    ad.link
                 )
                 res['price'] = ad.price
                 matched_searches = 0
@@ -154,15 +155,17 @@ class BazosWorker:
                         matched_searches += 1
                 if matched_searches == 0:
                     logger.info(
-                        "Valid ad did not match searches car_model_id=%s ad_id=%s",
+                        "Valid ad did not match searches car_model_id=%s ad_id=%s ad_link=%s",
                         row.car_model_id,
                         ad.id,
+                        ad.link
                     )
             else:
                 logger.debug(
-                    "Ollama marked ad as invalid car_model_id=%s ad_id=%s",
+                    "Ollama marked ad as invalid car_model_id=%s ad_id=%s ad_link=%s",
                     row.car_model_id,
                     ad.id,
+                    ad.link
                 )
             await self._add_checked_ad_to_history(ad, car)
             queue.remove(ad.link)
