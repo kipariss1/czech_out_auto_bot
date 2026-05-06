@@ -87,35 +87,19 @@ services:
       # - "11434:11434"   # just for testing
       logging: *stdout-file-logging
 
-  parser:
+  queue:
     build:
       context: .
       dockerfile: Dockerfile.queue
-    container_name: parser
+    container_name: queue
     restart: unless-stopped
     command:
-      - /bin/sh
-      - -c
-      - while true; do python -m queue_svc.parser.main; sleep "${INTERVAL_SECONDS:-7200}"; done
+      - python
+      - -m
+      - queue_svc.main
     environment:
       <<: *common-env
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-    logging: *stdout-file-logging
-
-  worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.queue
-    container_name: worker
-    restart: unless-stopped
-    command:
-      - /bin/sh
-      - -c
-      - while true; do python -m queue_svc.worker.main; sleep "${INTERVAL_SECONDS:-7200}"; done
-    environment:
-      <<: *common-env
+      # INTERVAL_SECONDS: ${INTERVAL_SECONDS:-7200}
       BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       postgres_db:

@@ -35,7 +35,7 @@ Relevant code areas:
 - [src/models](./src/models) - shared database and domain models used across services.
 - [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
 
-`parser` and `worker` run automatically in Docker every 2 hours after `docker compose up`.
+The Docker `queue` service runs one parser/worker cycle every 2 hours after `docker compose up`: first parser, then worker. The next cycle is scheduled from the cycle start timestamp. If the cycle finishes in less than 2 hours, `queue` waits the remaining time; if it takes 2 hours or more, the next cycle starts immediately.
 
 ## Local Run
 
