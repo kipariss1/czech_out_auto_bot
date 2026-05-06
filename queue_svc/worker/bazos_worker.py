@@ -75,7 +75,7 @@ class BazosWorker:
 
     @staticmethod
     def _format_table(rows: list[tuple[str, str, str]]) -> str:
-        header = ("Parameter", "Search criteria", "Found Parameters of the car")
+        header = ("Parameter", "Search", "Car")
         widths = [
             max(len(header[i]), *(len(row[i]) for row in rows))
             for i in range(len(header))
