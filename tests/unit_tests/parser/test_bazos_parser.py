@@ -134,6 +134,53 @@ def test_topped_adds_are_processed_separately(
     )
     assert queue == asserted_queue_without_checked_toped_ads
 
+def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_bazos, asserted_queue):
+    car_id = 1
+    mock_data = {
+        "Users": [
+            {"id": 1, "telegram_id": 111111111},
+        ],
+        "Car_Models": [
+            {
+                "id": car_id,
+                "manufacturer": "BMW",
+                "model": "F20",
+                "_last_checked_links": [],
+                "_last_checked_toped_links": [],
+            },
+        ],
+        "Car_Searches": [
+            {
+                "id": 1,
+                "user_id": 1,
+                "car_model_id": car_id,
+                "psc_code": "110 00",
+                "psc_km_range": "25",
+                "year_range_from": 2010,
+                "year_range_to": 2020,
+                "mileage_range_from": 0,
+                "mileage_range_to": 120000,
+                "price_range_from": 100000,
+                "price_range_to": 400000,
+            },
+        ],
+    }
+    mock_db = build_mock_db(
+        "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
+        mock_data
+    )
+    bp = BazosParser()
+    asyncio.run(bp.parse())
+    queue = (
+        mock_db.query(AdQueue.queue)
+        .filter(AdQueue.car_model_id == car_id)
+        .scalar()
+    )
+
+    assert len(queue) == 35
+    assert queue[:3] == asserted_queue[20:]
+    assert queue[15:] == asserted_queue[:20]
+
 def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
     asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")
     car_id = mock_data["Car_Models"][0]["id"]
@@ -157,5 +204,4 @@ def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch,
         .scalar()
     )
     assert queue == asserted_queue
-
 

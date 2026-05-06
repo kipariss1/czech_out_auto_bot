@@ -122,9 +122,22 @@ class AutoPage:
         advertisements = list(filter(lambda ad: ad.find("a"), advertisements))
         return list(map(lambda ad: self.base_url + ad.find("a")["href"], advertisements))
     
+    def has_next_page(self) -> bool:
+        parsed = bs(self.html, "html.parser")
+        pagination = parsed.find("div", class_="strankovani")
+        if not pagination:
+            return False
+        return any(
+            link.get_text(strip=True) == "Další"
+            for link in pagination.find_all("a")
+        )
+    
     def go_next_page(self):
+        if not self.has_next_page():
+            return False
         self.page += 1
         self.html = self._get_html()
+        return True
 
     def go_previous_page(self):
         if self.page == 0:
