@@ -1,4 +1,5 @@
 from queue_svc.parser.bazos_parser import BazosParser
+from queue_svc.bazos_api.auto_bazos_api import AutoPage
 from src.models.models import AdQueue
 from typing import List
 from unittest.mock import AsyncMock
@@ -180,6 +181,26 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
     assert len(queue) == 35
     assert queue[:3] == asserted_queue[20:]
     assert queue[15:] == asserted_queue[:20]
+
+
+def test_auto_page_constructs_link_with_empty_optional_params():
+    page = AutoPage.__new__(AutoPage)
+    page.base_url = "https://auto.bazos.cz"
+    page.model = "BMW F20"
+    page.locality = None
+    page.range = None
+    page.price_from = None
+    page.price_to = None
+
+    assert page._construct_link() == (
+        "https://auto.bazos.cz/"
+        "?hledat=BMW+F20&rubriky=auto&hlokalita=&humkreis="
+        "&cenaod=&cenado=&Submit=Hledat&order=&crp=&kitx=ano"
+    )
+    assert page._construct_link(1) == (
+        "https://auto.bazos.cz/20/"
+        "?hledat=BMW+F20&hlokalita=&humkreis=&cenaod=&cenado=&order="
+    )
 
 def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
     asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")

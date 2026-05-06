@@ -3,7 +3,7 @@ from typing import TypedDict
 import aiohttp
 from bs4 import BeautifulSoup as bs
 import re
-from urllib.parse import quote_plus
+from urllib.parse import urlencode
 
 
 def get(link):
@@ -105,18 +105,34 @@ class AutoPage:
         return get(self.url)
 
     def _construct_link(self, page=0):
-        model = quote_plus(self.model)
-        locality = quote_plus(self.locality) if self.locality is not None else ""
-        range = self.range if self.range is not None else 25
+        locality = self.locality if self.locality is not None else ""
+        km_range = self.range if self.range is not None else ""
         price_from = self.price_from if self.price_from is not None else ""
         price_to = self.price_to if self.price_to is not None else ""
         if page == 0:
-            url = f'{self.base_url}/?hledat={model}&' \
-                + f"rubriky=auto&hlokalita={locality}&humkreis={range}&" \
-                + f"cenaod={price_from}&cenado={price_to}&Submit=Hledat&order=&crp=&kitx=ano"
+            query = urlencode([
+                ("hledat", self.model),
+                ("rubriky", "auto"),
+                ("hlokalita", locality),
+                ("humkreis", km_range),
+                ("cenaod", price_from),
+                ("cenado", price_to),
+                ("Submit", "Hledat"),
+                ("order", ""),
+                ("crp", ""),
+                ("kitx", "ano"),
+            ])
+            url = f"{self.base_url}/?{query}"
         else:
-            url = f"{self.base_url}/{page*20}/?hledat={model}&hlokalita={locality}&" \
-                  + f"humkreis={range}&cenaod={price_from}&cenado={price_to}&order="
+            query = urlencode([
+                ("hledat", self.model),
+                ("hlokalita", locality),
+                ("humkreis", km_range),
+                ("cenaod", price_from),
+                ("cenado", price_to),
+                ("order", ""),
+            ])
+            url = f"{self.base_url}/{page*20}/?{query}"
         return url
 
     def get_advertisements(self) -> list[str]:

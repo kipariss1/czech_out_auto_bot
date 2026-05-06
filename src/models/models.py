@@ -2,7 +2,7 @@ from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
 from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import re
 
 Base = declarative_base()
@@ -34,21 +34,19 @@ class CarModel(Base):
 
 
 class CarSearchCreate(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
     manufacturer: str
     model: str
     input_year_range_from: str
     input_year_range_to: str
-    input_mileage_range_from: str
-    input_mileage_range_to: str
-    input_price_range_from: str
-    input_price_range_to: str
-    psc_code: str
-    psc_km_range: str
+    input_mileage_range_from: str | None = None
+    input_mileage_range_to: str | None = None
+    input_price_range_from: str | None = None
+    input_price_range_to: str | None = None
+    psc_code: str | None = None
+    psc_km_range: str | None = None
     telegram_user_id: int
-
-    class Config:
-        extra = "allow"
-
 
 class CarSearch(Base):
 
@@ -82,23 +80,57 @@ class CarSearch(Base):
         nullable=False
     )
 
+    @staticmethod
+    def _blank_to_none(value):
+        if value is None:
+            return None
+        value = str(value).strip()
+        if value == "":
+            return None
+        return value
+
+    @staticmethod
+    def _format_range(min_value: int | None, max_value: int | None) -> str:
+        if min_value is None and max_value is None:
+            return "any"
+        if min_value is None:
+            return f"<= {max_value}"
+        if max_value is None:
+            return f">= {min_value}"
+        return f"{min_value} - {max_value}"
+
     @validates("psc_code")
     def validate_psc_code(self, key, address):
-        if not re.match("^[0-9\s]{5,}$", address):
+        address = self._blank_to_none(address)
+        if address is None:
+            return None
+        if not re.match(r"^[0-9\s]{5,}$", address):
             raise ValueError("PSC code is not in right format")
         return address
 
     @validates("psc_km_range")
-    def validate_psc_code(self, key, address):
-        if not re.match("^[0-9]{1,4}$", address):
+    def validate_psc_km_range(self, key, address):
+        address = self._blank_to_none(address)
+        if address is None:
+            return None
+        if not re.match(r"^[0-9]{1,4}$", address):
             raise ValueError("PSC km range is not in right format")
         return address
 
     def _construct_attributes(self):
         new_attrs = {
-            "Year range": f"{self.year_range_from} - {self.year_range_to}",
-            "Mileage range": f"{self.mileage_range_from} - {self.mileage_range_to}",
-            "Price range": f"{self.price_range_from} - {self.price_range_to}",
+            "Year range": self._format_range(
+                self.year_range_from,
+                self.year_range_to,
+            ),
+            "Mileage range": self._format_range(
+                self.mileage_range_from,
+                self.mileage_range_to,
+            ),
+            "Price range": self._format_range(
+                self.price_range_from,
+                self.price_range_to,
+            ),
         }
         return new_attrs
 

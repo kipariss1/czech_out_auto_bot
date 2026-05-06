@@ -14,8 +14,9 @@ var list_from = [input_year_from, input_mileage_from, input_price_from];
 var list_to = [input_year_to, input_mileage_to, input_price_to];
 var list_show = [[1990, 2010], [50000, 200000], [50000, 100000]];
 var list_range = [[1950, currentYear], [0, 500000], [0, 1000000]];
+var list_optional = [false, true, true];
 
-function create_slider(slider, show, range, step, input_from, input_to) {
+function create_slider(slider, show, range, step, input_from, input_to, optional) {
     noUiSlider.create(slider, {
         start: [show[0], show[1]],
         connect: true,
@@ -33,7 +34,18 @@ function create_slider(slider, show, range, step, input_from, input_to) {
             }
         }
     });
+
+    var sync_inputs = !optional;
+    if (optional) {
+        setTimeout(function() {
+            sync_inputs = true;
+        }, 0);
+    }
+
     slider.noUiSlider.on("update", function (values, handle) {
+        if (!sync_inputs) {
+            return;
+        }
         if (handle === 0) {
             input_from.value = Math.round(values[0])
         } else {
@@ -41,13 +53,23 @@ function create_slider(slider, show, range, step, input_from, input_to) {
         }
     });
     input_from.addEventListener('change', function() {
+        if (optional && this.value === "") {
+            return;
+        }
         slider.noUiSlider.set([this.value, null])
     });
     input_to.addEventListener('change', function() {
+        if (optional && this.value === "") {
+            return;
+        }
         slider.noUiSlider.set([null, this.value])
     });
+    if (optional) {
+        input_from.value = "";
+        input_to.value = "";
+    }
 }
 
 list_sliders.forEach((slider, i) => {
-    create_slider(slider, list_show[i], list_range[i], 1, list_from[i], list_to[i]);
+    create_slider(slider, list_show[i], list_range[i], 1, list_from[i], list_to[i], list_optional[i]);
 })

@@ -1,4 +1,5 @@
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import responses
@@ -45,6 +46,28 @@ PAGE2_AD_14 = "https://auto.bazos.cz/inzerat/211941833/bmw-rady-1.php"
 PAGE2_AD_15 = "https://auto.bazos.cz/inzerat/211728369/bmw-116i-2011.php"
 
 TOPED_ADS = {TOPED_AD_1, TOPED_AD_2, TOPED_AD_3, TOPED_AD_4}
+
+
+def test_worker_treats_missing_price_and_mileage_ranges_as_any():
+    search = SimpleNamespace(
+        car_model=SimpleNamespace(manufacturer="BMW", model="F20"),
+        year_range_from=2010,
+        year_range_to=2020,
+        mileage_range_from=None,
+        mileage_range_to=None,
+        price_range_from=None,
+        price_range_to=None,
+    )
+    car_parse_res = {
+        "is_valid_ad": True,
+        "brand": "BMW",
+        "model": "F20",
+        "year": "2016",
+        "mileage": "300000",
+        "price": "900000",
+    }
+
+    assert BazosWorker._fits_to_search_criteria(car_parse_res, search)
 
 
 def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):

@@ -46,10 +46,11 @@ class BazosParser:
     @staticmethod
     def _build_search_args(search: CarSearch) -> AutoPageSearchArgs:
         car = search.car_model
+        locality = search.psc_code
         return {
             "model": f"{car.manufacturer} {car.model}",
-            "locality": search.psc_code,
-            "range": search.psc_km_range,
+            "locality": locality,
+            "range": search.psc_km_range if locality else None,
             "price_from": search.price_range_from,
             "price_to": search.price_range_to,
         }  # type: ignore

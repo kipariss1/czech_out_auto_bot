@@ -29,6 +29,22 @@ def _get_or_create_user_by_telegram_id(db: Session, telegram_user_id: int) -> Us
     return user
 
 
+def _optional_str(value: object | None) -> str | None:
+    if value is None:
+        return None
+    value = str(value).strip()
+    if value == "":
+        return None
+    return value
+
+
+def _optional_int(value: str | int | None) -> int | None:
+    value = _optional_str(value)
+    if value is None:
+        return None
+    return int(value)
+
+
 @router.get("/searches/{telegram_user_id}")
 def get_searches_by_id(
     telegram_user_id: int, db: Session = Depends(db_handler.get_db_connection)
@@ -128,17 +144,19 @@ def post_create_search_view(
     user = _get_or_create_user_by_telegram_id(db, request.telegram_user_id)
 
     cars = _find_car_by_model(request.manufacturer, request.model)
+    psc_code = _optional_str(request.psc_code)
+    psc_km_range = _optional_str(request.psc_km_range) if psc_code else None
     new_search_args = {
         "user_id": user.id,
         "car_model_id": cars[0].id,
-        "psc_code": request.psc_code,
-        "psc_km_range": request.psc_km_range,
+        "psc_code": psc_code,
+        "psc_km_range": psc_km_range,
         "year_range_from": int(request.input_year_range_from),
         "year_range_to": int(request.input_year_range_to),
-        "mileage_range_from": int(request.input_mileage_range_from),
-        "mileage_range_to": int(request.input_mileage_range_to),
-        "price_range_from": int(request.input_price_range_from),
-        "price_range_to": int(request.input_price_range_to),
+        "mileage_range_from": _optional_int(request.input_mileage_range_from),
+        "mileage_range_to": _optional_int(request.input_mileage_range_to),
+        "price_range_from": _optional_int(request.input_price_range_from),
+        "price_range_to": _optional_int(request.input_price_range_to),
     }
     if _check_if_search_exists(db, **new_search_args):
         return JSONResponse(
