@@ -182,7 +182,7 @@ class AdQueue(Base):
     __tablename__ = "Advertisements_Queue"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    car_search_id = Column(Integer, ForeignKey("Car_Searches.id"), ondelete="CASCADE", nullable=False)
+    car_search_id = Column(Integer, ForeignKey("Car_Searches.id", ondelete="CASCADE"), nullable=False)
     car_search = relationship("CarSearch")
     queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
 

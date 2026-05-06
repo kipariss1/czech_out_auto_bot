@@ -4,9 +4,13 @@ import aiohttp
 from bs4 import BeautifulSoup as bs
 import re
 from urllib.parse import urlencode
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get(link):
+    logger.debug("Getting syncronous url: %s", link)
     response = requests.get(link)
     text = response.text
     if response.status_code != 200:
@@ -15,6 +19,7 @@ def get(link):
 
 
 async def aget(link):
+    logger.debug("Getting assyncronous url: %s", link)
     async with aiohttp.ClientSession() as session:
         async with session.get(link) as response:
             text = await response.text()
@@ -64,7 +69,12 @@ class AutoAdvertisementPage:
     
     def _find_price(self) -> int:
         left_table = self.parsed.find("td", class_="listadvlevo")
-        price_text = left_table.contents[1].contents[9].text
+        for tr in left_table.find_all("tr"):
+            if "Cena:" in tr.get_text():
+                price_text = tr.find("span").get_text(strip=True)
+                break
+        if price_text.strip().lower() == 'dohodou':
+            return 0
         price = re.sub(r"\D", "", price_text)
         return int(price)
 
@@ -103,15 +113,11 @@ class AutoPage:
     def _get_html(self):
         self.url = self._construct_link(self.page)
         return get(self.url)
-
-    def _construct_link(self, page=0):
-        locality = self.locality if self.locality is not None else ""
-        km_range = self.range if self.range is not None else ""
-        price_from = self.price_from if self.price_from is not None else ""
-        price_to = self.price_to if self.price_to is not None else ""
-        if page == 0:
+    
+    def __construct_url_with_optional_attrs(self):
+        if self.page == 0:
             query = urlencode([
-                ("hledat", self.model),
+                ("hledat", self.model.lower()),
                 ("rubriky", "auto"),
                 ("hlokalita", locality),
                 ("humkreis", km_range),
@@ -122,17 +128,46 @@ class AutoPage:
                 ("crp", ""),
                 ("kitx", "ano"),
             ])
-            url = f"{self.base_url}/?{query}"
+            return f"{self.base_url}/?{query}"
         else:
             query = urlencode([
-                ("hledat", self.model),
+                ("hledat", self.model.lower()),
                 ("hlokalita", locality),
                 ("humkreis", km_range),
                 ("cenaod", price_from),
                 ("cenado", price_to),
                 ("order", ""),
             ])
-            url = f"{self.base_url}/{page*20}/?{query}"
+            return f"{self.base_url}/{page*20}/?{query}"
+    
+    def __construct_url_with_just_model(self):
+        if self.page == 0:
+            query = urlencode([
+                ("hledat", self.model.lower()),
+                ("rubriky", "auto"),
+                ("hlokalita", ""),
+                ("humkreis", "25"),
+                ("cenaod", ""),
+                ("cenado", ""),
+                ("Submit", "Hledat"),
+                ("order", ""),
+                ("crp", ""),
+                ("kitx", "ano"),
+            ])
+            return f"{self.base_url}/?{query}"
+        else:
+            return self.__construct_url_with_optional_attrs()
+
+    def _construct_link(self, page=0):
+
+        locality = self.locality if self.locality is not None else ""
+        km_range = self.range if self.range is not None else ""
+        price_from = self.price_from if self.price_from is not None else ""
+        price_to = self.price_to if self.price_to is not None else ""
+        if any([self.locality, self.price_from, self.price_to]):
+            url = self.__construct_url_with_optional_attrs()
+        else:
+            url = self.__construct_url_with_just_model()
         return url
 
     def get_advertisements(self) -> list[str]:
