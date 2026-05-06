@@ -114,61 +114,32 @@ class AutoPage:
         self.url = self._construct_link(self.page)
         return get(self.url)
     
-    def __construct_url_with_optional_attrs(self):
-        if self.page == 0:
-            query = urlencode([
-                ("hledat", self.model.lower()),
-                ("rubriky", "auto"),
-                ("hlokalita", locality),
-                ("humkreis", km_range),
-                ("cenaod", price_from),
-                ("cenado", price_to),
-                ("Submit", "Hledat"),
-                ("order", ""),
-                ("crp", ""),
-                ("kitx", "ano"),
-            ])
-            return f"{self.base_url}/?{query}"
-        else:
-            query = urlencode([
-                ("hledat", self.model.lower()),
-                ("hlokalita", locality),
-                ("humkreis", km_range),
-                ("cenaod", price_from),
-                ("cenado", price_to),
-                ("order", ""),
-            ])
-            return f"{self.base_url}/{page*20}/?{query}"
+    @staticmethod
+    def _blank_if_none(value):
+        return "" if value is None else value
     
-    def __construct_url_with_just_model(self):
-        if self.page == 0:
-            query = urlencode([
-                ("hledat", self.model.lower()),
+    def _construct_link(self, page=0):
+        query_params = [
+            ("hledat", self.model),
+            ("hlokalita", self._blank_if_none(self.locality)),
+            ("humkreis", self._blank_if_none(self.range)),
+            ("cenaod", self._blank_if_none(self.price_from)),
+            ("cenado", self._blank_if_none(self.price_to)),
+        ]
+        if page == 0:
+            query_params = [
+                query_params[0],
                 ("rubriky", "auto"),
-                ("hlokalita", ""),
-                ("humkreis", "25"),
-                ("cenaod", ""),
-                ("cenado", ""),
+                *query_params[1:],
                 ("Submit", "Hledat"),
                 ("order", ""),
                 ("crp", ""),
                 ("kitx", "ano"),
-            ])
-            return f"{self.base_url}/?{query}"
-        else:
-            return self.__construct_url_with_optional_attrs()
+            ]
+            return f"{self.base_url}/?{urlencode(query_params)}"
 
-    def _construct_link(self, page=0):
-
-        locality = self.locality if self.locality is not None else ""
-        km_range = self.range if self.range is not None else ""
-        price_from = self.price_from if self.price_from is not None else ""
-        price_to = self.price_to if self.price_to is not None else ""
-        if any([self.locality, self.price_from, self.price_to]):
-            url = self.__construct_url_with_optional_attrs()
-        else:
-            url = self.__construct_url_with_just_model()
-        return url
+        query_params.append(("order", ""))
+        return f"{self.base_url}/{page * 20}/?{urlencode(query_params)}"
 
     def get_advertisements(self) -> list[str]:
         parsed = bs(self.html, "html.parser")
