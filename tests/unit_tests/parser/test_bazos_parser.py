@@ -15,7 +15,7 @@ def mock_bazos(build_mock_bazos):
             'type': responses.GET,
             'mock_url': (
                 "https://auto.bazos.cz/"
-                "?hledat=BMW+F20&rubriky=auto&hlokalita=&humkreis=25"
+                "?hledat=BMW+F20&rubriky=auto&hlokalita=110+00&humkreis=25"
                 "&cenaod=100000&cenado=400000&Submit=Hledat"
                 "&order=&crp=&kitx=ano"
             ),
@@ -26,7 +26,7 @@ def mock_bazos(build_mock_bazos):
             'type': responses.GET,
             'mock_url': (
                 "https://auto.bazos.cz/20/"
-                "?hledat=BMW+F20&hlokalita=&humkreis=25"
+                "?hledat=BMW+F20&hlokalita=110+00&humkreis=25"
                 "&cenaod=100000&cenado=400000&order="
             ),
             'mock_html_path': "tests/unit_tests/test_data/test_bazos_parser_correctly_finds_the_last_checked_ad/page2.html",
@@ -82,7 +82,7 @@ def mock_data():
     return mock_data
 
 def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
-    car_id = mock_data["Car_Models"][0]["id"]
+    search_id = int(mock_data["Car_Searches"][0]["id"])
     mock_db = build_mock_db(
         "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data
@@ -99,7 +99,7 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_moc
     asyncio.run(bp.parse())
     queue = (
         mock_db.query(AdQueue.queue)
-        .filter(AdQueue.car_model_id == car_id)
+        .filter(AdQueue.car_search_id == search_id)
         .scalar()
     )
     assert queue == asserted_queue
@@ -112,7 +112,7 @@ def test_topped_adds_are_processed_separately(
         asserted_queue,
         mock_data_with_checked_toped_ads,
     ):
-    car_id = mock_data_with_checked_toped_ads["Car_Models"][0]["id"]
+    search_id = int(mock_data_with_checked_toped_ads["Car_Searches"][0]["id"])
     mock_db = build_mock_db(
         "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data_with_checked_toped_ads
@@ -129,7 +129,7 @@ def test_topped_adds_are_processed_separately(
     asyncio.run(bp.parse())
     queue = (
         mock_db.query(AdQueue.queue)
-        .filter(AdQueue.car_model_id == car_id)
+        .filter(AdQueue.car_search_id == search_id)
         .scalar()
     )
     assert queue == asserted_queue_without_checked_toped_ads
@@ -145,8 +145,6 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
                 "id": car_id,
                 "manufacturer": "BMW",
                 "model": "F20",
-                "_last_checked_links": [],
-                "_last_checked_toped_links": [],
             },
         ],
         "Car_Searches": [
@@ -162,6 +160,8 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
                 "mileage_range_to": 120000,
                 "price_range_from": 100000,
                 "price_range_to": 400000,
+                "_last_checked_links": [],
+                "_last_checked_toped_links": [],
             },
         ],
     }
@@ -173,7 +173,7 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
     asyncio.run(bp.parse())
     queue = (
         mock_db.query(AdQueue.queue)
-        .filter(AdQueue.car_model_id == car_id)
+        .filter(AdQueue.car_search_id == 1)
         .scalar()
     )
 
@@ -183,7 +183,7 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
 
 def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
     asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")
-    car_id = mock_data["Car_Models"][0]["id"]
+    search_id = int(mock_data["Car_Searches"][0]["id"])
     mock_db = build_mock_db(
         "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data
@@ -200,8 +200,7 @@ def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch,
     asyncio.run(bp.parse())
     queue = (
         mock_db.query(AdQueue.queue)
-        .filter(AdQueue.car_model_id == car_id)
+        .filter(AdQueue.car_search_id == search_id)
         .scalar()
     )
     assert queue == asserted_queue
-

@@ -3,6 +3,7 @@ from typing import TypedDict
 import aiohttp
 from bs4 import BeautifulSoup as bs
 import re
+from urllib.parse import quote_plus
 
 
 def get(link):
@@ -84,10 +85,10 @@ class AutoAdvertisementPage:
 
 class AutoPageSearchArgs(TypedDict):
     model: str
-    locality: str
-    range: str
-    price_from: int
-    price_to: int
+    locality: str | None
+    range: str | None
+    price_from: int | None
+    price_to: int | None
 
 
 class AutoPage:
@@ -104,16 +105,18 @@ class AutoPage:
         return get(self.url)
 
     def _construct_link(self, page=0):
-        model = self.model.replace(" ", "+")
-        locality = self.locality if self.locality is not None else ""
+        model = quote_plus(self.model)
+        locality = quote_plus(self.locality) if self.locality is not None else ""
         range = self.range if self.range is not None else 25
+        price_from = self.price_from if self.price_from is not None else ""
+        price_to = self.price_to if self.price_to is not None else ""
         if page == 0:
             url = f'{self.base_url}/?hledat={model}&' \
                 + f"rubriky=auto&hlokalita={locality}&humkreis={range}&" \
-                + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
+                + f"cenaod={price_from}&cenado={price_to}&Submit=Hledat&order=&crp=&kitx=ano"
         else:
             url = f"{self.base_url}/{page*20}/?hledat={model}&hlokalita={locality}&" \
-                  + f"humkreis={range}&cenaod={self.price_from}&cenado={self.price_to}&order="
+                  + f"humkreis={range}&cenaod={price_from}&cenado={price_to}&order="
         return url
 
     def get_advertisements(self) -> list[str]:

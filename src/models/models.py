@@ -28,51 +28,9 @@ class CarModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer = Column(String(length=20))
     model = Column(String(length=40))
-    _last_checked_links = (
-        Column(JSONB, nullable=True)
-        if settings.ENV == "production"
-        else Column(JSON, nullable=True)
-    )
-    _last_checked_toped_links = (
-        Column(JSONB, nullable=True)
-        if settings.ENV == "production"
-        else Column(JSON, nullable=True)
-    )
 
     def __mapper_configure__(cls, mapper):
         mapper.order_by = (cls.manufacturer, cls.model)
-
-    @property
-    def last_checked_links(self) -> list[str] | None:
-        return self._last_checked_links
-
-    @last_checked_links.setter
-    def last_checked_links(self, value: list[str]):
-        unique = list(dict.fromkeys(value))
-        self._last_checked_links = unique[-10:]
-
-    def add_last_checked_link(self, link: str):
-        current = self.last_checked_links
-        if not current:
-            self.last_checked_links = [link]
-            return
-        self.last_checked_links = current + [link]
-
-    @property
-    def last_checked_toped_links(self) -> list[str] | None:
-        return self._last_checked_toped_links
-    
-    @last_checked_toped_links.setter
-    def last_checked_toped_links(self, value: list[str]):
-        unique = list(dict.fromkeys(value))
-        self._last_checked_toped_links = unique[-25:]
-
-    def add_last_checked_toped_link(self, link: str):
-        current = self.last_checked_toped_links
-        if not current:
-            self.last_checked_toped_links = [link]
-            return
-        self.last_checked_toped_links = current + [link]
 
 
 class CarSearchCreate(BaseModel):
@@ -108,6 +66,16 @@ class CarSearch(Base):
     mileage_range_to = Column(Integer, nullable=True)
     price_range_from = Column(Integer, nullable=True)
     price_range_to = Column(Integer, nullable=True)
+    _last_checked_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
+    _last_checked_toped_links = (
+        Column(JSONB, nullable=True)
+        if settings.ENV == "production"
+        else Column(JSON, nullable=True)
+    )
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -134,6 +102,38 @@ class CarSearch(Base):
         }
         return new_attrs
 
+    @property
+    def last_checked_links(self) -> list[str] | None:
+        return self._last_checked_links
+
+    @last_checked_links.setter
+    def last_checked_links(self, value: list[str]):
+        unique = list(dict.fromkeys(value))
+        self._last_checked_links = unique[-10:]
+
+    def add_last_checked_link(self, link: str):
+        current = self.last_checked_links
+        if not current:
+            self.last_checked_links = [link]
+            return
+        self.last_checked_links = current + [link]
+
+    @property
+    def last_checked_toped_links(self) -> list[str] | None:
+        return self._last_checked_toped_links
+
+    @last_checked_toped_links.setter
+    def last_checked_toped_links(self, value: list[str]):
+        unique = list(dict.fromkeys(value))
+        self._last_checked_toped_links = unique[-25:]
+
+    def add_last_checked_toped_link(self, link: str):
+        current = self.last_checked_toped_links
+        if not current:
+            self.last_checked_toped_links = [link]
+            return
+        self.last_checked_toped_links = current + [link]
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -150,9 +150,10 @@ class AdQueue(Base):
     __tablename__ = "Advertisements_Queue"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    car_model_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    car_search_id = Column(Integer, ForeignKey("Car_Searches.id"), nullable=False)
+    car_search = relationship("CarSearch")
     queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
 
     __table_args__ = (
-        UniqueConstraint("car_model_id", name="uq_car_model_queue"),
+        UniqueConstraint("car_search_id", name="uq_car_search_queue"),
     )
