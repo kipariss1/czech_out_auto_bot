@@ -65,6 +65,9 @@ def _format_timestamp(value: datetime) -> str:
 
 async def run_forever(interval_seconds: int = DEFAULT_INTERVAL_SECONDS) -> None:
     interval = timedelta(seconds=interval_seconds)
+    def log_end(log_call: callable):
+        log_call()
+        logger.info("+" + "-" * 30 + "+")
     while True:
         cycle_started_at = datetime.now(timezone.utc)
         logger.info(
@@ -89,17 +92,21 @@ async def run_forever(interval_seconds: int = DEFAULT_INTERVAL_SECONDS) -> None:
         )
 
         if sleep_seconds == 0:
-            logger.info(
-                "Queue cycle exceeded interval interval_seconds=%s; starting next cycle immediately",
-                interval_seconds,
+            log_end(
+                lambda :logger.info(
+                    "Queue cycle exceeded interval interval_seconds=%s; starting next cycle immediately",
+                    interval_seconds,
+                )
             )
             continue
 
         next_cycle_at = cycle_finished_at + timedelta(seconds=sleep_seconds)
-        logger.info(
-            "Queue cycle finished before interval; sleeping sleep_seconds=%.3f next_cycle_at=%s",
-            sleep_seconds,
-            _format_timestamp(next_cycle_at),
+        log_end(
+            lambda :logger.info(
+                "Queue cycle finished before interval; sleeping sleep_seconds=%.3f next_cycle_at=%s",
+                sleep_seconds,
+                _format_timestamp(next_cycle_at),
+            )
         )
         await asyncio.sleep(sleep_seconds)
 
