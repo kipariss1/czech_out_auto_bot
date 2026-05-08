@@ -101,7 +101,10 @@ services:
       <<: *common-env
       # INTERVAL_SECONDS: ${INTERVAL_SECONDS:-7200}
       BOT_TOKEN: ${BOT_TOKEN}
+      LOG_LEVEL: "DEBUG"
     depends_on:
       postgres_db:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     logging: *stdout-file-logging
