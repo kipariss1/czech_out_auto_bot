@@ -83,8 +83,6 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-      # ports:
-      # - "11434:11434"   # just for testing
       logging: *stdout-file-logging
 
   queue:
