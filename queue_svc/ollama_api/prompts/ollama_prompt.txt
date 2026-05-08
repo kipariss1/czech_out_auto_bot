@@ -10,7 +10,7 @@ Your task is to analyze the text and determine:
    - Brand: <CAR_BRAND>
    - Model: <CAR_MODEL>
 
-If the advertisement is NOT a car sale advertisement (e.g. it's selling wheels or discs or controling unit, hardware or parts for car), or does NOT match the required brand, model, or additional characteristics, respond with the following JSON and nothing else:
+If the advertisement is NOT a car sale advertisement (e.g. it's selling wheels, discs, tires, controling units, hardware, parts for car or other things which is not car), or does NOT match the required brand, model, or additional characteristics, respond with the following JSON and nothing else:
 
 {
   "is_valid_ad": false

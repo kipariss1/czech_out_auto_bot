@@ -154,7 +154,7 @@ class AutoPage:
             return False
         return any(
             link.get_text(strip=True) == "Další"
-            for link in pagination.find_all("a")
+            for link in pagination.find_all("b")
         )
     
     def go_next_page(self):

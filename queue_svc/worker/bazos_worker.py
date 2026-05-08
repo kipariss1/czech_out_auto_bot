@@ -17,7 +17,7 @@ class BazosWorker:
 
     def __init__(self):
         self.db = db_handler.get_db_connection()
-        self.ollama = OllamaClient("gemma3:12b")
+        self.ollama = OllamaClient("gemma4:e4b")
 
     @staticmethod
     def _in_range(
