@@ -67,7 +67,7 @@ class AutoAdvertisementPage:
                 self._is_deleted = False
         return self._is_deleted
     
-    def _find_price(self) -> int:
+    def _find_price(self) -> int | str:
         left_table = self.parsed.find("td", class_="listadvlevo")
         for tr in left_table.find_all("tr"):
             if "Cena:" in tr.get_text():
@@ -77,7 +77,7 @@ class AutoAdvertisementPage:
             return 0
         price = re.sub(r"\D", "", price_text)
         if price == '':
-            return 0
+            return price_text
         return int(price)
 
     async def get_page_text(self):
