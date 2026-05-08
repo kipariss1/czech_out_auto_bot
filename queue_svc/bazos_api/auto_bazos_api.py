@@ -76,6 +76,8 @@ class AutoAdvertisementPage:
         if price_text.strip().lower() == 'dohodou':
             return 0
         price = re.sub(r"\D", "", price_text)
+        if price == '':
+            return 0
         return int(price)
 
     async def get_page_text(self):
