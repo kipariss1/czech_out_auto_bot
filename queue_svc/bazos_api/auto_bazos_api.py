@@ -13,7 +13,7 @@ def get(link):
     logger.debug("Getting syncronous url: %s", link)
     response = requests.get(link)
     text = response.text
-    status = response.status
+    status = response.status_code
     if response.status_code != 200:
         raise AssertionError(f"[{response.status_code}] Get request to {link} was not successful, status: {status}, reason: \n{text}")
     return text
