@@ -13,9 +13,8 @@ def get(link):
     logger.debug("Getting syncronous url: %s", link)
     response = requests.get(link)
     text = response.text
-    status = response.status_code
     if response.status_code != 200:
-        raise AssertionError(f"[{response.status_code}] Get request to {link} was not successful, status: {status}, reason: \n{text}")
+        raise AssertionError(f"[{response.status_code}] Get request to {link} was not successful, reason: \n{text}")
     return text
 
 
@@ -24,9 +23,8 @@ async def aget(link):
     async with aiohttp.ClientSession() as session:
         async with session.get(link) as response:
             text = await response.text()
-            status = response.status
             if response.status != 200:
-                raise AssertionError(f"[{response.status}] Async Get request to {link} was not successful, status: {status}, reason: \n{text}")
+                raise AssertionError(f"[{response.status}] Async Get request to {link} was not successful, reason: \n{text}")
             return text
 
 class AutoAdvertisementPage:

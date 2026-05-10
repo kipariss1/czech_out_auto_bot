@@ -66,6 +66,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    # ports:
+    #   - "5432:5432"
     logging: *stdout-file-logging
 
   ollama:
@@ -83,6 +85,8 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+      # ports:
+      #   - "11434:11434"
       logging: *stdout-file-logging
 
   queue:
