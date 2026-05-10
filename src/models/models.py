@@ -1,6 +1,6 @@
 from src.settings.settings import settings
 from sqlalchemy.orm import declarative_base, validates, relationship
-from sqlalchemy import Column, Integer, CheckConstraint, String, ForeignKey, JSON, DateTime, func, UniqueConstraint
+from sqlalchemy import Column, Integer, BIGINT, String, ForeignKey, JSON, DateTime, func, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel, ConfigDict
 import re
