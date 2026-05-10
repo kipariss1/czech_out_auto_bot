@@ -13,7 +13,7 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    telegram_id = Column(Integer, unique=True, nullable=False)
+    telegram_id = Column(BIGINT, unique=True, nullable=False)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
