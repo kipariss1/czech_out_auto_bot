@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup as bs
 
 logger = logging.getLogger(__name__)
 
-BAZOS_RATE_LIMIT_REQUESTS = 20
-BAZOS_RATE_LIMIT_PAUSE_SECONDS = 30
+BAZOS_RATE_LIMIT_REQUESTS = 100
+BAZOS_RATE_LIMIT_PAUSE_SECONDS = 300
 
 
 class _RequestRateLimiter:
