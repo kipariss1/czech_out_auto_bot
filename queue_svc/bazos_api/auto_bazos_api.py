@@ -1,15 +1,74 @@
-import requests
-from typing import TypedDict
-import aiohttp
-from bs4 import BeautifulSoup as bs
-import re
-from urllib.parse import urlencode
+import asyncio
 import logging
+import re
+import time
+from typing import TypedDict
+from urllib.parse import urlencode
+
+import aiohttp
+import requests
+from bs4 import BeautifulSoup as bs
 
 logger = logging.getLogger(__name__)
 
+BAZOS_RATE_LIMIT_REQUESTS = 20
+BAZOS_RATE_LIMIT_PAUSE_SECONDS = 30
+
+
+class _RequestRateLimiter:
+
+    def __init__(self, request_limit: int, pause_seconds: float):
+        self.request_limit = request_limit
+        self.pause_seconds = pause_seconds
+        self._request_count = 0
+        self._paused_until = 0.0
+
+    def _get_wait_time(self) -> float:
+        now = time.monotonic()
+        if now < self._paused_until:
+            return self._paused_until - now
+
+        if self._request_count >= self.request_limit:
+            self._request_count = 0
+            self._paused_until = now + self.pause_seconds
+            return self.pause_seconds
+
+        self._request_count += 1
+        return 0
+
+    def wait(self):
+        while True:
+            wait_time = self._get_wait_time()
+            if wait_time <= 0:
+                return
+
+            logger.info(
+                "Bazos request rate limit reached; waiting %.1f seconds",
+                wait_time,
+            )
+            time.sleep(wait_time)
+
+    async def await_wait(self):
+        while True:
+            wait_time = self._get_wait_time()
+            if wait_time <= 0:
+                return
+
+            logger.info(
+                "Bazos request rate limit reached; waiting %.1f seconds",
+                wait_time,
+            )
+            await asyncio.sleep(wait_time)
+
+
+_request_rate_limiter = _RequestRateLimiter(
+    BAZOS_RATE_LIMIT_REQUESTS,
+    BAZOS_RATE_LIMIT_PAUSE_SECONDS,
+)
+
 
 def get(link):
+    _request_rate_limiter.wait()
     logger.debug("Getting syncronous url: %s", link)
     response = requests.get(link)
     text = response.text
@@ -19,6 +78,7 @@ def get(link):
 
 
 async def aget(link):
+    await _request_rate_limiter.await_wait()
     logger.debug("Getting assyncronous url: %s", link)
     async with aiohttp.ClientSession() as session:
         async with session.get(link) as response:
