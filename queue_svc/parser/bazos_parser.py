@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 
 class BazosParser:
 
-    def __init__(self):
+    def __init__(self, page_limit_for_new_search: int = 30):
         self.db = db_handler.get_db_connection()
+        self.page_limit_for_new_search = page_limit_for_new_search
 
     def _get_searches(self) -> list[CarSearch]:
         return list(self.db.query(CarSearch).all())
@@ -95,6 +96,8 @@ class BazosParser:
                 len(car_ads),
             )
             if not car_page_bazos.go_next_page():
+                return pages
+            if car_page_bazos.page >= self.page_limit_for_new_search:
                 return pages
             logger.info(
                 "Search has older Bazos page; loading next page search_id=%s next_page=%s",
