@@ -29,7 +29,7 @@ The backend then:
 
 Relevant code areas:
 - [web_app](./web_app) - FastAPI web UI for creating and viewing car searches.
-- [telegram_bot](./telegram_bot) - Telegram bot integration used for sending matched-ad notifications.
+- [telegram_bot](./telegram_bot) - Telegram bot integration used for sending matched-ad notifications. Its Docker service also initializes the database on startup via [src/database_utils/init_db.py](./src/database_utils/init_db.py), applying Alembic migrations when migration files are present or creating initial tables and loading seed car model data otherwise.
 - [queue_svc/parser](./queue_svc/parser) - parser logic that scans Bazos and pushes new ads into the processing queue.
 - [queue_svc/worker](./queue_svc/worker) - worker pipeline that validates queued ads and matches them against user searches.
 - [src/models](./src/models) - shared database and domain models used across services.

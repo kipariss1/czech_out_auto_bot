@@ -6,6 +6,10 @@ COPY ./src /app/src
 
 COPY ./telegram_bot /app/telegram_bot
 
+COPY ./alembic.ini /app/alembic.ini
+
+COPY ./alembic /app/alembic
+
 RUN apt-get update && apt-get install -y \
     gcc \
     libsqlite3-dev \
