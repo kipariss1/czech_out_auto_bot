@@ -11,7 +11,7 @@ COPY src /app/src
 COPY telegram_bot /app/telegram_bot
 COPY queue_svc /app/queue_svc
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.0 /uv /usr/local/bin/uv
 COPY ./pyproject.toml ./uv.lock ./
 RUN uv sync --frozen --no-dev
 

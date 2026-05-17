@@ -96,6 +96,8 @@ services:
     container_name: queue
     restart: unless-stopped
     command:
+      - uv
+      - run
       - python
       - -m
       - queue_svc.main
