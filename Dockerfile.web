@@ -6,14 +6,15 @@ COPY ./src /app/src
 
 COPY ./web_app /app/web_app
 
-COPY ./requirements.txt /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY ./pyproject.toml ./uv.lock ./
 
 RUN apt-get update && apt-get install -y \
     gcc \
     libsqlite3-dev \
     build-essential
 
-RUN pip install -r requirements.txt
+RUN uv sync --frozen --no-dev
 
 EXPOSE 8000
 

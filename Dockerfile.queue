@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY ./pyproject.toml ./uv.lock ./
+RUN uv sync --frozen --no-dev
 
 COPY src /app/src
 COPY telegram_bot /app/telegram_bot
