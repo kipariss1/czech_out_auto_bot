@@ -114,9 +114,7 @@ class BazosParser:
         if not last_checked_id:
             pages = self._collect_all_pages(car_page_bazos, search)
             return None, pages, []
-
         pages: list[list[AutoAdvertisementPage]] = []
-
         while True:
             car_ads = self._get_ads_from_current_page(car_page_bazos)
             pages.append(car_ads)
@@ -128,10 +126,8 @@ class BazosParser:
                 len(car_ads),
                 last_checked_id,
             )
-
             if last_checked_id in car_ads_ids:
                 return last_checked_id, pages, car_ads
-
             logger.info(
                 "Last checked ad is not on current page; loading next page search_id=%s last_checked_id=%s current_page=%s",
                 search.id,
