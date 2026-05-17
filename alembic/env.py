@@ -81,6 +81,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
+# TODO: make the baseline migration for alembic
 if context.is_offline_mode():
     run_migrations_offline()
 else:
