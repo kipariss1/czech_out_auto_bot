@@ -24,11 +24,32 @@ const inputData: SearchFormInputs = {
     }
 
 test.beforeEach(async ({ page }) => {
+    sqliteDBhandler.cleanDB();
     sqliteDBhandler.insertUser(testUser);
+
+    await page.route('**/telegram-web-app.js', async route => {
+        await route.fulfill({
+            contentType: 'application/javascript',
+            body: `
+                window.Telegram = {
+                    WebApp: {
+                        ready() {},
+                        expand() {},
+                        initDataUnsafe: {
+                            user: { id: ${testUser.telegramId} }
+                        }
+                    }
+                };
+            `,
+        });
+    });
+
     await page.addInitScript((telegramUser) => {
         (window as typeof window & {
             Telegram?: {
                 WebApp?: {
+                    ready?: () => void,
+                    expand?: () => void,
                     initDataUnsafe?: {
                         user?: { id: number }
                     }
@@ -36,6 +57,8 @@ test.beforeEach(async ({ page }) => {
             }
         }).Telegram = {
             WebApp: {
+                ready() {},
+                expand() {},
                 initDataUnsafe: {
                     user: {
                         id: telegramUser.id

@@ -15,6 +15,14 @@ router = APIRouter()
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
+def get_db_session():
+    db = db_handler.get_new_db_connection()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def _get_user_by_telegram_id(db: Session, telegram_user_id: int) -> User | None:
     return db.query(User).filter(User.telegram_id == telegram_user_id).first()
 
@@ -47,7 +55,7 @@ def _optional_int(value: str | int | None) -> int | None:
 
 @router.get("/searches/{telegram_user_id}")
 def get_searches_by_id(
-    telegram_user_id: int, db: Session = Depends(db_handler.get_db_connection)
+    telegram_user_id: int, db: Session = Depends(get_db_session)
 ):
     user = _get_user_by_telegram_id(db, telegram_user_id)
     if user is None:
@@ -78,7 +86,7 @@ def main_view(
 @router.get("/create_search", response_class=HTMLResponse)
 def create_search_view(
     request: requests.Request,
-    db: Session = Depends(db_handler.get_db_connection),
+    db: Session = Depends(get_db_session),
 ):
     unique_car_manufacturers = (
         db.query(CarModel.manufacturer)
@@ -123,32 +131,31 @@ def _check_if_search_exists(
     return False
 
 
-def _find_car_by_model(manufacturer: str, model: str):
-    db = db_handler.get_db_connection()
-    cars = db.query(CarModel).filter(
+def _find_car_by_model(db: Session, manufacturer: str, model: str) -> CarModel:
+    cars = list(db.query(CarModel).filter(
         and_(
             CarModel.manufacturer == manufacturer,
             CarModel.model == model,
         )
-    )
-    if len(list(cars)) != 1:
+    ))
+    if len(cars) != 1:
         raise Exception("The car name is not found or ambiguous")
-    return cars
+    return cars[0]
 
 
 @router.post("/create_search", response_class=JSONResponse)
 def post_create_search_view(
     request: CarSearchCreate,
-    db: Session = Depends(db_handler.get_db_connection),
+    db: Session = Depends(get_db_session),
 ):
     user = _get_or_create_user_by_telegram_id(db, request.telegram_user_id)
 
-    cars = _find_car_by_model(request.manufacturer, request.model)
+    car = _find_car_by_model(db, request.manufacturer, request.model)
     psc_code = _optional_str(request.psc_code)
     psc_km_range = _optional_str(request.psc_km_range) if psc_code else None
     new_search_args = {
         "user_id": user.id,
-        "car_model_id": cars[0].id,
+        "car_model_id": car.id,
         "psc_code": psc_code,
         "psc_km_range": psc_km_range,
         "year_range_from": int(request.input_year_range_from),
@@ -171,7 +178,7 @@ def post_create_search_view(
 @router.post("/delete_search/{search_id}")
 def delete_search(
     search_id: int,
-    db: Session = Depends(db_handler.get_db_connection),
+    db: Session = Depends(get_db_session),
 ):
     car_search = db.query(CarSearch).filter(CarSearch.id == search_id).first()
     if car_search is None:
@@ -188,7 +195,7 @@ def delete_search(
 @router.get("/get_models/{manufacturer}", response_model=List[str])
 def get_models(
     manufacturer: str,
-    db: Session = Depends(db_handler.get_db_connection),
+    db: Session = Depends(get_db_session),
 ):
     models = (
         db.query(CarModel.model).filter(CarModel.manufacturer == manufacturer).all()

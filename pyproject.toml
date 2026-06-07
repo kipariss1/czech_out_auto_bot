@@ -2,7 +2,7 @@
 name = "czech-out-auto-bot"
 version = "0.1.0"
 description = "Bot for automatic searh for a car on bazos.cz"
-readme = "README.md"
+readme = "readme.md"
 requires-python = ">=3.11"
 dependencies = [
     "aiohappyeyeballs==2.6.1",
