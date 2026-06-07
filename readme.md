@@ -1,61 +1,20 @@
 # Czech Out Auto Bot
 
-`czech_out_auto_bot` is a car-search assistant for the Czech market.
+<img src="web_app/static/pics/logo.jpeg" alt="Czech Out Auto Bot logo" width="220">
 
-It combines:
-- a FastAPI web app for creating searches
-- a Telegram bot for notifications
-- a PostgreSQL database for persistent search data
-- a parser/worker pipeline for scraping Bazos and filtering ads with an LLM
-- automated test coverage for unit, integration, and smoke e2e flows
+Find the right used car in Czechia before someone else grabs it.
 
-## What It Does
+Czech Out Auto Bot watches Bazos for you, checks ads against your perfect-car wishlist, asks an LLM to sort the useful stuff from the noise, and pings you in Telegram when a match appears.
 
-The app lets a user define a car search with filters such as:
-- manufacturer and model
-- production year range
-- mileage range
-- price range
-- PSC / search radius
+No tab jungle. No "maybe I saw that ad yesterday". No refreshing Bazos like it owes you money.
 
-The backend then:
-1. collects matching ads from Bazos
-2. pushes new ads into a processing queue
-3. sends each ad to Ollama for structured extraction and validation
-4. checks whether the ad fits an existing user search
-5. sends a Telegram notification when a match is found
+## Why You Want It
 
-## Architecture
+- Set your dream car filters once: model, year, mileage, price, and location.
+- Let the bot keep watch while you do literally anything else.
+- Get Telegram alerts only when an ad actually looks relevant.
+- Run the whole thing with a web app, parser, worker, database, and bot working together.
 
-Relevant code areas:
-- [web_app](./web_app) - FastAPI web UI for creating and viewing car searches.
-- [telegram_bot](./telegram_bot) - Telegram bot integration used for sending matched-ad notifications.
-- [queue_svc/parser](./queue_svc/parser) - parser logic that scans Bazos and pushes new ads into the processing queue.
-- [queue_svc/worker](./queue_svc/worker) - worker pipeline that validates queued ads and matches them against user searches.
-- [src/models](./src/models) - shared database and domain models used across services.
-- [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
+## For Developers
 
-`parser` and `worker` run automatically in Docker every 2 hours after `docker compose up`.
-
-## Local Run
-
-### Requirements
-
-- Docker and Docker Compose
-- Python 3.11 if you want to run tests locally outside containers
-- Node.js 20 if you want to run Playwright smoke tests locally
-
-## CI
-
-The GitHub Actions workflow in [tests.yml](./.github/workflows/tests.yml) currently runs:
-- unit tests
-- integration tests
-- smoke e2e tests
-
-## Progress Tracker
-
-TODO:
- - separate containers for web_app, telegram bot and db ✅
- - grown up db ✅
- - implement smoke tests for web app ✅
- - implement jobs for scrapping bazos.cz and processing it with LLM & sending to user (parser & worker) ✅
+Want the wiring diagram, Docker notes, test details, and other serious-chair material? See [boaring_readme_for_devs.md](boaring_readme_for_devs.md).

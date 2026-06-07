@@ -34,6 +34,9 @@ class DatabaseHandler(ABC):
         db_conn = sess()
         return db_conn
 
+    def get_new_db_connection(self) -> Session:
+        return self._get_db_connection()
+
     def get_db_connection(self) -> Session:
         if self._db_conn is None:
             self._db_conn = self._get_db_connection()

@@ -1,5 +1,12 @@
 import { show_error_message, show_success_message } from "./utils.js";
 
+function display_optional_value(value) {
+    if (value === null || value === undefined || value === "") {
+        return "any";
+    }
+    return value;
+}
+
 export function populate_search_cards(list_searches) {
     const container = document.getElementById("search-cards-container");
     container.innerHTML = "";
@@ -17,11 +24,11 @@ export function populate_search_cards(list_searches) {
 
         const pscCode = document.createElement("p");
         pscCode.className = "card-text mb-1";
-        pscCode.innerHTML = `<strong>PSČ Code:</strong> ${search.psc_code}`;
+        pscCode.innerHTML = `<strong>PSČ Code:</strong> ${display_optional_value(search.psc_code)}`;
 
         const pscRange = document.createElement("p");
         pscRange.className = "card-text mb-2";
-        pscRange.innerHTML = `<strong>PSČ km range:</strong> ${search.psc_km_range}`;
+        pscRange.innerHTML = `<strong>PSČ km range:</strong> ${display_optional_value(search.psc_km_range)}`;
 
         const attrTitle = document.createElement("p");
         attrTitle.className = "card-text";

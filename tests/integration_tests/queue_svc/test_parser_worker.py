@@ -1,4 +1,5 @@
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import responses
@@ -47,6 +48,28 @@ PAGE2_AD_15 = "https://auto.bazos.cz/inzerat/211728369/bmw-116i-2011.php"
 TOPED_ADS = {TOPED_AD_1, TOPED_AD_2, TOPED_AD_3, TOPED_AD_4}
 
 
+def test_worker_treats_missing_price_and_mileage_ranges_as_any():
+    search = SimpleNamespace(
+        car_model=SimpleNamespace(manufacturer="BMW", model="F20"),
+        year_range_from=2010,
+        year_range_to=2020,
+        mileage_range_from=None,
+        mileage_range_to=None,
+        price_range_from=None,
+        price_range_to=None,
+    )
+    car_parse_res = {
+        "is_valid_ad": True,
+        "brand": "BMW",
+        "model": "F20",
+        "year": "2016",
+        "mileage": "300000",
+        "price": "900000",
+    }
+
+    assert BazosWorker._fits_to_search_criteria(car_parse_res, search)
+
+
 def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
     return build_mock_bazos(
         [
@@ -54,7 +77,7 @@ def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
                 "type": responses.GET,
                 "mock_url": (
                     "https://auto.bazos.cz/"
-                    "?hledat=BMW+F20&rubriky=auto&hlokalita=&humkreis=25"
+                    "?hledat=BMW+F20&rubriky=auto&hlokalita=110+00&humkreis=25"
                     f"&cenaod={min_from_price}&cenado={max_to_price}&Submit=Hledat"
                     "&order=&crp=&kitx=ano"
                 ),
@@ -67,7 +90,7 @@ def _mock_bazos_pages(build_mock_bazos, min_from_price: int, max_to_price: int):
                 'type': responses.GET,
                 'mock_url': (
                     "https://auto.bazos.cz/20/"
-                    "?hledat=BMW+F20&hlokalita=&humkreis=25"
+                    "?hledat=BMW+F20&hlokalita=110+00&humkreis=25"
                     f"&cenaod={min_from_price}&cenado={max_to_price}&order="
                 ),
                 'mock_html_path': "tests/integration_tests/test_data/test_parser_worker/page2.html",
@@ -141,8 +164,6 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "id": 1,
                 "manufacturer": "BMW",
                 "model": "F20",
-                "_last_checked_toped_links": [],
-                "_last_checked_links": [],
             },
         ],
         "Car_Searches": [
@@ -158,6 +179,8 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "mileage_range_to": 30000,
                 "price_range_from": 180000,
                 "price_range_to": 260000,
+                "_last_checked_toped_links": [],
+                "_last_checked_links": [],
             },
             {
                 "id": 2,
@@ -171,10 +194,13 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "mileage_range_to": 90000,
                 "price_range_from": 120000,
                 "price_range_to": 190000,
+                "_last_checked_toped_links": [],
+                "_last_checked_links": [],
             },
         ],
     }
-    _mock_bazos_pages(build_mock_bazos, 120000, 260000)
+    _mock_bazos_pages(build_mock_bazos, 180000, 260000)
+    _mock_bazos_pages(build_mock_bazos, 120000, 190000)
     ad_payloads = {
         TOPED_AD_1: {"text": "ad-for-user-1", "price": 220000},
         TOPED_AD_2: {"text": "miss-toped", "price": 450000},
@@ -231,7 +257,7 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
 
     asyncio.run(parser.parse())
 
-    row = mock_db.query(AdQueue).filter(AdQueue.car_model_id == 1).first()
+    row = mock_db.query(AdQueue).filter(AdQueue.car_search_id == 1).first()
     assert TOPED_AD_1 in row.queue
     assert REGULAR_AD_1 in row.queue
     assert PAGE2_AD_1 in row.queue
@@ -244,7 +270,7 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     assert any(call["chat_id"] == 111111111 and TOPED_AD_1 in call["text"] for call in calls)
     assert any(call["chat_id"] == 222222222 and REGULAR_AD_1 in call["text"] for call in calls)
     assert any(call["chat_id"] == 222222222 and PAGE2_AD_1 in call["text"] for call in calls)
-    assert row.queue == []
+    assert all(row.queue == [] for row in mock_db.query(AdQueue).all())
 
 
 def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
@@ -258,8 +284,6 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "id": 1,
                 "manufacturer": "BMW",
                 "model": "F20",
-                "_last_checked_toped_links": [TOPED_AD_3, TOPED_AD_4],
-                "_last_checked_links": [PAGE2_AD_10, PAGE2_AD_11, PAGE2_AD_12, PAGE2_AD_13, PAGE2_AD_14, PAGE2_AD_15],
             },
         ],
         "Car_Searches": [
@@ -275,6 +299,8 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "mileage_range_to": 120000,
                 "price_range_from": 100000,
                 "price_range_to": 400000,
+                "_last_checked_toped_links": [TOPED_AD_3, TOPED_AD_4],
+                "_last_checked_links": [PAGE2_AD_10, PAGE2_AD_11, PAGE2_AD_12, PAGE2_AD_13, PAGE2_AD_14, PAGE2_AD_15],
             },
             {
                 "id": 2,
@@ -288,10 +314,13 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
                 "mileage_range_to": 10000,
                 "price_range_from": 500000,
                 "price_range_to": 800000,
+                "_last_checked_toped_links": [TOPED_AD_3, TOPED_AD_4],
+                "_last_checked_links": [PAGE2_AD_10, PAGE2_AD_11, PAGE2_AD_12, PAGE2_AD_13, PAGE2_AD_14, PAGE2_AD_15],
             },
         ],
     }
-    _mock_bazos_pages(build_mock_bazos, 100000, 800000)
+    _mock_bazos_pages(build_mock_bazos, 100000, 400000)
+    _mock_bazos_pages(build_mock_bazos, 500000, 800000)
     OKAY_PRICE_FOR_FIRST_SEARCH = 220000
     NOT_OKAY_PRICE_FOR_FIRST_SEARCH = 450000
     OKAY_PRICE_FOR_SECOND_SEARCH = 600000
@@ -396,7 +425,7 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
 
     asyncio.run(parser.parse())
 
-    row = mock_db.query(AdQueue).filter(AdQueue.car_model_id == 1).first()
+    row = mock_db.query(AdQueue).filter(AdQueue.car_search_id == 1).first()
     assert TOPED_AD_3 not in row.queue
     assert TOPED_AD_4 not in row.queue
     assert PAGE2_AD_10 not in row.queue
@@ -418,4 +447,4 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     assert all(REGULAR_AD_2 not in call["text"] for call in calls)
     assert all(PAGE2_AD_1 not in call["text"] for call in calls)
     assert all(PAGE2_AD_10 not in call["text"] for call in calls)
-    assert row.queue == []
+    assert all(row.queue == [] for row in mock_db.query(AdQueue).all())

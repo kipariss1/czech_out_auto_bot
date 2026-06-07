@@ -24,11 +24,32 @@ const inputData: SearchFormInputs = {
     }
 
 test.beforeEach(async ({ page }) => {
+    sqliteDBhandler.cleanDB();
     sqliteDBhandler.insertUser(testUser);
+
+    await page.route('**/telegram-web-app.js', async route => {
+        await route.fulfill({
+            contentType: 'application/javascript',
+            body: `
+                window.Telegram = {
+                    WebApp: {
+                        ready() {},
+                        expand() {},
+                        initDataUnsafe: {
+                            user: { id: ${testUser.telegramId} }
+                        }
+                    }
+                };
+            `,
+        });
+    });
+
     await page.addInitScript((telegramUser) => {
         (window as typeof window & {
             Telegram?: {
                 WebApp?: {
+                    ready?: () => void,
+                    expand?: () => void,
                     initDataUnsafe?: {
                         user?: { id: number }
                     }
@@ -36,6 +57,8 @@ test.beforeEach(async ({ page }) => {
             }
         }).Telegram = {
             WebApp: {
+                ready() {},
+                expand() {},
                 initDataUnsafe: {
                     user: {
                         id: telegramUser.id
@@ -91,12 +114,14 @@ test('Assert form validation works', async ({ page }) => {
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'You must select car and model to continue!')
     });
-    await test.step('Assert form requires PSC', async () => {
+    await test.step('Assert form requires PSC when km range is filled', async () => {
         await createSearchPage.carModelSelect.selectOption(inputData.carModel);
+        await createSearchPage.kmRangeFromPSCinput.fill(inputData.kmRangeFromPSC!.toString());
         await createSearchPage.submitBtn.click();
-        await assertAlertPresent(page, 'You should enter PSC to continue!')
+        await assertAlertPresent(page, 'PSC is required when km range is provided!');
+        await createSearchPage.kmRangeFromPSCinput.fill('');
     });
-    await test.step('Assert form requires PSC in correct format', async () => {
+    await test.step('Assert form validates PSC in correct format when provided', async () => {
         await createSearchPage.PSCinput.fill('1');
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');

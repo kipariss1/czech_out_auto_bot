@@ -7,12 +7,12 @@ export type SearchFormInputs = {
     optionalAttributes?: string[];
     yearFromInput: number;
     yearToInput: number;               
-    mileageFrom: number;          
-    mileageTo: number;            
-    priceFrom: number;            
-    priceTo: number;              
-    pscCode: string;              
-    kmRangeFromPSC: number;       
+    mileageFrom?: number;          
+    mileageTo?: number;            
+    priceFrom?: number;            
+    priceTo?: number;              
+    pscCode?: string;              
+    kmRangeFromPSC?: number;       
 };
 
 export class CreateSearchPage extends BasePage {
@@ -66,12 +66,24 @@ export class CreateSearchPage extends BasePage {
         }
         await this.yearFromInput.fill(data.yearFromInput.toString());
         await this.yearToInput.fill(data.yearToInput.toString());
-        await this.milegeFromInput.fill(data.mileageFrom.toString());
-        await this.milegeToInput.fill(data.mileageTo.toString());
-        await this.priceFromInput.fill(data.priceFrom.toString());
-        await this.priceToInput.fill(data.priceTo.toString());
-        await this.PSCinput.fill(data.pscCode);
-        await this.kmRangeFromPSCinput.fill(data.kmRangeFromPSC.toString());
+        if (data.mileageFrom !== undefined) {
+            await this.milegeFromInput.fill(data.mileageFrom.toString());
+        }
+        if (data.mileageTo !== undefined) {
+            await this.milegeToInput.fill(data.mileageTo.toString());
+        }
+        if (data.priceFrom !== undefined) {
+            await this.priceFromInput.fill(data.priceFrom.toString());
+        }
+        if (data.priceTo !== undefined) {
+            await this.priceToInput.fill(data.priceTo.toString());
+        }
+        if (data.pscCode !== undefined) {
+            await this.PSCinput.fill(data.pscCode);
+        }
+        if (data.kmRangeFromPSC !== undefined) {
+            await this.kmRangeFromPSCinput.fill(data.kmRangeFromPSC.toString());
+        }
         await this.submitBtn.click();
     }
 }

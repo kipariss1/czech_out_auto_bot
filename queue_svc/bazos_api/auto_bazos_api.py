@@ -1,11 +1,75 @@
-import requests
-from typing import TypedDict
-import aiohttp
-from bs4 import BeautifulSoup as bs
+import asyncio
+import logging
 import re
+import time
+from typing import TypedDict
+from urllib.parse import urlencode
+
+import aiohttp
+import requests
+from bs4 import BeautifulSoup as bs
+
+logger = logging.getLogger(__name__)
+
+BAZOS_RATE_LIMIT_REQUESTS = 100
+BAZOS_RATE_LIMIT_PAUSE_SECONDS = 600
+
+
+class _RequestRateLimiter:
+
+    def __init__(self, request_limit: int, pause_seconds: float):
+        self.request_limit = request_limit
+        self.pause_seconds = pause_seconds
+        self._request_count = 0
+        self._paused_until = 0.0
+
+    def _get_wait_time(self) -> float:
+        now = time.monotonic()
+        if now < self._paused_until:
+            return self._paused_until - now
+
+        if self._request_count >= self.request_limit:
+            self._request_count = 0
+            self._paused_until = now + self.pause_seconds
+            return self.pause_seconds
+
+        self._request_count += 1
+        return 0
+
+    def wait(self):
+        while True:
+            wait_time = self._get_wait_time()
+            if wait_time <= 0:
+                return
+
+            logger.info(
+                "Bazos request rate limit reached; waiting %.1f seconds",
+                wait_time,
+            )
+            time.sleep(wait_time)
+
+    async def await_wait(self):
+        while True:
+            wait_time = self._get_wait_time()
+            if wait_time <= 0:
+                return
+
+            logger.info(
+                "Bazos request rate limit reached; waiting %.1f seconds",
+                wait_time,
+            )
+            await asyncio.sleep(wait_time)
+
+
+_request_rate_limiter = _RequestRateLimiter(
+    BAZOS_RATE_LIMIT_REQUESTS,
+    BAZOS_RATE_LIMIT_PAUSE_SECONDS,
+)
 
 
 def get(link):
+    _request_rate_limiter.wait()
+    logger.debug("Getting syncronous url: %s", link)
     response = requests.get(link)
     text = response.text
     if response.status_code != 200:
@@ -14,6 +78,8 @@ def get(link):
 
 
 async def aget(link):
+    await _request_rate_limiter.await_wait()
+    logger.debug("Getting assyncronous url: %s", link)
     async with aiohttp.ClientSession() as session:
         async with session.get(link) as response:
             text = await response.text()
@@ -61,10 +127,17 @@ class AutoAdvertisementPage:
                 self._is_deleted = False
         return self._is_deleted
     
-    def _find_price(self) -> int:
+    def _find_price(self) -> int | str:
         left_table = self.parsed.find("td", class_="listadvlevo")
-        price_text = left_table.contents[1].contents[9].text
+        for tr in left_table.find_all("tr"):
+            if "Cena:" in tr.get_text():
+                price_text = tr.find("span").get_text(strip=True)
+                break
+        if price_text.strip().lower() == 'dohodou':
+            return 0
         price = re.sub(r"\D", "", price_text)
+        if price == '':
+            return price_text
         return int(price)
 
     async def get_page_text(self):
@@ -84,10 +157,10 @@ class AutoAdvertisementPage:
 
 class AutoPageSearchArgs(TypedDict):
     model: str
-    locality: str
-    range: str
-    price_from: int
-    price_to: int
+    locality: str | None
+    range: str | None
+    price_from: int | None
+    price_to: int | None
 
 
 class AutoPage:
@@ -102,19 +175,33 @@ class AutoPage:
     def _get_html(self):
         self.url = self._construct_link(self.page)
         return get(self.url)
-
+    
+    @staticmethod
+    def _blank_if_none(value):
+        return "" if value is None else value
+    
     def _construct_link(self, page=0):
-        model = self.model.replace(" ", "+")
-        locality = self.locality if self.locality is not None else ""
-        range = self.range if self.range is not None else 25
+        query_params = [
+            ("hledat", self.model),
+            ("hlokalita", self._blank_if_none(self.locality)),
+            ("humkreis", self._blank_if_none(self.range)),
+            ("cenaod", self._blank_if_none(self.price_from)),
+            ("cenado", self._blank_if_none(self.price_to)),
+        ]
         if page == 0:
-            url = f'{self.base_url}/?hledat={model}&' \
-                + f"rubriky=auto&hlokalita={locality}&humkreis={range}&" \
-                + f"cenaod={self.price_from}&cenado={self.price_to}&Submit=Hledat&order=&crp=&kitx=ano"
-        else:
-            url = f"{self.base_url}/{page*20}/?hledat={model}&hlokalita={locality}&" \
-                  + f"humkreis={range}&cenaod={self.price_from}&cenado={self.price_to}&order="
-        return url
+            query_params = [
+                query_params[0],
+                ("rubriky", "auto"),
+                *query_params[1:],
+                ("Submit", "Hledat"),
+                ("order", ""),
+                ("crp", ""),
+                ("kitx", "ano"),
+            ]
+            return f"{self.base_url}/?{urlencode(query_params)}"
+
+        query_params.append(("order", ""))
+        return f"{self.base_url}/{page * 20}/?{urlencode(query_params)}"
 
     def get_advertisements(self) -> list[str]:
         parsed = bs(self.html, "html.parser")
@@ -129,7 +216,7 @@ class AutoPage:
             return False
         return any(
             link.get_text(strip=True) == "Další"
-            for link in pagination.find_all("a")
+            for link in pagination.find_all("b")
         )
     
     def go_next_page(self):
