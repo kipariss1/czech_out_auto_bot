@@ -243,6 +243,10 @@ class BazosWorker:
                 ad.link,
             )
             res = self.ollama.process(ad_text=ad.text, car=car)
+            await self._add_checked_ad_to_history(ad, search)
+            queue.remove(ad.link)
+            row.queue = queue
+            self.db.commit()
             if res["is_valid_ad"]:
                 logger.info(
                     "Ollama marked ad as valid search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
@@ -278,10 +282,6 @@ class BazosWorker:
                     ad.id,
                     ad.link,
                 )
-            await self._add_checked_ad_to_history(ad, search)
-            queue.remove(ad.link)
-            row.queue = queue
-            self.db.commit()
         logger.info(
             "Finished worker queue search_id=%s remaining_ads=%s",
             search.id,
