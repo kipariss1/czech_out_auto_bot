@@ -17,4 +17,4 @@ No tab jungle. No "maybe I saw that ad yesterday". No refreshing Bazos like it o
 
 ## For Developers
 
-Want the wiring diagram, Docker notes, test details, and other serious-chair material? See [boaring_readme_for_devs.md](boring_readme_for_devs.md).
+Want the wiring diagram, Docker notes, test details, and other serious-chair material? See [boring_readme_for_devs.md](boring_readme_for_devs.md).
