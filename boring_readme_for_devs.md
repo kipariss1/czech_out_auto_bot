@@ -46,9 +46,9 @@ The worker selects its LLM provider from `LLM`:
 
 Optional model overrides:
 
-- `OLLAMA_MODEL`, default `gemma4:e4b`
+- `OLLAMA_MODEL`, default `gemma4:12b`
 - `OLLAMA_BASE_URL`, default `http://ollama:11434` in production and `http://localhost:11434` in tests/local Python runs
-- `GEMINI_MODEL`, default `gemini-2.5-flash`
+- `GEMINI_MODEL`, default `gemini-3-flash`
 
 ## Local Run
 
