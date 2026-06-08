@@ -1,6 +1,7 @@
+from typing import Literal, TypedDict
+
 import os
 from pydantic_settings import BaseSettings
-from typing import Literal, TypedDict
 
 
 class PostgresData(TypedDict):
@@ -11,10 +12,15 @@ class PostgresData(TypedDict):
 
 class Settings(BaseSettings):
     ENV: Literal['production', 'test'] = os.getenv("ENV", "production")
+    LLM: Literal["local", "api-key"] = os.getenv("LLM", "local")
     POSTGRES_USER: str | None = os.getenv("POSTGRES_USER", None)
     POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD", None)
     POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", None)
     WEBAPP_BASE_URL: str | None = os.getenv("RENDER_EXTERNAL_URL")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "gemma4:12b")
+    OLLAMA_BASE_URL: str | None = os.getenv("OLLAMA_BASE_URL")
+    GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3-flash")
     
     @property
     def base_url(self):
@@ -23,6 +29,28 @@ class Settings(BaseSettings):
     @property
     def env(self) -> Literal['production', 'test']:
         return self.ENV
+
+    @property
+    def llm(self) -> Literal["local", "api-key"]:
+        return self.LLM
+
+    @property
+    def ollama_model(self) -> str:
+        return self.OLLAMA_MODEL
+
+    @property
+    def ollama_base_url(self) -> str:
+        if self.OLLAMA_BASE_URL:
+            return self.OLLAMA_BASE_URL
+        return "http://ollama:11434" if self.env == "production" else "http://localhost:11434"
+
+    @property
+    def gemini_api_key(self) -> str | None:
+        return self.GEMINI_API_KEY or None
+
+    @property
+    def gemini_model(self) -> str:
+        return self.GEMINI_MODEL
     
     @property
     def postgres_data(self) -> PostgresData:

@@ -249,7 +249,7 @@ def test_newly_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
         mock_data,
     )
     _mock_ad_methods(monkeypatch, ad_payloads)
-    worker.ollama = Mock(
+    worker.llm = Mock(
         process=Mock(
             side_effect=lambda ad_text, car: ollama_responses.get(ad_text, default_response).copy()
         )
@@ -417,7 +417,7 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
         mock_data,
     )
     _mock_ad_methods(monkeypatch, ad_payloads)
-    worker.ollama = Mock(
+    worker.llm = Mock(
         process=Mock(
             side_effect=lambda ad_text, car: ollama_responses.get(ad_text, default_response).copy()
         )
