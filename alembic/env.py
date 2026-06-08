@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.database_utils.postgres_database import PostgresDBHandler
+from src.database_utils.migrations import get_database_url as get_app_database_url
 from src.models.models import Base
 
 # this is the Alembic Config object, which provides
@@ -29,7 +29,10 @@ target_metadata = Base.metadata
 
 
 def get_database_url() -> str:
-    return PostgresDBHandler.db_url()
+    x_arguments = context.get_x_argument(as_dictionary=True)
+    if x_arguments.get("database_url"):
+        return x_arguments["database_url"]
+    return get_app_database_url()
 
 
 def run_migrations_offline() -> None:
@@ -49,6 +52,8 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        compare_type=True,
+        render_as_batch=url.startswith("sqlite"),
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -74,14 +79,16 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            render_as_batch=connection.dialect.name == "sqlite",
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
 
-# TODO: make the baseline migration for alembic
 if context.is_offline_mode():
     run_migrations_offline()
 else:
