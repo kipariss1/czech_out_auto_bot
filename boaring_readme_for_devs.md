@@ -21,7 +21,7 @@ The app lets a user define a car search with filters such as:
 The backend then:
 1. collects matching ads from Bazos
 2. pushes new ads into a processing queue
-3. sends each ad to Ollama for structured extraction and validation
+3. sends each ad to the configured LangChain LLM for structured extraction and validation
 4. checks whether the ad fits an existing user search
 5. sends a Telegram notification when a match is found
 
@@ -36,6 +36,19 @@ Relevant code areas:
 - [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
 
 The Docker `queue` service runs one parser/worker cycle every 2 hours after `docker compose up`: first parser, then worker. The next cycle is scheduled from the cycle start timestamp. If the cycle finishes in less than 2 hours, `queue` waits the remaining time; if it takes 2 hours or more, the next cycle starts immediately.
+
+## Worker LLM Configuration
+
+The worker selects its LLM provider from `LLM`:
+
+- `LLM=local` uses the Ollama service. This is the default.
+- `LLM=api-key` uses Gemini through `GEMINI_API_KEY`.
+
+Optional model overrides:
+
+- `OLLAMA_MODEL`, default `gemma4:e4b`
+- `OLLAMA_BASE_URL`, default `http://ollama:11434` in production and `http://localhost:11434` in tests/local Python runs
+- `GEMINI_MODEL`, default `gemini-2.5-flash`
 
 ## Local Run
 

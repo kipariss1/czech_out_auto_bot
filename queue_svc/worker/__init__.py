@@ -1,3 +1,1 @@
-from queue_svc.worker.bazos_worker import BazosWorker
-
-bw = BazosWorker()
+__all__: list[str] = []

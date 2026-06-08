@@ -6,7 +6,7 @@ from typing import Any
 from src.database_utils import db_handler
 from src.models.models import AdQueue, CarSearch, User
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
-from queue_svc.ollama_api.ollama_client import OllamaClient, ValidCarAd
+from queue_svc.worker.llm_client import LangChainCarAdClient, ValidCarAd
 from telegram_bot import bot
 
 
@@ -17,7 +17,7 @@ class BazosWorker:
 
     def __init__(self):
         self.db = db_handler.get_db_connection()
-        self.ollama = OllamaClient("gemma4:e4b")
+        self.llm = LangChainCarAdClient()
 
     @staticmethod
     def _in_range(
@@ -236,20 +236,20 @@ class BazosWorker:
                 self.db.commit()
                 continue
             logger.debug(
-                "Processing ad with Ollama search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
+                "Processing ad with LLM search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
                 search.id,
                 car.id,
                 ad.id,
                 ad.link,
             )
-            res = self.ollama.process(ad_text=ad.text, car=car)
+            res = self.llm.process(ad_text=ad.text, car=car)
             await self._add_checked_ad_to_history(ad, search)
             queue.remove(ad.link)
             row.queue = queue
             self.db.commit()
             if res["is_valid_ad"]:
                 logger.info(
-                    "Ollama marked ad as valid search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
+                    "LLM marked ad as valid search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
                     search.id,
                     car.id,
                     ad.id,
@@ -276,7 +276,7 @@ class BazosWorker:
                     )
             else:
                 logger.debug(
-                    "Ollama marked ad as invalid search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
+                    "LLM marked ad as invalid search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
                     search.id,
                     car.id,
                     ad.id,
