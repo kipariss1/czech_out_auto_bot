@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from src.database_utils import db_handler
@@ -33,7 +32,7 @@ class BazosParser:
 
     @staticmethod
     def _get_history_links(search: CarSearch) -> list[str]:
-        return (search.last_checked_links or []) + (search.last_checked_toped_links or [])
+        return (search.last_checked_links or []), (search.last_checked_toped_links or [])
 
     @staticmethod
     def _flatten_pages_from_oldest_to_newest(
@@ -41,7 +40,7 @@ class BazosParser:
     ) -> list[AutoAdvertisementPage]:
         queue_to_check: list[AutoAdvertisementPage] = []
         for ads in reversed(pages):
-            queue_to_check.extend(ads)
+            queue_to_check.extend(reversed(ads))
         return queue_to_check
 
     @staticmethod
@@ -57,28 +56,30 @@ class BazosParser:
         }  # type: ignore
 
     async def _find_last_valid_checked_id(self, search: CarSearch) -> str | None:
-        history_links = self._get_history_links(search)
-        if not history_links:
+        async def find_not_deleted_in_(history: list[str]) -> str | None:
+            # last_checked_links and last_checked_toped_links are written oldest to newest
+            for link in reversed(history):
+                ad = AutoAdvertisementPage(link)
+                if not await ad.is_deleted():
+                    logger.debug(
+                        "Found last valid checked ad search_id=%s ad_id=%s",
+                        search.id,
+                        ad.id,
+                    )
+                    return ad.id
+                logger.debug(
+                    "Skipping deleted checked ad search_id=%s link=%s",
+                    search.id,
+                    link,
+                )
+
+        history_links, history_toped_links = self._get_history_links(search)
+        if not history_links and not history_toped_links:
             logger.debug("No checked ad history for search_id=%s", search.id)
             return None
-
-        for link in history_links:
-            ad = AutoAdvertisementPage(link)
-            if not await ad.is_deleted():
-                logger.debug(
-                    "Found last valid checked ad search_id=%s ad_id=%s",
-                    search.id,
-                    ad.id,
-                )
-                return ad.id
-            logger.debug(
-                "Skipping deleted checked ad search_id=%s link=%s",
-                search.id,
-                link,
-            )
-
-        logger.debug("No valid checked ad history for search_id=%s", search.id)
-        return None
+        valid_link = await find_not_deleted_in_(history_links)
+        valid_toped_link = await find_not_deleted_in_(history_toped_links)
+        return valid_link or valid_toped_link
 
     def _collect_all_pages(
         self,
@@ -142,6 +143,14 @@ class BazosParser:
                     car_page_bazos.page,
                 )
                 return None, pages, car_ads
+            if car_page_bazos.page >= self.page_limit_for_new_search:
+                logger.info(
+                    "Hit the limit of pages, while going back searching for last checked add search_id=%s last_checked_id=%s current_page=%s",
+                    search.id,
+                    last_checked_id,
+                    car_page_bazos.page,
+                )
+                return pages
 
     def _form_queue_for_existing_search(
         self,
@@ -157,7 +166,7 @@ class BazosParser:
             if ad.id == last_checked_id
         )
         queue_pages = pages[:-1] + [page_with_last_checked_id[:idx_of_last_checked_ad]]
-        return [ad for page in queue_pages for ad in page]
+        return self._flatten_pages_from_oldest_to_newest(queue_pages)
 
     def _form_queue_for_new_search(
         self,
@@ -186,35 +195,6 @@ class BazosParser:
             len(links),
             action,
         )
-
-    async def _process_toped_ads(
-        self,
-        queue: list[AutoAdvertisementPage],
-        search: CarSearch,
-    ) -> list[AutoAdvertisementPage]:
-        if not search.last_checked_toped_links:
-            logger.debug(
-                "No topped ad history for search_id=%s; keeping queue unchanged ads=%s",
-                search.id,
-                len(queue),
-            )
-            return queue
-        is_toped_mask = await asyncio.gather(*[el.is_toped() for el in queue])
-        toped = [el for el, is_toped in zip(queue, is_toped_mask) if is_toped]
-        not_toped = [el for el, is_toped in zip(queue, is_toped_mask) if not is_toped]
-        new_toped = [
-            el for el in toped
-            if el.link not in search.last_checked_toped_links
-        ]
-        logger.info(
-            "Processed topped ads search_id=%s ads=%s topped=%s skipped_seen_topped=%s queued=%s",
-            search.id,
-            len(queue),
-            len(toped),
-            len(toped) - len(new_toped),
-            len(new_toped) + len(not_toped),
-        )
-        return new_toped + not_toped
 
     async def parse(self):
         logger.info("Parser run started")
@@ -262,7 +242,6 @@ class BazosParser:
                     len(queue_to_check),
                     last_checked_id,
                 )
-                queue_to_check = await self._process_toped_ads(queue_to_check, search)
                 self._add_queue_to_db(search.id, queue_to_check)
             except Exception:
                 logger.exception("Parser failed for search_id=%s", search.id)
