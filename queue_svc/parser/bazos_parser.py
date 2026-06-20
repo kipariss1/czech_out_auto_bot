@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from src.database_utils import db_handler
