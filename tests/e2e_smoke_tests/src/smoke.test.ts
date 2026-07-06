@@ -159,4 +159,18 @@ test('Optional filters stay disabled until switched on', async ({ page }) => {
     await createSearchPage.mileageFilterSwitch.uncheck();
     await expect(createSearchPage.milegeFromInput).toBeDisabled();
     await expect(createSearchPage.milegeFromInput).toHaveValue('');
+
+    const searchWithoutOptionalFilters: SearchFormInputs = {
+        carManufacturer: 'Audi',
+        carModel: 'A3',
+        yearFromInput: 2015,
+        yearToInput: 2017,
+    };
+
+    await createSearchPage.createNewSearch(searchWithoutOptionalFilters);
+    await landingPage.waitForPageToLoad();
+    await assertAlertPresent(page, 'New search successfully created!');
+    await assertTextPresent(page, `Year range: ${searchWithoutOptionalFilters.yearFromInput} - ${searchWithoutOptionalFilters.yearToInput}`);
+    await assertTextPresent(page, 'Mileage range: any');
+    await assertTextPresent(page, 'Price range (Kč): any');
 });
