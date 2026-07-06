@@ -1,4 +1,4 @@
-import { test } from 'playwright/test'
+import { expect, test } from 'playwright/test'
 import { sqliteDBhandler } from './index';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
 import { assertTextPresent, assertAlertPresent } from './assertions';
@@ -116,12 +116,14 @@ test('Assert form validation works', async ({ page }) => {
     });
     await test.step('Assert form requires PSC when km range is filled', async () => {
         await createSearchPage.carModelSelect.selectOption(inputData.carModel);
+        await createSearchPage.kmRangeFromPSCFilterSwitch.check();
         await createSearchPage.kmRangeFromPSCinput.fill(inputData.kmRangeFromPSC!.toString());
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'PSC is required when km range is provided!');
         await createSearchPage.kmRangeFromPSCinput.fill('');
     });
     await test.step('Assert form validates PSC in correct format when provided', async () => {
+        await createSearchPage.PSCFilterSwitch.check();
         await createSearchPage.PSCinput.fill('1');
         await createSearchPage.submitBtn.click();
         await assertAlertPresent(page, 'PSC should be only numbers with optional space and needs to be at least 5 characters!');
@@ -135,4 +137,40 @@ test('Assert form validation works', async ({ page }) => {
         await createSearchPage.submitBtn.click();
         await landingPage.waitForPageToLoad();
     });
+});
+
+test('Optional filters stay disabled until switched on', async ({ page }) => {
+    const landingPage = new LandingPage(page);
+    const createSearchPage = new CreateSearchPage(page);
+
+    await page.goto(baseUrl);
+    await landingPage.waitForPageToLoad();
+    await landingPage.createSearchBtn.click();
+    await createSearchPage.waitForPageToLoad();
+
+    await expect(createSearchPage.mileageFilterSwitch).not.toBeChecked();
+    await expect(createSearchPage.milegeFromInput).toBeDisabled();
+    await expect(createSearchPage.milegeFromInput).toHaveValue('');
+
+    await createSearchPage.mileageFilterSwitch.check();
+    await expect(createSearchPage.milegeFromInput).toBeEnabled();
+    await expect(createSearchPage.milegeFromInput).not.toHaveValue('');
+
+    await createSearchPage.mileageFilterSwitch.uncheck();
+    await expect(createSearchPage.milegeFromInput).toBeDisabled();
+    await expect(createSearchPage.milegeFromInput).toHaveValue('');
+
+    const searchWithoutOptionalFilters: SearchFormInputs = {
+        carManufacturer: 'Audi',
+        carModel: 'A3',
+        yearFromInput: 2015,
+        yearToInput: 2017,
+    };
+
+    await createSearchPage.createNewSearch(searchWithoutOptionalFilters);
+    await landingPage.waitForPageToLoad();
+    await assertAlertPresent(page, 'New search successfully created!');
+    await assertTextPresent(page, `Year range: ${searchWithoutOptionalFilters.yearFromInput} - ${searchWithoutOptionalFilters.yearToInput}`);
+    await assertTextPresent(page, 'Mileage range: any');
+    await assertTextPresent(page, 'Price range (Kč): any');
 });

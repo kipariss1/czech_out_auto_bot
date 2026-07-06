@@ -58,6 +58,26 @@ Optional model overrides:
 - Python 3.11 if you want to run tests locally outside containers
 - Node.js 20 if you want to run Playwright smoke tests locally
 
+### Local Development Startup
+
+Before running the application services locally, you must first initialize the local SQLite test database:
+
+```bash
+export ENV=test && uv run python -m src.database_utils.init_test_db
+```
+
+Once the test database is initialized, you can start the individual services for local development:
+
+- **Web App**:
+  ```bash
+  export ENV=test && uv run python -m web_app.main
+  ```
+
+- **Telegram Bot**:
+  ```bash
+  export ENV=test && uv run python -m telegram_bot.run_bot
+  ```
+
 ## Database Migrations
 
 Alembic is configured in [alembic.ini](./alembic.ini), with migration scripts in [alembic/versions](./alembic/versions). The runtime database URL is resolved through [src/database_utils/migrations.py](./src/database_utils/migrations.py): `ENV=production` uses PostgreSQL settings, while `ENV=test` uses the local SQLite database at [src/db/local.db](./src/db/local.db).

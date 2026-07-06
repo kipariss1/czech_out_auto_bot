@@ -64,6 +64,7 @@ def get_searches_by_id(
     searches = (
         db.query(CarSearch)
         .filter(CarSearch.user_id == user.id)
+        .order_by(CarSearch.created_at.desc())
         .all()
     )
     return JSONResponse(list(map(lambda s: s.to_dict(), list(searches))))
