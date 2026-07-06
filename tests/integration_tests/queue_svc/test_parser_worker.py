@@ -426,13 +426,13 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     asyncio.run(parser.parse())
 
     row = mock_db.query(AdQueue).filter(AdQueue.car_search_id == 1).first()
-    assert TOPED_AD_3 not in row.queue
-    assert TOPED_AD_4 not in row.queue
-    assert PAGE2_AD_10 not in row.queue
-    assert PAGE2_AD_11 not in row.queue
-    assert PAGE2_AD_12 not in row.queue
-    assert PAGE2_AD_13 not in row.queue
-    assert PAGE2_AD_14 not in row.queue
+    assert TOPED_AD_3 in row.queue
+    assert TOPED_AD_4 in row.queue
+    assert PAGE2_AD_10 in row.queue
+    assert PAGE2_AD_11 in row.queue
+    assert PAGE2_AD_12 in row.queue
+    assert PAGE2_AD_13 in row.queue
+    assert PAGE2_AD_14 in row.queue
     assert PAGE2_AD_15 not in row.queue
 
     asyncio.run(worker.process_queue())

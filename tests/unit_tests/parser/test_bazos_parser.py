@@ -37,7 +37,7 @@ def mock_bazos(build_mock_bazos):
     yield build_mock_bazos(urls2mock)
 
 @pytest.fixture
-def asserted_queue():
+def page1_links():
     return [
         'https://auto.bazos.cz/inzerat/213142446/f20-188i-urban-line.php', 
         'https://auto.bazos.cz/inzerat/214086678/prodam-motor-b47d20b-z-bmw-x5-f15-25dx-170kw-najeto-70tis-km.php', 
@@ -59,14 +59,43 @@ def asserted_queue():
         'https://auto.bazos.cz/inzerat/213761480/bmw-e92-335i.php', 
         'https://auto.bazos.cz/inzerat/213759936/bmw-rada-1-20d-rv-32013-najeto-201130-km.php', 
         'https://auto.bazos.cz/inzerat/212022352/bmw-f20-118d-20d-105kw-zf.php', 
-        'https://auto.bazos.cz/inzerat/213641524/bmw-f20-20d-2013.php', 
-        'https://auto.bazos.cz/inzerat/213355388/bmw-1-116d-85kw-f20-n47-kuze.php', 
-        'https://auto.bazos.cz/inzerat/213281536/bmw-116d-f20.php']
+    ]
 
 
 @pytest.fixture
-def asserted_queue_without_checked_toped_ads(asserted_queue):
-    return asserted_queue[2:]
+def page2_links():
+    return [
+        'https://auto.bazos.cz/inzerat/213641524/bmw-f20-20d-2013.php',
+        'https://auto.bazos.cz/inzerat/213355388/bmw-1-116d-85kw-f20-n47-kuze.php',
+        'https://auto.bazos.cz/inzerat/213281536/bmw-116d-f20.php',
+        'https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php',
+        'https://auto.bazos.cz/inzerat/213213449/bmw-f20-116i-automat-100kw-2014.php',
+        'https://auto.bazos.cz/inzerat/213173933/bmw-116i-benzin-100kw-136k-model-f20-120000km.php',
+        'https://auto.bazos.cz/inzerat/213152605/bmw-f20-120xd-xdrive-135-kw-4x4-manual-carplay.php',
+        'https://auto.bazos.cz/inzerat/212214828/bmw-m135i-xdrive-f20crservis-historier-2013166-tkm.php',
+        'https://auto.bazos.cz/inzerat/212654616/bmw-118d-f20-20d-105kw.php',
+        'https://auto.bazos.cz/inzerat/212478971/a.php',
+        'https://auto.bazos.cz/inzerat/212270350/bmw-f20-125d-m-paket.php',
+        'https://auto.bazos.cz/inzerat/212192049/bmw-rad-1-116d-f20.php',
+        'https://auto.bazos.cz/inzerat/212122463/bmw-f20-xdrive-118d-sport-line-rok-2014.php',
+        'https://auto.bazos.cz/inzerat/211941833/bmw-rady-1.php',
+        'https://auto.bazos.cz/inzerat/211728369/bmw-116i-2011.php',
+    ]
+
+
+@pytest.fixture
+def asserted_queue(page1_links, page2_links):
+    return list(reversed(page2_links[:5])) + list(reversed(page1_links))
+
+
+@pytest.fixture
+def asserted_new_search_queue(page1_links, page2_links):
+    return list(reversed(page2_links)) + list(reversed(page1_links))
+
+
+@pytest.fixture
+def asserted_queue_with_deleted_last_checked_link(page1_links, page2_links):
+    return list(reversed(page2_links[:4])) + list(reversed(page1_links))
 
 @pytest.fixture
 def mock_data_with_checked_toped_ads():
@@ -89,10 +118,6 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_moc
         mock_data
     )
     monkeypatch.setattr(
-        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
-        AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
-    )
-    monkeypatch.setattr(
         "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
         AsyncMock(side_effect=lambda : False)
     )
@@ -105,11 +130,10 @@ def test_bazos_parser_correctly_finds_the_last_checked_ad(monkeypatch, build_moc
     )
     assert queue == asserted_queue
 
-def test_topped_adds_are_processed_separately(
+def test_topped_ads_history_does_not_filter_parser_queue(
         monkeypatch, 
         build_mock_db, 
         mock_bazos, 
-        asserted_queue_without_checked_toped_ads,
         asserted_queue,
         mock_data_with_checked_toped_ads,
     ):
@@ -118,9 +142,10 @@ def test_topped_adds_are_processed_separately(
         "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data_with_checked_toped_ads
     )
+    is_toped_mock = AsyncMock(return_value=True)
     monkeypatch.setattr(
         "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
-        AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
+        is_toped_mock,
     )
     monkeypatch.setattr(
         "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
@@ -133,9 +158,10 @@ def test_topped_adds_are_processed_separately(
         .filter(AdQueue.car_search_id == search_id)
         .scalar()
     )
-    assert queue == asserted_queue_without_checked_toped_ads
+    is_toped_mock.assert_not_awaited()
+    assert queue == asserted_queue
 
-def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_bazos, asserted_queue):
+def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_bazos, asserted_new_search_queue):
     car_id = 1
     mock_data = {
         "Users": [
@@ -179,8 +205,7 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
     )
 
     assert len(queue) == 35
-    assert queue[:3] == asserted_queue[20:]
-    assert queue[15:] == asserted_queue[:20]
+    assert queue == asserted_new_search_queue
 
 
 def test_auto_page_constructs_link_with_empty_optional_params():
@@ -202,16 +227,17 @@ def test_auto_page_constructs_link_with_empty_optional_params():
         "?hledat=BMW+F20&hlokalita=&humkreis=&cenaod=&cenado=&order="
     )
 
-def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch, build_mock_db, mock_bazos, asserted_queue, mock_data):
-    asserted_queue.append("https://auto.bazos.cz/inzerat/213232408/bmw-rad-1-model-f20.php")
+def test_deleted_adds_in_last_checked_links_are_processed_correctly(
+        monkeypatch,
+        build_mock_db,
+        mock_bazos,
+        asserted_queue_with_deleted_last_checked_link,
+        mock_data,
+    ):
     search_id = int(mock_data["Car_Searches"][0]["id"])
     mock_db = build_mock_db(
         "queue_svc.parser.bazos_parser.db_handler.get_db_connection",
         mock_data
-    )
-    monkeypatch.setattr(
-        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
-        AsyncMock(side_effect=[True]*4 + [False]*(len(asserted_queue) - 4))
     )
     monkeypatch.setattr(
         "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
@@ -224,4 +250,4 @@ def test_deleted_adds_in_last_checked_links_are_processed_correctly(monkeypatch,
         .filter(AdQueue.car_search_id == search_id)
         .scalar()
     )
-    assert queue == asserted_queue
+    assert queue == asserted_queue_with_deleted_last_checked_link
