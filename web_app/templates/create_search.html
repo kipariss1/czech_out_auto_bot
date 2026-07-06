@@ -86,22 +86,34 @@
             <div id="id-slider-price"></div>
         </div>
         <div class="row mx-3 my-3">
-            <div class="d-flex align-items-center justify-content-between gap-3 px-0 pb-2">
-                <label for="id-psc-code" class="form-label mb-0">Enter PSČ (optional)</label>
-                <div class="form-check form-switch m-0 d-flex align-items-center">
-                    <input class="form-check-input mt-0" type="checkbox" role="switch" id="id-enable-psc-filter" data-testid="id-enable-psc-filter" aria-label="Enable PSČ filter">
+            <div class="row g-2 align-items-center px-0">
+                <div class="col-12 col-sm-3 text-start">
+                    <label for="id-psc-code" class="form-label mb-0">Enter PSČ (optional)</label>
+                </div>
+                <div class="col-10 col-sm-7">
+                    <textarea class="form-control" id="id-psc-code" name="psc_code" rows="1" placeholder="Any location"></textarea>
+                </div>
+                <div class="col-2 col-sm-2 d-flex justify-content-end align-items-center pe-0">
+                    <div class="form-check form-switch m-0 d-flex align-items-center">
+                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="id-enable-psc-filter" data-testid="id-enable-psc-filter" aria-label="Enable PSČ filter">
+                    </div>
                 </div>
             </div>
-            <textarea class="form-control" id="id-psc-code" name="psc_code" rows="1" placeholder="Any location"></textarea>
         </div>
         <div class="row mx-3 my-3">
-            <div class="d-flex align-items-center justify-content-between gap-3 px-0 pb-2">
-                <label for="id-psc-km-range" class="form-label mb-0">km range from PSČ (optional)</label>
-                <div class="form-check form-switch m-0 d-flex align-items-center">
-                    <input class="form-check-input mt-0" type="checkbox" role="switch" id="id-enable-psc-km-filter" data-testid="id-enable-psc-km-filter" aria-label="Enable PSČ km range filter">
+            <div class="row g-2 align-items-center px-0">
+                <div class="col-12 col-sm-3 text-start">
+                    <label for="id-psc-km-range" class="form-label mb-0">km range from PSČ (optional)</label>
+                </div>
+                <div class="col-10 col-sm-7">
+                    <input type="number" id="id-psc-km-range" name="psc_km_range" class="form-control" min="0" step="5" placeholder="Any">
+                </div>
+                <div class="col-2 col-sm-2 d-flex justify-content-end align-items-center pe-0">
+                    <div class="form-check form-switch m-0 d-flex align-items-center">
+                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="id-enable-psc-km-filter" data-testid="id-enable-psc-km-filter" aria-label="Enable PSČ km range filter">
+                    </div>
                 </div>
             </div>
-            <input type="number" id="id-psc-km-range" name="psc_km_range" class="form-control" min="0" step="5" placeholder="Any">
         </div>
         <div class="row mx-3 my-3">
             <button type="submit" class="btn btn-primary" data-testid="submit-btn">Submit</button>
