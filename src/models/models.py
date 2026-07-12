@@ -189,3 +189,19 @@ class AdQueue(Base):
     __table_args__ = (
         UniqueConstraint("car_search_id", name="uq_car_search_queue"),
     )
+
+
+class ParsedAdvertisementCache(Base):
+
+    __tablename__ = "Parsed_Advertisements_Cache"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bazos_id = Column(BIGINT, nullable=False)
+    car_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
+    parsed_result = Column(JSONB, nullable=False) if settings.ENV == 'production' else Column(JSON, nullable=False)
+
+    car = relationship("CarModel")
+
+    __table_args__ = (
+        UniqueConstraint("bazos_id", "car_id", name="uq_parsed_ad_cache_bazos_car"),
+    )
