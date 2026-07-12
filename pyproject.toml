@@ -74,3 +74,14 @@ dependencies = [
     "wsproto==1.2.0",
     "yarl==1.22.0",
 ]
+
+[project.scripts]
+start-local-db = "src.scripts.start_local_db:main"
+generate-migration = "src.scripts.generate_migration:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]

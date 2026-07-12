@@ -1,8 +1,8 @@
 """add parsed advertisement cache
 
-Revision ID: f6991f02cd0d
+Revision ID: 60b4deb1bd84
 Revises: 54e2c7c7af01
-Create Date: 2026-07-12 20:56:38.428933
+Create Date: 2026-07-13 00:50:07.271946
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f6991f02cd0d'
+revision: str = '60b4deb1bd84'
 down_revision: Union[str, Sequence[str], None] = '54e2c7c7af01'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
