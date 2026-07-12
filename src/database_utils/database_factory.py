@@ -9,7 +9,9 @@ class DBFactory:
     
     @staticmethod
     def create_db_handler() -> DatabaseHandler:
-        if settings.env == 'production':
+        if settings.is_postgres_env:
             return PostgresDBHandler(Base)
         if settings.env == 'test':
             return SqliteDBHandler(Base)
+
+        raise ValueError(f"Unsupported ENV value for database handler: {settings.env}")

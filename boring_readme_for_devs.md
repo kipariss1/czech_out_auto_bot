@@ -47,7 +47,7 @@ The worker selects its LLM provider from `LLM`:
 Optional model overrides:
 
 - `OLLAMA_MODEL`, default `gemma4:12b`
-- `OLLAMA_BASE_URL`, default `http://ollama:11434` in production and `http://localhost:11434` in tests/local Python runs
+- `OLLAMA_BASE_URL`, default `http://ollama:11434` in `production` and `http://localhost:11434` in `local`/`test`
 - `GEMINI_MODEL`, default `gemini-3-flash`
 
 ## Local Run
@@ -58,9 +58,9 @@ Optional model overrides:
 - Python 3.11 if you want to run tests locally outside containers
 - Node.js 20 if you want to run Playwright smoke tests locally
 
-### Local Development Startup
+### Local Development Startup With SQLite Tests
 
-Before running the application services locally, you must first initialize the local SQLite test database:
+`ENV=test` uses the local SQLite database at [src/db/local.db](./src/db/local.db). Before running the application services against SQLite, initialize the test database:
 
 ```bash
 export ENV=test && uv run python -m src.database_utils.init_test_db
@@ -78,9 +78,34 @@ Once the test database is initialized, you can start the individual services for
   export ENV=test && uv run python -m telegram_bot.run_bot
   ```
 
+### Local PostgreSQL Container
+
+`ENV=local` is for commands run from the host machine against the Docker PostgreSQL container. It connects to PostgreSQL through `localhost:5432`, so the `postgres_db` service publishes port `5432`.
+
+To start only the local PostgreSQL container:
+
+```bash
+docker compose up -d postgres_db
+```
+
+Initialize it from the host:
+
+```bash
+ENV=local uv run python -m src.database_utils.init_db
+```
+
+Create or apply Alembic migrations from the host with the same environment:
+
+```bash
+ENV=local uv run alembic revision --autogenerate -m "describe schema change"
+ENV=local uv run alembic upgrade head
+```
+
+Docker Compose services run with `ENV=production` and connect to PostgreSQL through the Compose DNS name `postgres_db`.
+
 ## Database Migrations
 
-Alembic is configured in [alembic.ini](./alembic.ini), with migration scripts in [alembic/versions](./alembic/versions). The runtime database URL is resolved through [src/database_utils/migrations.py](./src/database_utils/migrations.py): `ENV=production` uses PostgreSQL settings, while `ENV=test` uses the local SQLite database at [src/db/local.db](./src/db/local.db).
+Alembic is configured in [alembic.ini](./alembic.ini), with migration scripts in [alembic/versions](./alembic/versions). The runtime database URL is resolved through [src/database_utils/migrations.py](./src/database_utils/migrations.py): `ENV=production` and `ENV=local` use PostgreSQL settings, while `ENV=test` uses the local SQLite database at [src/db/local.db](./src/db/local.db).
 
 Apply migrations in the configured production environment:
 
@@ -107,6 +132,8 @@ uv run alembic revision --autogenerate -m "describe schema change"
 ```
 
 The Telegram bot container also runs [src/database_utils/init_db.py](./src/database_utils/init_db.py) on startup, so migrations are applied before seed car model data is loaded.
+
+For local PostgreSQL without starting the Telegram bot, start `postgres_db` and run `ENV=local uv run python -m src.database_utils.init_db` from the host.
 
 ## CI
 

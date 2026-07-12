@@ -66,12 +66,12 @@ class CarSearch(Base):
     price_range_to = Column(Integer, nullable=True)
     _last_checked_links = (
         Column(JSONB, nullable=True)
-        if settings.ENV == "production"
+        if settings.is_postgres_env
         else Column(JSON, nullable=True)
     )
     _last_checked_toped_links = (
         Column(JSONB, nullable=True)
-        if settings.ENV == "production"
+        if settings.is_postgres_env
         else Column(JSON, nullable=True)
     )
     created_at = Column(
@@ -184,7 +184,7 @@ class AdQueue(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     car_search_id = Column(Integer, ForeignKey("Car_Searches.id", ondelete="CASCADE"), nullable=False)
     car_search = relationship("CarSearch")
-    queue = Column(JSONB, nullable=True) if settings.ENV == 'production' else Column(JSON, nullable=True)
+    queue = Column(JSONB, nullable=True) if settings.is_postgres_env else Column(JSON, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("car_search_id", name="uq_car_search_queue"),
@@ -198,7 +198,7 @@ class ParsedAdvertisementCache(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     bazos_id = Column(BIGINT, nullable=False)
     car_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
-    parsed_result = Column(JSONB, nullable=False) if settings.ENV == 'production' else Column(JSON, nullable=False)
+    parsed_result = Column(JSONB, nullable=False) if settings.is_postgres_env else Column(JSON, nullable=False)
 
     car = relationship("CarModel")
 

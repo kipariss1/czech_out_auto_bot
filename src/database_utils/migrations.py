@@ -20,7 +20,7 @@ def has_migrations() -> bool:
 
 
 def get_database_url() -> str:
-    if settings.env == "production":
+    if settings.is_postgres_env:
         return PostgresDBHandler.db_url()
     if settings.env == "test":
         return SqliteDBHandler.db_url()
