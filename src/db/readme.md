@@ -1,5 +1,4 @@
-### Deprecated:
+### Database Data Files
 
-The postgres is now used as prod db and sqlite is solely test db
-
-~~Here is the folder for actual prod/test db sqlite file~~
+PostgreSQL is used for `ENV=production` and `ENV=local`.
+SQLite at `local.db` is only used for `ENV=test`.

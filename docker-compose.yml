@@ -1,5 +1,3 @@
-version: '3.9'
-
 x-common-env: &common-env
   POSTGRES_USER: ${POSTGRES_USER}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
