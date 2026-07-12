@@ -5,14 +5,14 @@ from pydantic_settings import BaseSettings
 
 
 class PostgresData(TypedDict):
-    user: str
-    password: str
-    db: str
+    user: str | None
+    password: str | None
+    db: str | None
 
 
 class Settings(BaseSettings):
-    ENV: Literal['production', 'test'] = os.getenv("ENV", "production")
-    LLM: Literal["local", "api-key"] = os.getenv("LLM", "local")
+    ENV: Literal['production', 'test'] = os.getenv("ENV", "production") # type: ignore
+    LLM: Literal["local", "api-key"] = os.getenv("LLM", "local") # type: ignore
     POSTGRES_USER: str | None = os.getenv("POSTGRES_USER", None)
     POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD", None)
     POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", None)
