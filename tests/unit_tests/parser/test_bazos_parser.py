@@ -1,6 +1,7 @@
 from queue_svc.parser.bazos_parser import BazosParser
 from queue_svc.bazos_api.auto_bazos_api import AutoPage
 from src.models.models import AdQueue
+from types import SimpleNamespace
 from typing import List
 from unittest.mock import AsyncMock
 from tests.pytest_fixtures.common import MockURL
@@ -206,6 +207,41 @@ def test_new_search_collects_ads_from_last_page_to_first(build_mock_db, mock_baz
 
     assert len(queue) == 35
     assert queue == asserted_new_search_queue
+
+
+def test_collect_pages_until_last_checked_falls_back_to_full_queue_on_page_limit(monkeypatch):
+    class PageWithNext:
+        def __init__(self):
+            self.page = 0
+
+        def go_next_page(self):
+            self.page += 1
+            return True
+
+    parser = BazosParser.__new__(BazosParser)
+    parser.page_limit_for_new_search = 2
+    parser._find_last_valid_checked_id = AsyncMock(return_value="missing-ad-id")
+
+    ads_by_page = {
+        0: [SimpleNamespace(id="ad-0", link="link-0")],
+        1: [SimpleNamespace(id="ad-1", link="link-1")],
+    }
+    monkeypatch.setattr(
+        parser,
+        "_get_ads_from_current_page",
+        lambda car_page: ads_by_page[car_page.page],
+    )
+
+    last_checked_id, pages, page_with_last_checked_id = asyncio.run(
+        parser._collect_pages_until_last_checked(
+            SimpleNamespace(id=13),
+            PageWithNext(),
+        )
+    )
+
+    assert last_checked_id is None
+    assert pages == [ads_by_page[0], ads_by_page[1]]
+    assert page_with_last_checked_id == ads_by_page[1]
 
 
 def test_auto_page_constructs_link_with_empty_optional_params():
