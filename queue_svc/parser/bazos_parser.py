@@ -245,6 +245,5 @@ class BazosParser:
                 self._add_queue_to_db(search.id, queue_to_check)
             except Exception:
                 logger.exception("Parser failed for search_id=%s", search.id)
-                raise
         logger.info("Parser run finished")
         logger.info("+" + "-" * 30 + "+")
