@@ -145,12 +145,12 @@ class BazosParser:
                 return None, pages, car_ads
             if car_page_bazos.page >= self.page_limit_for_new_search:
                 logger.info(
-                    "Hit the limit of pages, while going back searching for last checked add search_id=%s last_checked_id=%s current_page=%s",
+                    "Hit the limit of pages while searching for last checked ad; falling back to full queue search_id=%s last_checked_id=%s current_page=%s",
                     search.id,
                     last_checked_id,
                     car_page_bazos.page,
                 )
-                return pages
+                return None, pages, car_ads
 
     def _form_queue_for_existing_search(
         self,
@@ -245,6 +245,5 @@ class BazosParser:
                 self._add_queue_to_db(search.id, queue_to_check)
             except Exception:
                 logger.exception("Parser failed for search_id=%s", search.id)
-                raise
         logger.info("Parser run finished")
         logger.info("+" + "-" * 30 + "+")

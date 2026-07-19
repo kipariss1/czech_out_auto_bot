@@ -304,6 +304,5 @@ class BazosWorker:
                     "Worker failed for car_search_id=%s",
                     row.car_search_id,
                 )
-                raise
         logger.info("Worker run finished")
         logger.info("+" + "-" * 30 + "+")
