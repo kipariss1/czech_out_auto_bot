@@ -7,6 +7,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger(__name__)
 
 
+def docker_system_df():
+    logger.info("Checking docker disk usage...")
+    subprocess.run(["docker", "system", "df"], check=True)
+
+
 def git_pull():
     logger.info("Pulling latest changes from git...")
     subprocess.run(["git", "pull"], check=True)
@@ -28,6 +33,7 @@ def main():
         sys.exit(1)
 
     try:
+        docker_system_df()
         git_pull()
         docker_compose_build()
         docker_compose_up()
