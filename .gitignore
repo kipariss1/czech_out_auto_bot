@@ -23,3 +23,6 @@ postgres_data/
 ollama_data/
 # Build artifacts
 *.egg-info/
+
+# macOS
+.DS_Store
