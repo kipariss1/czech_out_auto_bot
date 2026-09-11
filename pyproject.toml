@@ -78,6 +78,7 @@ dependencies = [
 [project.scripts]
 start-local-db = "src.scripts.start_local_db:main"
 generate-migration = "src.scripts.generate_migration:main"
+deploy = "src.scripts.deploy:main"
 
 [build-system]
 requires = ["setuptools"]

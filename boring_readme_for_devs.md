@@ -115,6 +115,8 @@ ENV=local uv run alembic upgrade head
 
 Docker Compose services run with `ENV=production` and connect to PostgreSQL through the Compose DNS name `postgres_db`.
 
+To update the server after merging an MR, run `uv run deploy` (`git pull` + `docker compose build` + `docker compose up -d`).
+
 ## Database Migrations
 
 Alembic is configured in [alembic.ini](./alembic.ini), with migration scripts in [alembic/versions](./alembic/versions). The runtime database URL is resolved through [src/database_utils/migrations.py](./src/database_utils/migrations.py): `ENV=production` and `ENV=local` use PostgreSQL settings, while `ENV=test` uses the local SQLite database at [src/db/local.db](./src/db/local.db).
