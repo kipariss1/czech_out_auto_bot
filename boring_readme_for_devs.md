@@ -35,7 +35,19 @@ Relevant code areas:
 - [src/models](./src/models) - shared database and domain models used across services.
 - [src/database_utils](./src/database_utils) - database access and helper utilities for persistence-related operations.
 
-The Docker `queue` service runs one parser/worker cycle every 2 hours after `docker compose up`: first parser, then worker. The next cycle is scheduled from the cycle start timestamp. If the cycle finishes in less than 2 hours, `queue` waits the remaining time; if it takes 2 hours or more, the next cycle starts immediately.
+The Docker `queue` service runs one parser/worker/cache-cleanup cycle every 2 hours after `docker compose up`: first parser, then worker, then cache cleanup. The next cycle is scheduled from the cycle start timestamp. If the cycle finishes in less than 2 hours, `queue` waits the remaining time; if it takes 2 hours or more, the next cycle starts immediately.
+
+## Parsed Advertisement Cache
+
+Before asking the LLM to parse an advertisement, `BazosWorker` checks
+`Parsed_Advertisements_Cache` for a non-expired result keyed by the advertisement's Bazos id and
+the car model (`CarModel.id`) it's being evaluated against. On a hit, the stored result is reused
+and the LLM is not called; on a miss, the LLM result is written back to the cache (updating the
+existing row if one already expired and got reprocessed, never duplicating it).
+
+Cache rows older than `PARSED_AD_CACHE_RETENTION_DAYS` (default `30`) are deleted automatically as
+the third step of each `queue` cycle, after the parser and worker steps. A cache read/write failure
+is logged and falls back to a direct LLM call — it never blocks advertisement processing.
 
 ## Worker LLM Configuration
 

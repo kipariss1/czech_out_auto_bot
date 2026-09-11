@@ -1,12 +1,14 @@
 import asyncio
 import logging
+from datetime import datetime, timedelta, timezone
 from html import escape
 from typing import Any
 
 from src.database_utils import db_handler
-from src.models.models import AdQueue, CarSearch, User
+from src.models.models import AdQueue, CarSearch, ParsedAdvertisementCache, User
+from src.settings.settings import settings
 from queue_svc.bazos_api.auto_bazos_api import AutoAdvertisementPage
-from queue_svc.worker.llm_client import LangChainCarAdClient, ValidCarAd
+from queue_svc.worker.llm_client import CarAdParseResult, LangChainCarAdClient, ValidCarAd
 from telegram_bot import bot
 
 
@@ -201,6 +203,78 @@ class BazosWorker:
             return ad.link in (search.last_checked_toped_links or [])
         return ad.link in (search.last_checked_links or [])
 
+    def _get_cached_parse_result(self, ad_id: str, car_id: int) -> CarAdParseResult | None:
+        try:
+            cutoff = datetime.now(timezone.utc) - timedelta(
+                days=settings.parsed_ad_cache_retention_days
+            )
+            cached = (
+                self.db.query(ParsedAdvertisementCache)
+                .filter(
+                    ParsedAdvertisementCache.bazos_id == int(ad_id),
+                    ParsedAdvertisementCache.car_id == car_id,
+                    ParsedAdvertisementCache.cached_at >= cutoff,
+                )
+                .first()
+            )
+            return dict(cached.parsed_result) if cached is not None else None
+        except Exception:
+            logger.exception(
+                "Cache lookup failed ad_id=%s car_id=%s",
+                ad_id,
+                car_id,
+            )
+            return None
+
+    def _save_parsed_result_to_cache(
+        self,
+        ad_id: str,
+        car_id: int,
+        result: CarAdParseResult,
+    ) -> None:
+        try:
+            bazos_id = int(ad_id)
+            cached = (
+                self.db.query(ParsedAdvertisementCache)
+                .filter(
+                    ParsedAdvertisementCache.bazos_id == bazos_id,
+                    ParsedAdvertisementCache.car_id == car_id,
+                )
+                .first()
+            )
+            if cached is not None:
+                cached.parsed_result = result
+                cached.cached_at = datetime.now(timezone.utc)
+            else:
+                self.db.add(
+                    ParsedAdvertisementCache(
+                        bazos_id=bazos_id,
+                        car_id=car_id,
+                        parsed_result=result,
+                        cached_at=datetime.now(timezone.utc),
+                    )
+                )
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            logger.exception(
+                "Cache write failed ad_id=%s car_id=%s",
+                ad_id,
+                car_id,
+            )
+
+    def cleanup_expired_cache(self) -> None:
+        cutoff = datetime.now(timezone.utc) - timedelta(
+            days=settings.parsed_ad_cache_retention_days
+        )
+        deleted = (
+            self.db.query(ParsedAdvertisementCache)
+            .filter(ParsedAdvertisementCache.cached_at < cutoff)
+            .delete(synchronize_session=False)
+        )
+        self.db.commit()
+        logger.info("Cache cleanup removed expired entries count=%s", deleted)
+
     async def _process_row_in_queue(self, row: AdQueue):
         queue = row.queue or []
         search = (
@@ -235,14 +309,26 @@ class BazosWorker:
                 row.queue = queue
                 self.db.commit()
                 continue
-            logger.debug(
-                "Processing ad with LLM search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
-                search.id,
-                car.id,
-                ad.id,
-                ad.link,
-            )
-            res = self.llm.process(ad_text=ad.text, car=car)
+            cached_result = self._get_cached_parse_result(ad.id, car.id)
+            if cached_result is not None:
+                logger.info(
+                    "Using cached parse result search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
+                    search.id,
+                    car.id,
+                    ad.id,
+                    ad.link,
+                )
+                res = cached_result
+            else:
+                logger.debug(
+                    "Processing ad with LLM search_id=%s car_model_id=%s ad_id=%s ad_link=%s",
+                    search.id,
+                    car.id,
+                    ad.id,
+                    ad.link,
+                )
+                res = self.llm.process(ad_text=ad.text, car=car)
+                self._save_parsed_result_to_cache(ad.id, car.id, res)
             await self._add_checked_ad_to_history(ad, search)
             queue.remove(ad.link)
             row.queue = queue

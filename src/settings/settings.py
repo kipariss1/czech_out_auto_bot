@@ -31,7 +31,8 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str | None = None
     GEMINI_API_KEY: str | None = None
     GEMINI_MODEL: str = "gemini-3-flash"
-    
+    PARSED_AD_CACHE_RETENTION_DAYS: int = 30
+
     @property
     def base_url(self) -> str | None:
         return self.WEBAPP_BASE_URL
@@ -65,7 +66,11 @@ class Settings(BaseSettings):
     @property
     def gemini_model(self) -> str:
         return self.GEMINI_MODEL
-    
+
+    @property
+    def parsed_ad_cache_retention_days(self) -> int:
+        return self.PARSED_AD_CACHE_RETENTION_DAYS
+
     @property
     def postgres_data(self) -> PostgresData:
         if not self.is_postgres_env:

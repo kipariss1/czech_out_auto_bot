@@ -199,6 +199,11 @@ class ParsedAdvertisementCache(Base):
     bazos_id = Column(BIGINT, nullable=False)
     car_id = Column(Integer, ForeignKey("Car_Models.id"), nullable=False)
     parsed_result = Column(JSONB, nullable=False) if settings.is_postgres_env else Column(JSON, nullable=False)
+    cached_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
 
     car = relationship("CarModel")
 

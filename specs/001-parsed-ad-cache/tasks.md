@@ -27,9 +27,11 @@ Single existing project — paths are relative to the repository root (`src/`, `
 
 **Purpose**: Confirm the environment is ready before touching schema or code
 
-- [ ] T001 Confirm branch `001-parsed-ad-cache` is checked out and the local SQLite test DB is
+- [X] T001 Confirm branch `001-parsed-ad-cache` is checked out and the local SQLite test DB is
       current by running `export ENV=test && uv run python -m src.database_utils.init_test_db`
-      from the repository root (per quickstart.md step 1)
+      from the repository root (per quickstart.md step 1) — done on working branch `add-cache`,
+      which already carries this feature's groundwork commit; no separate `001-parsed-ad-cache`
+      git branch exists (the spec-kit `before_specify` git hook never ran, per plan.md)
 
 **Checkpoint**: Environment ready — no dependency changes needed for this feature (no new
 third-party packages per plan.md's Technical Context)
@@ -42,19 +44,29 @@ third-party packages per plan.md's Technical Context)
 
 **⚠️ CRITICAL**: No user story task may begin until this phase is complete
 
-- [ ] T002 [P] In `src/models/models.py`, add a `cached_at` column to `ParsedAdvertisementCache`:
+- [X] T002 [P] In `src/models/models.py`, add a `cached_at` column to `ParsedAdvertisementCache`:
       `Column(DateTime(timezone=True), server_default=func.now(), nullable=False)` — the same
       pattern already used for `CarSearch.created_at` / `User.created_at` — per data-model.md's
       field table (type "DateTime (timezone-aware)", "not null", `server_default=func.now()`)
-- [ ] T003 [P] In `src/settings/settings.py`, add `PARSED_AD_CACHE_RETENTION_DAYS: int = 30` to the
+- [X] T003 [P] In `src/settings/settings.py`, add `PARSED_AD_CACHE_RETENTION_DAYS: int = 30` to the
       `Settings` class and a `parsed_ad_cache_retention_days` property returning it, following the
       exact existing pattern used for `OLLAMA_MODEL`/`ollama_model` (per research.md's "Retention
       period is a `Settings` field" decision)
-- [ ] T004 Generate a new Alembic migration adding the `cached_at` column to
+- [X] T004 Generate a new Alembic migration adding the `cached_at` column to
       `Parsed_Advertisements_Cache` via `uv run alembic revision --autogenerate -m "add cached_at
       to parsed advertisement cache"` in `alembic/versions/`, verifying its `down_revision` points
       at the current head `60b4deb1bd84` (depends on T002; do not hand-edit `60b4deb1bd84_...py`
-      itself, per Constitution Principle III)
+      itself, per Constitution Principle III) — **deviation, user-approved**: while verifying this
+      task, discovered `60b4deb1bd84_add_parsed_advertisement_cache.py` hardcodes
+      `postgresql.JSONB` with no SQLite branch, breaking `ENV=test alembic upgrade head` on a
+      pre-existing, unrelated revision (it didn't follow the dialect-aware `_json_type()` pattern
+      the initial schema migration already established). User explicitly chose to fix it inline as
+      part of this feature rather than leave it or defer it; see plan.md's Constitution Check
+      re-evaluation and Complexity Tracking for the justification this constitutes for Principle
+      III. New migration `9b04abf82c79_add_cached_at_to_parsed_advertisement_.py` written by hand
+      (no live DB available for `--autogenerate`) using the same dialect-aware
+      `_created_at_default()` pattern; verified with a full up → down → up round-trip against the
+      local SQLite test DB
 
 **Checkpoint**: Schema and settings exist — user story implementation can now begin
 
@@ -73,12 +85,18 @@ unchanged.
 
 ### Tests for User Story 1
 
-- [ ] T005 [P] [US1] Unit test in `tests/unit_tests/worker/test_bazos_worker.py` for the
+**Incidental fix**: `tests/unit_tests/conftest.py` was missing the `BOT_TOKEN`/`telebot.TeleBot`
+stub that `tests/integration_tests/conftest.py` already had — harmless until now because no
+existing unit test imported `queue_svc.worker.bazos_worker` (which imports `telegram_bot.bot` at
+module load time, and that constructs a real `TeleBot(None)` without it). T005 is the first unit
+test under `tests/unit_tests/` to import that module, so the same stub was added there too.
+
+- [X] T005 [P] [US1] Unit test in `tests/unit_tests/worker/test_bazos_worker.py` for the
       cache-lookup helper: returns the stored result when a row exists with `cached_at` within
       `settings.parsed_ad_cache_retention_days` days, returns `None` when no row exists for that
       `(bazos_id, car_id)`, and returns `None` when the row's `cached_at` is older than the
       retention period
-- [ ] T006 [P] [US1] Integration test in
+- [X] T006 [P] [US1] Integration test in
       `tests/integration_tests/queue_svc/test_parser_worker.py`: seed a `Parsed_Advertisements_Cache`
       row matching a fixture ad's `bazos_id`/`car_id`, run the worker, and assert the mocked
       `worker.llm.process` is never called while the existing matching/notification assertions
@@ -86,14 +104,19 @@ unchanged.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Implement `_get_cached_parse_result(self, bazos_id: int, car_id: int)` in
+- [X] T007 [US1] Implement `_get_cached_parse_result(self, bazos_id: int, car_id: int)` in
       `queue_svc/worker/bazos_worker.py`: query `ParsedAdvertisementCache` filtered by
       `bazos_id`/`car_id`, return `row.parsed_result` if found and
       `row.cached_at >= now - settings.parsed_ad_cache_retention_days days`, else `None`; wrap the
       whole method body in `try`/`except Exception` that logs via `logger.exception(...)` and
       returns `None` on failure (depends on T002, T003; per research.md's failure-isolation
-      decision so a cache read failure never raises into the caller)
-- [ ] T008 [US1] In `_process_row_in_queue` (`queue_svc/worker/bazos_worker.py`), before calling
+      decision so a cache read failure never raises into the caller) — implemented as
+      `_get_cached_parse_result(self, ad_id: str, car_id: int)`, doing the `int(ad_id)` conversion
+      *inside* the try block (so a malformed id is also covered by the failure-isolation guard, not
+      just DB errors); returns a shallow `dict()` copy of `parsed_result` rather than the live ORM
+      attribute, so a caller mutating it (the existing `res["price"] = ...` override) never risks
+      touching the session-tracked object
+- [X] T008 [US1] In `_process_row_in_queue` (`queue_svc/worker/bazos_worker.py`), before calling
       `self.llm.process(ad_text=ad.text, car=car)`, call
       `self._get_cached_parse_result(int(ad.id), car.id)`; if it returns a non-`None` result use
       it as `res` and skip the LLM call, leaving the existing `res["price"] = str(ad.price)`
@@ -117,24 +140,27 @@ is updated in place (no `IntegrityError`, no duplicate row).
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Unit test in `tests/unit_tests/worker/test_bazos_worker.py` for the
+- [X] T009 [P] [US2] Unit test in `tests/unit_tests/worker/test_bazos_worker.py` for the
       cache-write helper: inserts a new row when none exists for `(bazos_id, car_id)`; updates the
       existing row's `parsed_result` and `cached_at` in place (no new row, no `IntegrityError`)
       when one already exists for that same key
-- [ ] T010 [P] [US2] Integration test in
+- [X] T010 [P] [US2] Integration test in
       `tests/integration_tests/queue_svc/test_parser_worker.py`: with no seeded cache row, run the
       worker and assert the mocked LLM is called once and a `Parsed_Advertisements_Cache` row now
       exists holding its result
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Implement `_save_parsed_result_to_cache(self, bazos_id: int, car_id: int, result:
+- [X] T011 [US2] Implement `_save_parsed_result_to_cache(self, bazos_id: int, car_id: int, result:
       CarAdParseResult)` in `queue_svc/worker/bazos_worker.py`: query by `(bazos_id, car_id)`; if a
       row exists, update its `parsed_result` and `cached_at`; otherwise insert a new row; commit;
       wrap the method body in `try`/`except Exception` logging via `logger.exception(...)` so a
       write failure never raises into the caller (depends on T002, T003; per research.md's
-      upsert and failure-isolation decisions)
-- [ ] T012 [US2] In `_process_row_in_queue` (`queue_svc/worker/bazos_worker.py`), on the cache-miss
+      upsert and failure-isolation decisions) — implemented as `_save_parsed_result_to_cache(self,
+      ad_id: str, car_id: int, result: CarAdParseResult)`, converting `ad_id` to `int` inside the
+      try block; rolls back the session in the `except` branch before logging, so a failed write
+      doesn't leave the shared `self.db` session in a broken transaction state for the next ad
+- [X] T012 [US2] In `_process_row_in_queue` (`queue_svc/worker/bazos_worker.py`), on the cache-miss
       path (after `res = self.llm.process(...)`, before the `res["price"] = str(ad.price)`
       override line), call `self._save_parsed_result_to_cache(int(ad.id), car.id, res)` with the
       raw LLM result, per research.md's "cache stores the raw LLM result" decision (depends on
@@ -155,27 +181,30 @@ retention period and one within it, run the cleanup step, and verify only the ex
 
 ### Tests for User Story 3
 
-- [ ] T013 [P] [US3] Unit test in `tests/unit_tests/worker/test_cache_cleanup.py` for the cleanup
+- [X] T013 [P] [US3] Unit test in `tests/unit_tests/worker/test_cache_cleanup.py` for the cleanup
       query: deletes rows with `cached_at` older than `settings.parsed_ad_cache_retention_days`
       days, leaves rows within the retention period untouched, and is a no-op (no error) when no
       rows are expired
-- [ ] T014 [P] [US3] Integration test in `tests/integration_tests/queue_svc/test_parser_worker.py`
+- [X] T014 [P] [US3] Integration test in `tests/integration_tests/queue_svc/test_parser_worker.py`
       (or a new `tests/integration_tests/queue_svc/test_cache_cleanup.py`): seed one expired and
       one fresh `Parsed_Advertisements_Cache` row, invoke the cleanup step, and assert only the
       expired row was deleted
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Implement a cleanup method (e.g. `BazosWorker.cleanup_expired_cache()`) in
+- [X] T015 [US3] Implement a cleanup method (e.g. `BazosWorker.cleanup_expired_cache()`) in
       `queue_svc/worker/bazos_worker.py` that deletes all `ParsedAdvertisementCache` rows where
       `cached_at < now - settings.parsed_ad_cache_retention_days days` and commits (depends on
       T002, T003)
-- [ ] T016 [US3] In `queue_svc/main.py`, add `_run_cache_cleanup()` following the exact shape of
+- [X] T016 [US3] In `queue_svc/main.py`, add `_run_cache_cleanup()` following the exact shape of
       `_run_parser()`/`_run_worker()` (own started_at/finished_at/elapsed logging,
       `db_handler.close_db_connection()` in a `finally`), call the method from T015, and append it
       as a third step in `run_cycle()` (`_run_parser()` → `_run_worker()` → `_run_cache_cleanup()`)
       so a cleanup failure is caught the same way the existing steps are and never stops the next
-      scheduled cycle (depends on T015)
+      scheduled cycle (depends on T015) — matches the existing convention exactly: no extra
+      try/except added inside `_run_cache_cleanup()` itself, since `_run_parser`/`_run_worker` also
+      let exceptions propagate to `run_forever`'s outer try/except, which already logs and
+      continues to the next scheduled cycle
 
 **Checkpoint**: All three user stories are independently functional — the cache is read, written,
 and expired automatically
@@ -186,14 +215,18 @@ and expired automatically
 
 **Purpose**: Final validation and documentation required by the project's Development Workflow
 
-- [ ] T017 Run the full regression suite: `export ENV=test && uv run pytest tests/unit_tests -v`
+- [X] T017 Run the full regression suite: `export ENV=test && uv run pytest tests/unit_tests -v`
       and `uv run pytest tests/integration_tests -v`, confirming all existing tests plus the new
       cache/cleanup tests pass (depends on T001-T016; per quickstart.md step 5 and Constitution
-      Principle I)
-- [ ] T018 [P] Update `boring_readme_for_devs.md` to document the parse-result cache behavior and
+      Principle I) — 19 unit + 6 integration tests, all passing, zero regressions. Note: also
+      requires `PYTHONPATH` set to the repo root (as CI's `tests.yml` already does via an env var)
+      — undocumented in `boring_readme_for_devs.md`'s quick command, a pre-existing gap unrelated
+      to this feature, left as-is
+- [X] T018 [P] Update `boring_readme_for_devs.md` to document the parse-result cache behavior and
       the new `PARSED_AD_CACHE_RETENTION_DAYS` environment variable, per Constitution's
       Development Workflow section ("update `boring_readme_for_devs.md` for architecture, testing,
-      or Docker-related changes")
+      or Docker-related changes") — added a "Parsed Advertisement Cache" section and updated the
+      cycle description to mention the new cleanup step
 
 ---
 
