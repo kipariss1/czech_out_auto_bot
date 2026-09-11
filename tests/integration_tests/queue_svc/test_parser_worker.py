@@ -6,7 +6,7 @@ import responses
 
 from queue_svc.parser.bazos_parser import BazosParser
 from queue_svc.worker.bazos_worker import BazosWorker
-from src.models.models import AdQueue
+from src.models.models import AdQueue, ParsedAdvertisementCache
 
 
 TOPED_AD_1 = "https://auto.bazos.cz/inzerat/213142446/f20-188i-urban-line.php"
@@ -448,3 +448,132 @@ def test_already_created_searches(monkeypatch, build_mock_db, build_mock_bazos):
     assert all(PAGE2_AD_1 not in call["text"] for call in calls)
     assert all(PAGE2_AD_10 not in call["text"] for call in calls)
     assert all(row.queue == [] for row in mock_db.query(AdQueue).all())
+
+
+def _cache_test_mock_data():
+    return {
+        "Users": [{"id": 1, "telegram_id": 111111111}],
+        "Car_Models": [{"id": 1, "manufacturer": "BMW", "model": "F20"}],
+        "Car_Searches": [
+            {
+                "id": 1,
+                "user_id": 1,
+                "car_model_id": 1,
+                "psc_code": "110 00",
+                "psc_km_range": "25",
+                "year_range_from": 2010,
+                "year_range_to": 2020,
+                "mileage_range_from": 0,
+                "mileage_range_to": 200000,
+                "price_range_from": 100000,
+                "price_range_to": 500000,
+                "_last_checked_toped_links": [],
+                "_last_checked_links": [],
+            },
+        ],
+        "Advertisements_Queue": [
+            {"id": 1, "car_search_id": 1, "queue": [REGULAR_AD_1]},
+        ],
+    }
+
+
+def test_worker_reuses_cached_parse_result_without_calling_llm(monkeypatch, build_mock_db):
+    mock_data = _cache_test_mock_data()
+    mock_data["Parsed_Advertisements_Cache"] = [
+        {
+            "id": 1,
+            "bazos_id": 214330574,
+            "car_id": 1,
+            "parsed_result": {
+                "is_valid_ad": True,
+                "brand": "BMW",
+                "model": "F20",
+                "engine": "B47",
+                "year": "2016",
+                "mileage": "70000",
+            },
+        },
+    ]
+    mock_db, _parser, worker, send_message = _build_parser_and_worker(
+        monkeypatch,
+        build_mock_db,
+        mock_data,
+    )
+    _mock_ad_methods(monkeypatch, {REGULAR_AD_1: {"text": "cached-ad-text", "price": 220000}})
+    worker.llm = Mock(process=Mock())
+
+    asyncio.run(worker.process_queue())
+
+    worker.llm.process.assert_not_called()
+    calls = _notification_calls(send_message)
+    assert len(calls) == 1
+    assert calls[0]["chat_id"] == 111111111
+    assert REGULAR_AD_1 in calls[0]["text"]
+
+
+def test_worker_caches_new_parse_result_after_llm_call(monkeypatch, build_mock_db):
+    mock_data = _cache_test_mock_data()
+    mock_db, _parser, worker, send_message = _build_parser_and_worker(
+        monkeypatch,
+        build_mock_db,
+        mock_data,
+    )
+    _mock_ad_methods(monkeypatch, {REGULAR_AD_1: {"text": "fresh-ad-text", "price": 220000}})
+    llm_result = {
+        "is_valid_ad": True,
+        "brand": "BMW",
+        "model": "F20",
+        "engine": "B47",
+        "year": "2016",
+        "mileage": "70000",
+    }
+    worker.llm = Mock(process=Mock(return_value=llm_result.copy()))
+
+    assert mock_db.query(ParsedAdvertisementCache).count() == 0
+
+    asyncio.run(worker.process_queue())
+
+    worker.llm.process.assert_called_once()
+    cached_rows = mock_db.query(ParsedAdvertisementCache).all()
+    assert len(cached_rows) == 1
+    assert cached_rows[0].bazos_id == 214330574
+    assert cached_rows[0].car_id == 1
+    assert cached_rows[0].parsed_result["brand"] == "BMW"
+
+
+def test_cache_cleanup_removes_only_expired_entries(monkeypatch, build_mock_db):
+    from datetime import datetime, timedelta, timezone
+
+    from src.settings.settings import settings
+
+    stale_cached_at = datetime.now(timezone.utc) - timedelta(
+        days=settings.parsed_ad_cache_retention_days + 5
+    )
+    fresh_cached_at = datetime.now(timezone.utc)
+    mock_data = _cache_test_mock_data()
+    mock_data["Parsed_Advertisements_Cache"] = [
+        {
+            "id": 1,
+            "bazos_id": 111,
+            "car_id": 1,
+            "parsed_result": {"is_valid_ad": False},
+            "cached_at": f"#ConvertStr2Datetime {stale_cached_at.isoformat()}",
+        },
+        {
+            "id": 2,
+            "bazos_id": 222,
+            "car_id": 1,
+            "parsed_result": {"is_valid_ad": False},
+            "cached_at": f"#ConvertStr2Datetime {fresh_cached_at.isoformat()}",
+        },
+    ]
+    mock_db, _parser, worker, _send_message = _build_parser_and_worker(
+        monkeypatch,
+        build_mock_db,
+        mock_data,
+    )
+
+    worker.cleanup_expired_cache()
+
+    remaining = mock_db.query(ParsedAdvertisementCache).all()
+    assert [row.bazos_id for row in remaining] == [222]

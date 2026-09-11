@@ -54,9 +54,30 @@ async def _run_worker() -> None:
         )
 
 
+async def _run_cache_cleanup() -> None:
+    cleanup_started_at = datetime.now(timezone.utc)
+    logger.info(
+        "Queue cache cleanup step started cleanup_started_at=%s",
+        _format_timestamp(cleanup_started_at),
+    )
+    try:
+        worker = BazosWorker()
+        worker.cleanup_expired_cache()
+    finally:
+        db_handler.close_db_connection()
+        cleanup_finished_at = datetime.now(timezone.utc)
+        logger.info(
+            "Queue cache cleanup step finished cleanup_started_at=%s cleanup_finished_at=%s elapsed_seconds=%.3f",
+            _format_timestamp(cleanup_started_at),
+            _format_timestamp(cleanup_finished_at),
+            (cleanup_finished_at - cleanup_started_at).total_seconds(),
+        )
+
+
 async def run_cycle() -> None:
     await _run_parser()
     await _run_worker()
+    await _run_cache_cleanup()
 
 
 def _format_timestamp(value: datetime) -> str:

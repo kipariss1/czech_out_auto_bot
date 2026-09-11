@@ -1,7 +1,11 @@
 from typing import Literal, TypedDict
 
-import os
-from pydantic_settings import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+AppEnv = Literal["production", "local", "test"]
+LLMProvider = Literal["local", "api-key"]
 
 
 class PostgresData(TypedDict):
@@ -11,27 +15,38 @@ class PostgresData(TypedDict):
 
 
 class Settings(BaseSettings):
-    ENV: Literal['production', 'test'] = os.getenv("ENV", "production")
-    LLM: Literal["local", "api-key"] = os.getenv("LLM", "local")
-    POSTGRES_USER: str | None = os.getenv("POSTGRES_USER", None)
-    POSTGRES_PASSWORD: str | None = os.getenv("POSTGRES_PASSWORD", None)
-    POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", None)
-    WEBAPP_BASE_URL: str | None = os.getenv("RENDER_EXTERNAL_URL")
-    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "gemma4:12b")
-    OLLAMA_BASE_URL: str | None = os.getenv("OLLAMA_BASE_URL")
-    GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3-flash")
-    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    ENV: AppEnv = "local"
+    LLM: LLMProvider = "local"
+    POSTGRES_USER: str | None = None
+    POSTGRES_PASSWORD: str | None = None
+    POSTGRES_DB: str | None = None
+    WEBAPP_BASE_URL: str | None = Field(default=None, validation_alias="RENDER_EXTERNAL_URL")
+    OLLAMA_MODEL: str = "gemma4:12b"
+    OLLAMA_BASE_URL: str | None = None
+    GEMINI_API_KEY: str | None = None
+    GEMINI_MODEL: str = "gemini-3-flash"
+    PARSED_AD_CACHE_RETENTION_DAYS: int = 30
+
     @property
-    def base_url(self):
+    def base_url(self) -> str | None:
         return self.WEBAPP_BASE_URL
     
     @property
-    def env(self) -> Literal['production', 'test']:
+    def env(self) -> AppEnv:
         return self.ENV
 
     @property
-    def llm(self) -> Literal["local", "api-key"]:
+    def is_postgres_env(self) -> bool:
+        return self.env in ("production", "local")
+
+    @property
+    def llm(self) -> LLMProvider:
         return self.LLM
 
     @property
@@ -51,18 +66,28 @@ class Settings(BaseSettings):
     @property
     def gemini_model(self) -> str:
         return self.GEMINI_MODEL
-    
+
+    @property
+    def parsed_ad_cache_retention_days(self) -> int:
+        return self.PARSED_AD_CACHE_RETENTION_DAYS
+
     @property
     def postgres_data(self) -> PostgresData:
-        if any(x is None for x in (self.POSTGRES_USER, self.POSTGRES_PASSWORD, self.POSTGRES_DB)) and self.ENV == 'production':
-            raise ValueError("ENV type is 'production' but Postgres data is missing, check the data below" 
-                             + f"\n\t - User is {self.POSTGRES_USER}" 
-                             + f"\n\t - Password is {'xxxxxxx' if self.POSTGRES_PASSWORD is not None else None}" 
-                             + f"\n\t - DB name is {self.POSTGRES_DB}")
+        if not self.is_postgres_env:
+            raise ValueError(f"ENV type is '{self.env}', but Postgres settings were requested")
+
+        if not self.POSTGRES_USER or not self.POSTGRES_PASSWORD or not self.POSTGRES_DB:
+            raise ValueError(
+                f"ENV type is '{self.env}' but Postgres data is missing, check the data below"
+                + f"\n\t - User is {self.POSTGRES_USER}"
+                + f"\n\t - Password is {'xxxxxxx' if self.POSTGRES_PASSWORD is not None else None}"
+                + f"\n\t - DB name is {self.POSTGRES_DB}"
+            )
+
         return {
             'user': self.POSTGRES_USER,
             'password': self.POSTGRES_PASSWORD,
-            'db': self.POSTGRES_DB
+            'db': self.POSTGRES_DB,
         }
 
 
