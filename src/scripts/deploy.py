@@ -13,8 +13,8 @@ def git_pull():
 
 
 def docker_compose_build():
-    logger.info("Building docker images...")
-    subprocess.run(["docker", "compose", "build"], check=True)
+    logger.info("Building docker images from scratch (no cache)...")
+    subprocess.run(["docker", "compose", "build", "--no-cache"], check=True)
 
 
 def docker_compose_up():

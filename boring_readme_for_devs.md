@@ -115,7 +115,7 @@ ENV=local uv run alembic upgrade head
 
 Docker Compose services run with `ENV=production` and connect to PostgreSQL through the Compose DNS name `postgres_db`.
 
-To update the server after merging an MR, run `uv run deploy` (`git pull` + `docker compose build` + `docker compose up -d`).
+To update the server after merging an MR, run `uv run deploy` (`git pull` + `docker compose build --no-cache` + `docker compose up -d`).
 
 ## Database Migrations
 
