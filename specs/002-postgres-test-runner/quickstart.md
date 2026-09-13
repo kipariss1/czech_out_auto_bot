@@ -79,23 +79,36 @@ docker ps                          # both postgres_db and postgres_test_db healt
 
 ## Scenario 5 — Every run starts empty (SC-004)
 
+Both `run-local-component-tests` and `run-local-e2e-tests` tear the test container down completely
+when they finish (not just its tables), so there is nothing left to inspect immediately afterward.
+Instead, verify the container is destroyed and recreated — not reused — across a run, and that the
+freshly-recreated container ends up empty:
+
 ```bash
 uv run start-test-db
-docker exec -it postgres_test_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+docker inspect --format='{{.Id}}' postgres_test_db   # note this container ID
+docker exec postgres_test_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   -c "INSERT INTO \"Users\" (id, telegram_id) VALUES (999, 999);"   # or any table from src/models/models.py
-uv run run-local-component-tests   # or run-local-e2e-tests — either one must wipe it
-docker exec -it postgres_test_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-  -c "SELECT * FROM \"Users\" WHERE id = 999;"   # expect: no rows — the container was recreated empty
+
+uv run run-local-component-tests   # or run-local-e2e-tests — force-recreates, then tears down at the end
+
+uv run start-test-db               # starts a brand-new container (the previous one no longer exists)
+docker inspect --format='{{.Id}}' postgres_test_db   # expect: a different container ID than before
+docker exec postgres_test_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -c "SELECT * FROM \"Users\" WHERE id = 999;"   # expect: no rows — no volume means nothing survives destroy+recreate
 ```
 
 ## Scenario 6 — No remaining SQLite references (SC-005)
 
 ```bash
-grep -rn "sqlite" src/ alembic/ web_app/ telegram_bot/ queue_svc/ readme.md boring_readme_for_devs.md src/db/readme.md AGENTS.md
+grep -rn "sqlite" -i src/ alembic/ web_app/ telegram_bot/ queue_svc/ readme.md boring_readme_for_devs.md src/db/readme.md AGENTS.md
+grep -rn "sqlite" -i --exclude-dir=node_modules --exclude-dir=dist tests/e2e_smoke_tests/
 ```
 
 **Expected outcome**: no matches. (`tests/pytest_fixtures/common.py`'s `build_mock_db` fixture is
-intentionally excluded from this check — it is out of scope per the spec's Assumptions.)
+intentionally excluded from this check — it is out of scope per the spec's Assumptions. The second
+command covers the Playwright suite's own former SQLite fixture handler, discovered and migrated to
+Postgres during implementation — see tasks.md Notes.)
 
 ## Scenario 7 — Interruption cleans up (edge case)
 

@@ -6,7 +6,7 @@
 ## Tech Stack
 - **Language**: Python >= 3.11, Node.js 20 (for E2E tests)
 - **Web Framework**: FastAPI (with Uvicorn and Starlette)
-- **Database**: PostgreSQL (Production), SQLite (Local/Test)
+- **Database**: PostgreSQL everywhere — Production, Local, and Test (`ENV=test` uses a dedicated, disposable `postgres_test_db` container on `localhost:5433`)
 - **ORM & Migrations**: SQLAlchemy 2.0, Alembic
 - **Scraping & Parsing**: BeautifulSoup4, undetected-chromedriver
 - **LLM Integration**: LangChain (Google GenAI, Ollama)
@@ -42,13 +42,12 @@ The project is a multi-service application orchestrated via Docker Compose:
 - **Dev (Docker):** 
   `docker compose up --build`
 - **Dev (Local Python):**
-  1. Initialize Test DB: `export ENV=test && uv run python -m src.database_utils.init_test_db`
+  1. Start the test database: `uv run start-test-db`
   2. Start Web App: `export ENV=test && uv run python -m web_app.main`
   3. Start Bot: `export ENV=test && uv run python -m telegram_bot.run_bot`
 - **Test:**
-  - Unit Tests: `export ENV=test && uv run pytest tests/unit_tests -v`
-  - Integration Tests: `export ENV=test && uv run pytest tests/integration_tests -v`
-  - E2E Tests: `cd tests/e2e_smoke_tests && npm run test:playwright` (Requires the web app to be running on port 8000).
+  - Component Tests (unit + integration, starts its own test DB): `uv run run-local-component-tests`
+  - E2E Tests (starts its own test DB and the web app, runs Playwright): `uv run run-local-e2e-tests`
 - **Lint/Format:** 
   The project does not have a strict CI linting gate, but standard PEP8 should be followed. *[INFERRED]* You may use `ruff check .` or `black .` if available in your global environment.
 - **Build:** 
@@ -81,7 +80,7 @@ The project is a multi-service application orchestrated via Docker Compose:
   - NEVER manually edit existing migration files in `alembic/versions/`.
   - Always generate a new migration after modifying SQLAlchemy models: `uv run alembic revision --autogenerate -m "description of change"`.
 - **Development Process**:
-  - Test locally against the SQLite test DB (`ENV=test`) before opening a PR.
+  - Test locally against the disposable Postgres test container (`ENV=test`) before opening a PR — `uv run run-local-component-tests` and `uv run run-local-e2e-tests`.
   - Include unit tests for new parser or worker logic.
 
 ## Environment Setup
@@ -117,5 +116,5 @@ OLLAMA_BASE_URL=http://ollama:11434
 
 ## Known Gotchas
 - **Database Initialization**: The Telegram bot container is unusually tasked with running DB migrations on startup. If the bot container crashes, the DB schema might not be updated.
-- **Test Database Targeting**: The system switches between PostgreSQL and SQLite based on the `ENV` variable. Ensure `export ENV=test` is present when testing or developing locally outside of Docker to target the SQLite DB instead of crashing while looking for PostgreSQL.
+- **Test Database Targeting**: `ENV=test` targets the dedicated `postgres_test_db` container on `localhost:5433`, distinct from the `local`/`production` Postgres container. Start it with `uv run start-test-db` (or let `uv run run-local-component-tests` / `uv run run-local-e2e-tests` start it for you) before running anything locally outside of Docker with `ENV=test` set.
 - **Queue Cycle Timer**: The `queue` service's parser/worker cycle runs every 2 hours. If a cycle takes less than 2 hours, the container naturally sleeps for the remainder of the time.

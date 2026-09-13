@@ -113,8 +113,14 @@ tests/
 ├── unit_tests/                  # run by run_local_component_tests.py
 ├── integration_tests/           # run by run_local_component_tests.py
 ├── e2e_smoke_tests/              # Playwright suite, run by run_local_e2e_tests.py against the running web app
+│   ├── src/db/PostgresDBHandler.ts  # NEW (discovered during implementation): replaces SQLiteDBhandler.ts,
+│   │                                  # which opened src/db/local.db directly — broken once the web app
+│   │                                  # moved to Postgres; now uses the `pg` npm package against :5433
+│   └── package.json                 # better-sqlite3/@types/better-sqlite3 removed, pg/@types/pg added
 └── pytest_fixtures/
-    └── common.py                # build_mock_db: UNCHANGED (stays in-memory SQLite; out of scope)
+    └── common.py                # build_mock_db: behavior UNCHANGED (stays in-memory SQLite; out of scope) —
+                                  # gained a @compiles(JSONB, "sqlite") shim so it keeps working now that
+                                  # src/models/models.py picks JSONB columns for is_postgres_env (incl. test)
 
 docker-compose.yml                # + new postgres_test_db service, gated behind a "test" profile
 pyproject.toml                    # + new [project.scripts] entries: start-test-db, run-local-component-tests, run-local-e2e-tests

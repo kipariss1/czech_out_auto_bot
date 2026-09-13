@@ -36,7 +36,7 @@ at the repository root.
 **Purpose**: Declare the new test-database container as a project resource, before any code routes
 `ENV=test` to it.
 
-- [ ] T001 Add a `postgres_test_db` service to `docker-compose.yml`: image `postgres:15`, `container_name: postgres_test_db`, reuse the existing `<<: *common-env` anchor for `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`, publish port `"5433:5432"` (distinct from `postgres_db`'s `5432`), **no** `volumes:` entry (must stay disposable/empty), a healthcheck of `["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]`, `profiles: ["test"]` so plain `docker compose up` never starts it, and reuse the `logging: *stdout-file-logging` anchor
+- [X] T001 Add a `postgres_test_db` service to `docker-compose.yml`: image `postgres:15`, `container_name: postgres_test_db`, reuse the existing `<<: *common-env` anchor for `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`, publish port `"5433:5432"` (distinct from `postgres_db`'s `5432`), **no** `volumes:` entry (must stay disposable/empty), a healthcheck of `["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]`, `profiles: ["test"]` so plain `docker compose up` never starts it, and reuse the `logging: *stdout-file-logging` anchor
 
 ---
 
@@ -47,12 +47,12 @@ and 3 all depend on this being in place.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] In `src/database_utils/postgres_database.py`, add `TEST_POSTGRES_HOST = "localhost"` and `TEST_POSTGRES_PORT = 5433` constants, extend `_db_url_for_host` to accept a `port: int = POSTGRES_PORT` parameter, and add an `env == "test"` branch to `PostgresDBHandler.db_url()` that returns `_db_url_for_host(TEST_POSTGRES_HOST, TEST_POSTGRES_PORT)`
-- [ ] T003 [P] In `src/settings/settings.py`, update `Settings.is_postgres_env` to return `True` for `self.env in ("production", "local", "test")` (currently only `"production"`/`"local"`)
-- [ ] T004 In `src/database_utils/database_factory.py`, remove the `from src.database_utils.sqlite_database import SqliteDBHandler` import and the `if settings.env == 'test': return SqliteDBHandler(Base)` branch from `DBFactory.create_db_handler`, leaving only the `settings.is_postgres_env` branch and the `ValueError` fallback (depends on T002, T003)
-- [ ] T005 [P] In `src/database_utils/migrations.py`, remove the `from src.database_utils.sqlite_database import SqliteDBHandler` import and the `if settings.env == "test": return SqliteDBHandler.db_url()` branch from `get_database_url`, leaving only the `settings.is_postgres_env` branch and the `ValueError` fallback (depends on T002, T003)
-- [ ] T006 [P] In `alembic/env.py`, replace `render_as_batch=url.startswith("sqlite")` in `run_migrations_offline` and `render_as_batch=connection.dialect.name == "sqlite"` in `run_migrations_online` with `render_as_batch=False` in both functions, since every environment now runs against PostgreSQL
-- [ ] T007 Delete `src/database_utils/sqlite_database.py` — no remaining code path references `SqliteDBHandler` after T004 and T005 (depends on T004, T005)
+- [X] T002 [P] In `src/database_utils/postgres_database.py`, add `TEST_POSTGRES_HOST = "localhost"` and `TEST_POSTGRES_PORT = 5433` constants, extend `_db_url_for_host` to accept a `port: int = POSTGRES_PORT` parameter, and add an `env == "test"` branch to `PostgresDBHandler.db_url()` that returns `_db_url_for_host(TEST_POSTGRES_HOST, TEST_POSTGRES_PORT)`
+- [X] T003 [P] In `src/settings/settings.py`, update `Settings.is_postgres_env` to return `True` for `self.env in ("production", "local", "test")` (currently only `"production"`/`"local"`)
+- [X] T004 In `src/database_utils/database_factory.py`, remove the `from src.database_utils.sqlite_database import SqliteDBHandler` import and the `if settings.env == 'test': return SqliteDBHandler(Base)` branch from `DBFactory.create_db_handler`, leaving only the `settings.is_postgres_env` branch and the `ValueError` fallback (depends on T002, T003)
+- [X] T005 [P] In `src/database_utils/migrations.py`, remove the `from src.database_utils.sqlite_database import SqliteDBHandler` import and the `if settings.env == "test": return SqliteDBHandler.db_url()` branch from `get_database_url`, leaving only the `settings.is_postgres_env` branch and the `ValueError` fallback (depends on T002, T003)
+- [X] T006 [P] In `alembic/env.py`, replace `render_as_batch=url.startswith("sqlite")` in `run_migrations_offline` and `render_as_batch=connection.dialect.name == "sqlite"` in `run_migrations_online` with `render_as_batch=False` in both functions, since every environment now runs against PostgreSQL
+- [X] T007 Delete `src/database_utils/sqlite_database.py` — no remaining code path references `SqliteDBHandler` after T004 and T005 (depends on T004, T005)
 
 **Checkpoint**: `ENV=test` now resolves exclusively to PostgreSQL through `src.database_utils.db_handler`. User story implementation can begin.
 
@@ -69,14 +69,14 @@ never touches the web app or Node/Playwright, and leaves no test-only container 
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Create `src/scripts/run_local_component_tests.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (mirroring the existing check in `src/scripts/start_local_db.py` and `src/scripts/deploy.py`) and exits with a clear error if not run from the repo root
-- [ ] T009 [US1] In `src/scripts/run_local_component_tests.py`, implement `ensure_empty_test_db()`: run `docker rm -f postgres_test_db` (tolerating a "no such container" error), then `docker compose --profile test up -d postgres_test_db`, then poll `docker inspect --format='{{json .State.Health.Status}}' postgres_test_db` until it reports `"healthy"`, failing with a clear, specific error message after a bounded number of retries instead of hanging (FR-005, FR-011)
-- [ ] T010 [US1] In `src/scripts/run_local_component_tests.py`, implement `init_schema()`: with `ENV=test` set in the process environment, call `src.database_utils.init_db.init_db()` to apply Alembic migrations and seed car data against the freshly-started test database
-- [ ] T011 [US1] In `src/scripts/run_local_component_tests.py`, implement `run_unit_tests()`: run `pytest tests/unit_tests -v` as a subprocess with `ENV=test` (and `BOT_TOKEN` defaulted to a placeholder if unset) in its environment, capturing the pass/fail result without raising on a non-zero exit code
-- [ ] T012 [US1] In `src/scripts/run_local_component_tests.py`, implement `run_integration_tests()`: run `pytest tests/integration_tests -v` as a subprocess with `ENV=test` in its environment, capturing the pass/fail result without raising on a non-zero exit code
-- [ ] T013 [US1] In `src/scripts/run_local_component_tests.py`, implement `teardown()` — remove the `postgres_test_db` container — and wire it into `main()` via a `try`/`finally` plus a `SIGINT`/`SIGTERM` handler so it always executes, including when the developer interrupts the run with Ctrl+C (FR-010, interruption edge case)
-- [ ] T014 [US1] In `src/scripts/run_local_component_tests.py`, implement `main()` orchestration that runs `ensure_empty_test_db()` → `init_schema()` → `run_unit_tests()` → `run_integration_tests()` in order, always calls `teardown()` (T013), prints a summary naming every suite's pass/fail status, and exits with a non-zero status if either suite failed (Acceptance Scenario 2) or `0` only if both passed
-- [ ] T015 [US1] Add `run-local-component-tests = "src.scripts.run_local_component_tests:main"` to `[project.scripts]` in `pyproject.toml`
+- [X] T008 [US1] Create `src/scripts/run_local_component_tests.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (mirroring the existing check in `src/scripts/start_local_db.py` and `src/scripts/deploy.py`) and exits with a clear error if not run from the repo root
+- [X] T009 [US1] In `src/scripts/run_local_component_tests.py`, implement `ensure_empty_test_db()`: run `docker rm -f postgres_test_db` (tolerating a "no such container" error), then `docker compose --profile test up -d postgres_test_db`, then poll `docker inspect --format='{{json .State.Health.Status}}' postgres_test_db` until it reports `"healthy"`, failing with a clear, specific error message after a bounded number of retries instead of hanging (FR-005, FR-011)
+- [X] T010 [US1] In `src/scripts/run_local_component_tests.py`, implement `init_schema()`: with `ENV=test` set in the process environment, call `src.database_utils.init_db.init_db()` to apply Alembic migrations and seed car data against the freshly-started test database
+- [X] T011 [US1] In `src/scripts/run_local_component_tests.py`, implement `run_unit_tests()`: run `pytest tests/unit_tests -v` as a subprocess with `ENV=test` (and `BOT_TOKEN` defaulted to a placeholder if unset) in its environment, capturing the pass/fail result without raising on a non-zero exit code
+- [X] T012 [US1] In `src/scripts/run_local_component_tests.py`, implement `run_integration_tests()`: run `pytest tests/integration_tests -v` as a subprocess with `ENV=test` in its environment, capturing the pass/fail result without raising on a non-zero exit code
+- [X] T013 [US1] In `src/scripts/run_local_component_tests.py`, implement `teardown()` — remove the `postgres_test_db` container — and wire it into `main()` via a `try`/`finally` plus a `SIGINT`/`SIGTERM` handler so it always executes, including when the developer interrupts the run with Ctrl+C (FR-010, interruption edge case)
+- [X] T014 [US1] In `src/scripts/run_local_component_tests.py`, implement `main()` orchestration that runs `ensure_empty_test_db()` → `init_schema()` → `run_unit_tests()` → `run_integration_tests()` in order, always calls `teardown()` (T013), prints a summary naming every suite's pass/fail status, and exits with a non-zero status if either suite failed (Acceptance Scenario 2) or `0` only if both passed
+- [X] T015 [US1] Add `run-local-component-tests = "src.scripts.run_local_component_tests:main"` to `[project.scripts]` in `pyproject.toml`
 
 **Checkpoint**: `uv run run-local-component-tests` is fully functional and independently testable — User Story 1 delivers the MVP.
 
@@ -93,14 +93,14 @@ pass/fail result, and leaves no test-only container or web app process running a
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Create `src/scripts/run_local_e2e_tests.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (same pattern as T008) and exits with a clear error if not run from the repo root
-- [ ] T017 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `ensure_empty_test_db()`: run `docker rm -f postgres_test_db` (tolerating a "no such container" error), then `docker compose --profile test up -d postgres_test_db`, then poll `docker inspect --format='{{json .State.Health.Status}}' postgres_test_db` until it reports `"healthy"`, failing with a clear, specific error message after a bounded number of retries instead of hanging (FR-005, FR-011) — this mirrors T009's logic; each command owns its own copy rather than sharing a helper module, per plan.md's file structure
-- [ ] T018 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `init_schema()`: with `ENV=test` set in the process environment, call `src.database_utils.init_db.init_db()` to apply Alembic migrations and seed car data against the freshly-started test database
-- [ ] T019 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `start_web_app()`: launch `uvicorn web_app.main:app --host 0.0.0.0 --port 8000` as a background subprocess with `ENV=test` in its environment, poll `http://127.0.0.1:8000/` until it responds, and report a clear failure (not a hang) if it does not become ready within a bounded timeout (FR-011, edge case: web app never becomes ready)
-- [ ] T020 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `run_smoke_e2e_tests()`: from `tests/e2e_smoke_tests`, run `npm ci` only if `node_modules` is missing, then `npx playwright install --with-deps`, `npm run build`, and `npm run test:playwright`, capturing the pass/fail result; if `start_web_app()` did not report ready, mark this stage failed with that reason instead of attempting to run Playwright against a dead server
-- [ ] T021 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `teardown()` — stop the web app subprocess started by `start_web_app()` (if any) and remove the `postgres_test_db` container — and wire it into `main()` via a `try`/`finally` plus a `SIGINT`/`SIGTERM` handler so it always executes, including when the developer interrupts the run with Ctrl+C (FR-010, interruption edge case)
-- [ ] T022 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `main()` orchestration that runs `ensure_empty_test_db()` → `init_schema()` → `start_web_app()` → `run_smoke_e2e_tests()` in order, always calls `teardown()` (T021), prints a summary naming the stage that failed (if any), and exits with a non-zero status on failure (Acceptance Scenario 2) or `0` only if the suite passed
-- [ ] T023 [US2] Add `run-local-e2e-tests = "src.scripts.run_local_e2e_tests:main"` to `[project.scripts]` in `pyproject.toml`
+- [X] T016 [US2] Create `src/scripts/run_local_e2e_tests.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (same pattern as T008) and exits with a clear error if not run from the repo root
+- [X] T017 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `ensure_empty_test_db()`: run `docker rm -f postgres_test_db` (tolerating a "no such container" error), then `docker compose --profile test up -d postgres_test_db`, then poll `docker inspect --format='{{json .State.Health.Status}}' postgres_test_db` until it reports `"healthy"`, failing with a clear, specific error message after a bounded number of retries instead of hanging (FR-005, FR-011) — this mirrors T009's logic; each command owns its own copy rather than sharing a helper module, per plan.md's file structure
+- [X] T018 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `init_schema()`: with `ENV=test` set in the process environment, call `src.database_utils.init_db.init_db()` to apply Alembic migrations and seed car data against the freshly-started test database
+- [X] T019 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `start_web_app()`: launch `uvicorn web_app.main:app --host 0.0.0.0 --port 8000` as a background subprocess with `ENV=test` in its environment, poll `http://127.0.0.1:8000/` until it responds, and report a clear failure (not a hang) if it does not become ready within a bounded timeout (FR-011, edge case: web app never becomes ready)
+- [X] T020 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `run_smoke_e2e_tests()`: from `tests/e2e_smoke_tests`, run `npm ci` only if `node_modules` is missing, then `npx playwright install --with-deps`, `npm run build`, and `npm run test:playwright`, capturing the pass/fail result; if `start_web_app()` did not report ready, mark this stage failed with that reason instead of attempting to run Playwright against a dead server
+- [X] T021 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `teardown()` — stop the web app subprocess started by `start_web_app()` (if any) and remove the `postgres_test_db` container — and wire it into `main()` via a `try`/`finally` plus a `SIGINT`/`SIGTERM` handler so it always executes, including when the developer interrupts the run with Ctrl+C (FR-010, interruption edge case)
+- [X] T022 [US2] In `src/scripts/run_local_e2e_tests.py`, implement `main()` orchestration that runs `ensure_empty_test_db()` → `init_schema()` → `start_web_app()` → `run_smoke_e2e_tests()` in order, always calls `teardown()` (T021), prints a summary naming the stage that failed (if any), and exits with a non-zero status on failure (Acceptance Scenario 2) or `0` only if the suite passed
+- [X] T023 [US2] Add `run-local-e2e-tests = "src.scripts.run_local_e2e_tests:main"` to `[project.scripts]` in `pyproject.toml`
 
 **Checkpoint**: `uv run run-local-component-tests` and `uv run run-local-e2e-tests` both work independently — User Stories 1 and 2 together restore full local/CI parity, now as two separate commands.
 
@@ -117,10 +117,10 @@ an already-running local-development database without conflict.
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Create `src/scripts/start_test_db.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (same pattern as T008/T016) and exits with a clear error if not run from the repo root
-- [ ] T025 [US3] In `src/scripts/start_test_db.py`, implement startup logic: if `postgres_test_db` is already reporting `"healthy"` (via `docker inspect --format='{{json .State.Health.Status}}'`), reuse it as-is; otherwise run `docker compose --profile test up -d postgres_test_db` and poll for healthy status, failing with a clear error after a bounded number of retries — unlike User Stories 1/2's `ensure_empty_test_db()`, this MUST NOT force-remove an existing container (FR-001, FR-009, and the "on demand" framing distinct from either full test-run command)
-- [ ] T026 [US3] In `src/scripts/start_test_db.py`, after the container reports healthy, call `src.database_utils.init_db.init_db()` with `ENV=test` set in the process environment so a freshly-started container has schema and seed data ready to use
-- [ ] T027 [US3] Add `start-test-db = "src.scripts.start_test_db:main"` to `[project.scripts]` in `pyproject.toml`
+- [X] T024 [US3] Create `src/scripts/start_test_db.py` with a `main()` entry point that checks for `docker-compose.yml` in the current directory (same pattern as T008/T016) and exits with a clear error if not run from the repo root
+- [X] T025 [US3] In `src/scripts/start_test_db.py`, implement startup logic: if `postgres_test_db` is already reporting `"healthy"` (via `docker inspect --format='{{json .State.Health.Status}}'`), reuse it as-is; otherwise run `docker compose --profile test up -d postgres_test_db` and poll for healthy status, failing with a clear error after a bounded number of retries — unlike User Stories 1/2's `ensure_empty_test_db()`, this MUST NOT force-remove an existing container (FR-001, FR-009, and the "on demand" framing distinct from either full test-run command)
+- [X] T026 [US3] In `src/scripts/start_test_db.py`, after the container reports healthy, call `src.database_utils.init_db.init_db()` with `ENV=test` set in the process environment so a freshly-started container has schema and seed data ready to use
+- [X] T027 [US3] Add `start-test-db = "src.scripts.start_test_db:main"` to `[project.scripts]` in `pyproject.toml`
 
 **Checkpoint**: `uv run start-test-db`, `uv run run-local-component-tests`, and `uv run run-local-e2e-tests` all work independently, and can run concurrently with `uv run start-local-db`.
 
@@ -137,10 +137,10 @@ fixture.
 
 ### Implementation for User Story 4
 
-- [ ] T028 [P] [US4] Update `boring_readme_for_devs.md`: replace the "Local Development Startup With SQLite Tests" section (currently describing `export ENV=test && uv run python -m src.database_utils.init_test_db` against `src/db/local.db`) with the Postgres test container workflow, describing all three commands (`uv run start-test-db`, `uv run run-local-component-tests`, `uv run run-local-e2e-tests`), and update the "Database Migrations" paragraph and the "throwaway SQLite database" Alembic example that currently state `ENV=test` uses SQLite
-- [ ] T029 [P] [US4] Update `src/db/readme.md`: replace "SQLite at `local.db` is only used for `ENV=test`." with a description of the dedicated, disposable `postgres_test_db` container used for `ENV=test`
-- [ ] T030 [P] [US4] Update `AGENTS.md`: the "Database" bullet (`PostgreSQL (Production), SQLite (Local/Test)`), the "Local Dev Startup" steps referencing `src.database_utils.init_test_db` and SQLite, the PR checklist line ("Test locally against the SQLite test DB"), and the "Test Database Targeting" note (currently: "the system switches between PostgreSQL and SQLite based on the `ENV` variable") — all MUST describe the Postgres test container workflow and the two separate test commands instead, per the constitution's requirement that `AGENTS.md` stay consistent with `.specify/memory/constitution.md`
-- [ ] T031 [US4] Search the repository (`grep -rn "sqlite" src/ alembic/ web_app/ telegram_bot/ queue_svc/ readme.md boring_readme_for_devs.md src/db/readme.md AGENTS.md`) and confirm zero remaining references to the retired SQLite-based `ENV=test` database, outside of `tests/pytest_fixtures/common.py`'s `build_mock_db` fixture, which is explicitly out of scope (SC-005) (depends on T007, T028, T029, T030)
+- [X] T028 [P] [US4] Update `boring_readme_for_devs.md`: replace the "Local Development Startup With SQLite Tests" section (currently describing `export ENV=test && uv run python -m src.database_utils.init_test_db` against `src/db/local.db`) with the Postgres test container workflow, describing all three commands (`uv run start-test-db`, `uv run run-local-component-tests`, `uv run run-local-e2e-tests`), and update the "Database Migrations" paragraph and the "throwaway SQLite database" Alembic example that currently state `ENV=test` uses SQLite
+- [X] T029 [P] [US4] Update `src/db/readme.md`: replace "SQLite at `local.db` is only used for `ENV=test`." with a description of the dedicated, disposable `postgres_test_db` container used for `ENV=test`
+- [X] T030 [P] [US4] Update `AGENTS.md`: the "Database" bullet (`PostgreSQL (Production), SQLite (Local/Test)`), the "Local Dev Startup" steps referencing `src.database_utils.init_test_db` and SQLite, the PR checklist line ("Test locally against the SQLite test DB"), and the "Test Database Targeting" note (currently: "the system switches between PostgreSQL and SQLite based on the `ENV` variable") — all MUST describe the Postgres test container workflow and the two separate test commands instead, per the constitution's requirement that `AGENTS.md` stay consistent with `.specify/memory/constitution.md`
+- [X] T031 [US4] Search the repository (`grep -rn "sqlite" src/ alembic/ web_app/ telegram_bot/ queue_svc/ readme.md boring_readme_for_devs.md src/db/readme.md AGENTS.md`) and confirm zero remaining references to the retired SQLite-based `ENV=test` database, outside of `tests/pytest_fixtures/common.py`'s `build_mock_db` fixture, which is explicitly out of scope (SC-005) (depends on T007, T028, T029, T030)
 
 **Checkpoint**: All user stories are independently functional, and no stale SQLite or single-command references remain.
 
@@ -150,7 +150,7 @@ fixture.
 
 **Purpose**: Final end-to-end validation across all delivered stories.
 
-- [ ] T032 Run all seven scenarios in `specs/002-postgres-test-runner/quickstart.md` (standalone start-test-db reuse behavior, component-test run with a deliberately failing suite, e2e-test run with a deliberately failing suite, concurrent local-dev + test databases, empty-database-on-every-run, zero remaining SQLite references, and cleanup on Ctrl+C interruption for both commands) and fix any discrepancy found
+- [X] T032 Run all seven scenarios in `specs/002-postgres-test-runner/quickstart.md` (standalone start-test-db reuse behavior, component-test run with a deliberately failing suite, e2e-test run with a deliberately failing suite, concurrent local-dev + test databases, empty-database-on-every-run, zero remaining SQLite references, and cleanup on Ctrl+C interruption for both commands) and fix any discrepancy found
 
 ---
 
@@ -256,3 +256,37 @@ Foundational's T007 has landed.
   for both User Story 1 and User Story 2)
 - Commit after each task or logical group
 - Stop at any checkpoint to validate a story independently
+
+### Discovered during implementation (addendum, not in the original task list)
+
+Real end-to-end execution of User Story 2 (T032 polish validation) surfaced a third SQLite touchpoint
+none of the spec/plan/tasks rounds caught: `tests/e2e_smoke_tests/src/db/SQLiteDBhandler.ts` opened
+`src/db/local.db` directly (via `better-sqlite3`) to seed/clean a test user and searches before/after
+each Playwright test. It only ever worked because the web app *also* used that same SQLite file for
+`ENV=test`; once the web app moved to Postgres, this handler broke outright (FR-006/FR-012 apply here
+just as much as to the Python side). Per explicit user confirmation, this was fixed as part of this
+implementation, not deferred:
+- `tests/e2e_smoke_tests/src/db/SQLiteDBhandler.ts` → replaced with `PostgresDBHandler.ts` (uses the
+  `pg` npm package, connects to `localhost:5433` with the same `POSTGRES_USER`/`POSTGRES_PASSWORD`/
+  `POSTGRES_DB` credentials, forwarded into the `npm`/Playwright subprocess environment by
+  `run_local_e2e_tests.py`'s new `_npm_env()` helper).
+- `tests/e2e_smoke_tests/src/index.ts` and `src/smoke.test.ts` updated to the renamed, now-async
+  `testDBHandler` (connect once at module load, `await` every `cleanDB()`/`insertUser()` call, added
+  a `test.afterAll` disconnect).
+- `tests/e2e_smoke_tests/package.json`: `better-sqlite3`/`@types/better-sqlite3` removed, `pg`/
+  `@types/pg` added.
+- Also fixed along the way (found only through actually running the scripts against Docker, not
+  through static review): (1) `src/models/models.py` picks `JSONB` vs. generic `JSON` based on
+  `settings.is_postgres_env`, which now includes `test` — this silently broke `build_mock_db`'s
+  in-memory SQLite engine (`JSONB` isn't renderable on SQLite) until a
+  `@compiles(JSONB, "sqlite")` shim was added to `tests/pytest_fixtures/common.py` (the fixture's
+  *behavior* is unchanged; this is a compatibility shim, not a scope violation of FR-007/FR-008); (2)
+  both `run_local_component_tests.py` and `run_local_e2e_tests.py` needed `os.environ["ENV"] = "test"`
+  set for their *own* process (not just for subprocess `env=` dicts), since `init_schema()` runs
+  in-process; (3) Alembic's `fileConfig()` (triggered by `init_db()`) disables every logger not
+  listed in `alembic.ini` and resets the root logger's level to `WARNING`, silently swallowing each
+  script's own post-migration log output — fixed by resetting `logger.disabled = False` and
+  `logger.setLevel(logging.INFO)` right after the `init_db()` call in all three scripts.
+- `quickstart.md` Scenario 6 and the SC-005 grep were updated to also cover
+  `tests/e2e_smoke_tests/` (excluding `node_modules`/`dist`), since the original grep list was
+  Python/docs-only and would never have caught the TS-side SQLite handler.
