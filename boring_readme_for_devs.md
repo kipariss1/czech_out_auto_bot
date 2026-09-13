@@ -81,7 +81,8 @@ just empty and separate. Three `uv run` commands cover the local test workflow:
   uv run start-test-db
   ```
   Reuses an already-healthy `postgres_test_db` container if one exists, or starts and initializes a
-  fresh one otherwise.
+  fresh one otherwise. This is a thin wrapper that sets `ENV=test` and calls `start-db`; without
+  `ENV=test`, `uv run start-db` starts the `local`/`production` `postgres_db` container instead.
 
 - **Run the component tests** (unit + integration; starts/recreates the test database, never touches
   the web app):

@@ -76,8 +76,8 @@ dependencies = [
 ]
 
 [project.scripts]
-start-local-db = "src.scripts.start_local_db:main"
-start-test-db = "src.scripts.start_test_db:main"
+start-db = "src.scripts.start_db:main"
+start-test-db = "src.scripts.start_db:main_test_db"
 local-component-tests = "src.scripts.run_local_component_tests:main"
 local-e2e-tests = "src.scripts.run_local_e2e_tests:main"
 generate-migration = "src.scripts.generate_migration:main"
