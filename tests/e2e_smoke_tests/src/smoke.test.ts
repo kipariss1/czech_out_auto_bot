@@ -1,5 +1,5 @@
 import { expect, test } from 'playwright/test'
-import { sqliteDBhandler } from './index';
+import { testDBHandler } from './index';
 import { LandingPage, CreateSearchPage, type SearchFormInputs } from './poms';
 import { assertTextPresent, assertAlertPresent } from './assertions';
 
@@ -24,8 +24,8 @@ const inputData: SearchFormInputs = {
     }
 
 test.beforeEach(async ({ page }) => {
-    sqliteDBhandler.cleanDB();
-    sqliteDBhandler.insertUser(testUser);
+    await testDBHandler.cleanDB();
+    await testDBHandler.insertUser(testUser);
 
     await page.route('**/telegram-web-app.js', async route => {
         await route.fulfill({
@@ -70,7 +70,11 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.afterEach(async ({}) => {
-    sqliteDBhandler.cleanDB();
+    await testDBHandler.cleanDB();
+});
+
+test.afterAll(async () => {
+    await testDBHandler.disconnect();
 });
 
 test('Happy path test', async ({ page }) => {

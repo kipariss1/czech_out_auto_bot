@@ -3,12 +3,23 @@ from unittest.mock import patch
 from typing import Any, Dict, Callable, TypedDict, Literal, List
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
 from src.models.models import Base
 from datetime import datetime
 import responses
 import pathlib
 
 JSON = Dict[str, Any]
+
+
+@compiles(JSONB, "sqlite")
+def _compile_jsonb_as_json_for_sqlite(element, compiler, **kw):
+    # src/models/models.py uses Postgres JSONB columns whenever settings.is_postgres_env is
+    # True (which now includes ENV=test, since ENV=test targets a real Postgres container).
+    # This in-memory mock always runs on SQLite regardless of ENV, so JSONB columns need a
+    # SQLite-renderable equivalent to create the schema at all.
+    return "JSON"
 
 class MockURL(TypedDict):
     type: Literal[responses.GET, responses.POST, responses.PUT, responses.PATCH, responses.DELETE]

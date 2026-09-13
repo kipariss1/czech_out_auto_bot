@@ -1,14 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: (unratified template) → 1.0.0
-- Modified principles: none (initial ratification)
-- Added principles:
-  - I. Test-First Coverage for Parser & Worker Logic (NON-NEGOTIABLE)
-  - II. Environment Isolation (Test vs. Production)
-  - III. Migration-Only Schema Changes
-  - IV. Respectful External Scraping
-  - V. Secrets & Config Hygiene
-- Added sections: Technology & Service Boundaries; Development Workflow; Governance
+- Version change: 1.0.0 → 2.0.0
+- Modified principles:
+  - II. Environment Isolation (Test vs. Production) — redefined: the test/non-test split is no
+    longer SQLite vs. PostgreSQL. Every environment (`ENV=test`, `ENV=local`, `ENV=production`) now
+    targets PostgreSQL; the test database is a disposable instance that starts empty, identical in
+    engine to production, isolated only by being empty and separate rather than by a different
+    database technology.
+- Added principles: none
+- Added sections: none
 - Removed sections: none
 - Templates requiring updates:
   - .specify/templates/plan-template.md ⚠ pending manual review for constitution alignment
@@ -32,12 +32,16 @@ schedule against a third-party site with no human in the loop, so regressions ar
 user misses a real match.
 
 ### II. Environment Isolation (Test vs. Production)
-Local development and test runs MUST target the SQLite database via `ENV=test`; production and
-local-container work MUST target PostgreSQL via `ENV=production` or `ENV=local`. Code MUST resolve
-database connections exclusively through `src.database_utils.db_handler`; hardcoded connection
-strings or credentials are forbidden anywhere in application code. Rationale: the project runs the
-same codebase against two different database engines, and a hardcoded or misrouted connection
-either corrupts production data or makes tests meaningless.
+Every environment (`ENV=test`, `ENV=local`, `ENV=production`) MUST target PostgreSQL; no environment
+may be backed by a different database engine. The test database is isolated from local-development
+and production data by state, not by engine: it MUST always start empty and disposable, distinct
+from the local-development and production databases, and MUST NOT persist data across runs beyond
+what a given test run itself seeds. Code MUST resolve database connections exclusively through
+`src.database_utils.db_handler`; hardcoded connection strings or credentials are forbidden anywhere
+in application code. Rationale: running tests against the same database engine as production
+eliminates an entire class of bugs that only surface from engine-specific behavior (type coercion,
+constraint enforcement, SQL dialect differences); keeping the test database empty and separate
+still guarantees tests stay deterministic and never touch real data.
 
 ### III. Migration-Only Schema Changes
 Any change to a SQLAlchemy model in `src/models/` MUST be accompanied by a new Alembic revision
@@ -77,7 +81,7 @@ Branches follow `<ProjectKey>-<TicketNumber>-<short-description>` (e.g. `TCP-123
 commits follow `[TCP-1234] Description of changes`. Work is tracked in Jira under the default
 project **TCP**; tickets are assigned before work begins and transitioned through "In Progress" /
 "In Review" as work progresses. Before opening a pull request, changes MUST be verified locally
-against the SQLite test database (`ENV=test`). Pull requests into `main` are gated by the GitHub
+against the disposable PostgreSQL test database (`ENV=test`). Pull requests into `main` are gated by the GitHub
 Actions pipeline running unit, integration, and e2e smoke tests. `readme.md` MUST be updated for
 user-facing changes; `boring_readme_for_devs.md` MUST be updated for architecture, testing, or
 Docker-related changes.
@@ -99,4 +103,4 @@ Pull requests that touch parser/worker logic, database models, migrations, scrap
 secrets handling MUST be reviewed for compliance with the Core Principles above before merge.
 Complexity or deviation from a principle MUST be justified explicitly in the PR description.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-11 | **Last Amended**: 2026-09-11
+**Version**: 2.0.0 | **Ratified**: 2026-09-11 | **Last Amended**: 2026-09-11

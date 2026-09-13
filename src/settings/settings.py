@@ -43,7 +43,7 @@ class Settings(BaseSettings):
 
     @property
     def is_postgres_env(self) -> bool:
-        return self.env in ("production", "local")
+        return self.env in ("production", "local", "test")
 
     @property
     def llm(self) -> LLMProvider:
