@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import subprocess
@@ -92,7 +93,7 @@ def start_web_app() -> bool:
     return False
 
 
-def run_smoke_e2e_tests(web_app_ready: bool) -> bool:
+def run_smoke_e2e_tests(web_app_ready: bool, headed: bool) -> bool:
     if not web_app_ready:
         logger.error("Skipping smoke e2e tests — web app never became ready.")
         return False
@@ -103,7 +104,10 @@ def run_smoke_e2e_tests(web_app_ready: bool) -> bool:
         subprocess.run(["npm", "ci"], cwd=E2E_TESTS_DIR, env=npm_env, check=True)
     subprocess.run(["npx", "playwright", "install", "--with-deps"], cwd=E2E_TESTS_DIR, env=npm_env, check=True)
     subprocess.run(["npm", "run", "build"], cwd=E2E_TESTS_DIR, env=npm_env, check=True)
-    result = subprocess.run(["npm", "run", "test:playwright"], cwd=E2E_TESTS_DIR, env=npm_env)
+    test_command = ["npm", "run", "test:playwright"]
+    if headed:
+        test_command += ["--", "--headed"]
+    result = subprocess.run(test_command, cwd=E2E_TESTS_DIR, env=npm_env)
     return result.returncode == 0
 
 
@@ -123,6 +127,10 @@ def teardown() -> None:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--headed", action="store_true", help="Run Playwright tests with a visible browser.")
+    args = parser.parse_args()
+
     if not os.path.exists("docker-compose.yml"):
         logger.error("Please run this command from the project root directory (where docker-compose.yml is located).")
         sys.exit(1)
@@ -139,7 +147,7 @@ def main():
         ensure_empty_test_db()
         init_schema()
         web_app_ready = start_web_app()
-        smoke_passed = run_smoke_e2e_tests(web_app_ready)
+        smoke_passed = run_smoke_e2e_tests(web_app_ready, headed=args.headed)
     finally:
         teardown()
 
