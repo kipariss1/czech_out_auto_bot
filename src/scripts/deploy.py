@@ -12,6 +12,12 @@ def docker_system_df():
     subprocess.run(["docker", "system", "df"], check=True)
 
 
+def docker_cleanup():
+    logger.info("Cleaning up unused docker images and build cache...")
+    subprocess.run(["docker", "image", "prune", "-af"], check=True)
+    subprocess.run(["docker", "builder", "prune", "-af"], check=True)
+
+
 def git_pull():
     logger.info("Pulling latest changes from git...")
     subprocess.run(["git", "pull"], check=True)
@@ -34,6 +40,7 @@ def main():
 
     try:
         docker_system_df()
+        docker_cleanup()
         git_pull()
         docker_compose_build()
         docker_compose_up()
