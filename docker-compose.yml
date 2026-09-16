@@ -24,6 +24,7 @@ services:
     environment:
       CIPHER_KEY: ${CIPHER_KEY}
       RENDER_EXTERNAL_URL: ${RENDER_EXTERNAL_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       <<: *common-env
     depends_on:
       postgres_db:

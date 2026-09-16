@@ -42,6 +42,31 @@
     </main>
 
     <script>
+        // Mirrors Python's logging module levels/semantics: a handler only
+        // fires when the configured level is low enough to admit it.
+        const PY_LOG_LEVELS = { DEBUG: 10, INFO: 20, WARNING: 30, ERROR: 40, CRITICAL: 50 };
+        const currentLogLevel = PY_LOG_LEVELS["{{ log_level }}"] ?? PY_LOG_LEVELS.INFO;
+
+        if (currentLogLevel <= PY_LOG_LEVELS.DEBUG) {
+            const showDebugError = (label, details) => {
+                const tab = document.getElementById('id-alert-tab');
+                if (!tab) return;
+                tab.innerText = `${label}: ${details}`;
+                tab.style.display = "block";
+            };
+
+            window.addEventListener('error', (event) => {
+                showDebugError(
+                    'JS error',
+                    `${event.message} @ ${event.filename}:${event.lineno}:${event.colno}\n${event.error?.stack || ''}`
+                );
+            });
+
+            window.addEventListener('unhandledrejection', (event) => {
+                showDebugError('Unhandled rejection', String(event.reason?.stack || event.reason));
+            });
+        }
+
         const telegramWebApp = window.Telegram?.WebApp;
         if (telegramWebApp) {
             telegramWebApp.ready();

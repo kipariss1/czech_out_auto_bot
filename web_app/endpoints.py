@@ -8,6 +8,7 @@ from src.models.models import CarModel, User
 from fastapi.templating import Jinja2Templates
 from typing import List
 from src.models.models import CarSearchCreate, CarSearch
+from src.settings.settings import settings
 from web_app import BASE_DIR
 
 
@@ -80,6 +81,7 @@ def main_view(
         "request": request,
         "new_search_created": new_search_created,
         "search_already_exists": search_already_exists,
+        "log_level": settings.log_level,
     }
     return templates.TemplateResponse("index.html", render_dict)
 
@@ -96,7 +98,11 @@ def create_search_view(
         .all()
     )
     unique_car_manufacturers = list(map(lambda el: el[0], unique_car_manufacturers))
-    render_dict = {"request": request, "car_manufacturers": unique_car_manufacturers}
+    render_dict = {
+        "request": request,
+        "car_manufacturers": unique_car_manufacturers,
+        "log_level": settings.log_level,
+    }
     return templates.TemplateResponse("create_search.html", render_dict)
 
 
