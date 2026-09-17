@@ -541,6 +541,59 @@ def test_worker_caches_new_parse_result_after_llm_call(monkeypatch, build_mock_d
     assert cached_rows[0].parsed_result["brand"] == "BMW"
 
 
+def test_worker_keeps_failed_ad_in_queue_without_dropping_successful_ones(monkeypatch, build_mock_db):
+    mock_data = _cache_test_mock_data()
+    mock_data["Advertisements_Queue"] = [
+        {"id": 1, "car_search_id": 1, "queue": [REGULAR_AD_1, REGULAR_AD_2]},
+    ]
+    mock_db, _parser, worker, send_message = _build_parser_and_worker(
+        monkeypatch,
+        build_mock_db,
+        mock_data,
+    )
+
+    async def fake_get_page_text(self):
+        if self.link == REGULAR_AD_2:
+            raise AssertionError("[403] Async Get request was not successful")
+        self.text = "ok-ad-text"
+        self.price = 220000
+        self.psc = "110 00"
+
+    monkeypatch.setattr(
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.get_page_text",
+        fake_get_page_text,
+    )
+    monkeypatch.setattr(
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_toped",
+        AsyncMock(return_value=False),
+    )
+    monkeypatch.setattr(
+        "queue_svc.bazos_api.auto_bazos_api.AutoAdvertisementPage.is_deleted",
+        AsyncMock(return_value=False),
+    )
+    worker.llm = Mock(
+        process=Mock(
+            return_value={
+                "is_valid_ad": True,
+                "brand": "BMW",
+                "model": "F20",
+                "engine": "B47",
+                "year": "2016",
+                "mileage": "70000",
+            }
+        )
+    )
+
+    asyncio.run(worker.process_queue())
+
+    row = mock_db.query(AdQueue).filter(AdQueue.car_search_id == 1).first()
+    assert row.queue == [REGULAR_AD_2]
+
+    calls = _notification_calls(send_message)
+    assert len(calls) == 1
+    assert REGULAR_AD_1 in calls[0]["text"]
+
+
 def test_cache_cleanup_removes_only_expired_entries(monkeypatch, build_mock_db):
     from datetime import datetime, timedelta, timezone
 
