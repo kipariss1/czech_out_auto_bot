@@ -29,7 +29,7 @@ def _test_env() -> dict:
 
 
 def _npm_env() -> dict:
-    from src.database_utils.postgres_database import TEST_POSTGRES_HOST, TEST_POSTGRES_PORT
+    from src.database_utils.postgres_database import LOCAL_TEST_POSTGRES_HOST, LOCAL_TEST_POSTGRES_PORT
     from src.settings.settings import settings
 
     env = os.environ.copy()
@@ -37,8 +37,8 @@ def _npm_env() -> dict:
     env["POSTGRES_USER"] = postgres_data["user"]
     env["POSTGRES_PASSWORD"] = postgres_data["password"]
     env["POSTGRES_DB"] = postgres_data["db"]
-    env["TEST_POSTGRES_HOST"] = TEST_POSTGRES_HOST
-    env["TEST_POSTGRES_PORT"] = str(TEST_POSTGRES_PORT)
+    env["TEST_POSTGRES_HOST"] = LOCAL_TEST_POSTGRES_HOST
+    env["TEST_POSTGRES_PORT"] = str(LOCAL_TEST_POSTGRES_PORT)
     return env
 
 

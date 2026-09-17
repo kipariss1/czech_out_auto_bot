@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "gemma4:12b"
     OLLAMA_BASE_URL: str | None = None
     GEMINI_API_KEY: str | None = None
-    GEMINI_MODEL: str = "gemini-3-flash"
+    GEMINI_MODEL: str = "gemini-2.5-flash"
     PARSED_AD_CACHE_RETENTION_DAYS: int = 30
     LOG_LEVEL: str = "INFO"
 

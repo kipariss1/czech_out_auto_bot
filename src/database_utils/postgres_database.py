@@ -3,10 +3,9 @@ from src.settings.settings import settings
 
 
 POSTGRES_PORT = 5432
-LOCAL_POSTGRES_HOST = "localhost"
 PRODUCTION_POSTGRES_HOST = "postgres_db"
-TEST_POSTGRES_HOST = "localhost"
-TEST_POSTGRES_PORT = 5433
+LOCAL_TEST_POSTGRES_HOST = "localhost"
+LOCAL_TEST_POSTGRES_PORT = 5433
 
 
 class PostgresDBHandler(DatabaseHandler):
@@ -21,11 +20,9 @@ class PostgresDBHandler(DatabaseHandler):
 
     @staticmethod
     def db_url() -> str:
-        if settings.env == "local":
-            return PostgresDBHandler._db_url_for_host(LOCAL_POSTGRES_HOST)
         if settings.env == "production":
             return PostgresDBHandler._db_url_for_host(PRODUCTION_POSTGRES_HOST)
-        if settings.env == "test":
-            return PostgresDBHandler._db_url_for_host(TEST_POSTGRES_HOST, TEST_POSTGRES_PORT)
+        if settings.env in ("local", "test"):
+            return PostgresDBHandler._db_url_for_host(LOCAL_TEST_POSTGRES_HOST, LOCAL_TEST_POSTGRES_PORT)
 
         raise ValueError(f"Unsupported ENV value for Postgres database URL: {settings.env}")
