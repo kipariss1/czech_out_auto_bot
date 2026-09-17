@@ -297,7 +297,21 @@ class BazosWorker:
             search.car_model_id,
             len(ads),
         )
-        await asyncio.gather(*[ad.get_page_text() for ad in ads])
+        fetch_results = await asyncio.gather(
+            *[ad.get_page_text() for ad in ads], return_exceptions=True
+        )
+        failed_ads = set()
+        for ad, result in zip(ads, fetch_results):
+            if isinstance(result, Exception):
+                logger.warning(
+                    "Failed to fetch ad page; leaving it in queue for retry search_id=%s ad_id=%s ad_link=%s error=%s",
+                    search.id,
+                    ad.id,
+                    ad.link,
+                    result,
+                )
+                failed_ads.add(ad.link)
+        ads = [ad for ad in ads if ad.link not in failed_ads]
         for ad in ads:
             if await self._was_already_checked(ad, search):
                 logger.info(
