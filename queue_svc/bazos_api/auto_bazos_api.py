@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 BAZOS_RATE_LIMIT_REQUESTS = 100
 BAZOS_RATE_LIMIT_PAUSE_SECONDS = 600
+BAZOS_MAX_CONCURRENT_REQUESTS = 50
 
 
 class _RequestRateLimiter:
@@ -65,6 +66,7 @@ _request_rate_limiter = _RequestRateLimiter(
     BAZOS_RATE_LIMIT_REQUESTS,
     BAZOS_RATE_LIMIT_PAUSE_SECONDS,
 )
+_concurrency_semaphore = asyncio.Semaphore(BAZOS_MAX_CONCURRENT_REQUESTS)
 
 
 def get(link):
@@ -78,14 +80,15 @@ def get(link):
 
 
 async def aget(link):
-    await _request_rate_limiter.await_wait()
-    logger.debug("Getting assyncronous url: %s", link)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(link) as response:
-            text = await response.text()
-            if response.status != 200:
-                raise AssertionError(f"[{response.status}] Async Get request to {link} was not successful, reason: \n{text}")
-            return text
+    async with _concurrency_semaphore:
+        await _request_rate_limiter.await_wait()
+        logger.debug("Getting assyncronous url: %s", link)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(link) as response:
+                text = await response.text()
+                if response.status != 200:
+                    raise AssertionError(f"[{response.status}] Async Get request to {link} was not successful, reason: \n{text}")
+                return text
 
 class AutoAdvertisementPage:
 
